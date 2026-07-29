@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffffc;
+  --foreground: #18181b;
+  --muted: #66625c;
+  --accent: #c2410c;
+  --border: #e5e1d9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0c0d;
+    --foreground: #f4f4f5;
+    --muted: #a1a1aa;
+    --accent: #fb923c;
+    --border: #27272a;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --font-sans: var(--font-general-sans);
+  /* Overrides Tailwind's default rounded-md (6px) — the site standardizes every
+     image/video container on this exact 4px radius. */
+  --radius-md: 4px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Forces the scrollbar track (and thumb, when there's overflow) to always
+   render, instead of appearing/disappearing per route based on whether that
+   page's content happens to overflow. Without this, /gallery (which has no
+   overflow by design) would render measurably narrower than every other
+   route in non-overlay-scrollbar environments, and the scrollbar itself
+   would flicker in/out when navigating between them. */
+html {
+  overflow-y: scroll;
+}
+
+/* Per-project accent override: case study pages set --accent-light/--accent-dark
+   inline, this resolves them against the same light/dark switch as the global
+   --accent so the rest of the component tree doesn't need to know the difference. */
+[data-project-accent] {
+  --accent: var(--accent-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-project-accent] {
+    --accent: var(--accent-dark);
+  }
+}
+
+/* Forces the dark-mode token values unconditionally (no @media guard) — for
+   /gallery, which stays dark regardless of the visitor's system light/dark
+   preference, unlike the rest of the site which follows prefers-color-scheme
+   as normal. Values are duplicated from the dark half of :root above rather
+   than introduced as new tokens, matching how this file already duplicates
+   light/dark values rather than sharing a light/dark variable pair for the
+   base tokens (only --accent gets that treatment, for per-project overrides).
+   color-scheme is set too so any native form/scroll UI within this scope
+   also renders dark. */
+[data-force-dark] {
+  --background: #0c0c0d;
+  --foreground: #f4f4f5;
+  --muted: #a1a1aa;
+  --accent: #fb923c;
+  --border: #27272a;
+  color-scheme: dark;
 }

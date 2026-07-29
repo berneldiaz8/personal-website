@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw source material for the media pipeline (see CLAUDE.md's "Media pipeline"
+# section) — original video/image exports converted down into public/work/,
+# public/about/, public/assets/, which are what the site actually serves.
+# These folders are hundreds of MB of source footage/screenshots that don't
+# belong in the deployed repo.
+/Media 3/
+/Recordings/
+/reference/
+
+# personal, machine-local Claude Code permission log — not meant for version
+# control (the "local" in the filename is Claude Code's own convention for
+# this), and it incidentally logs local absolute file paths.
+.claude/settings.local.json
