@@ -9,6 +9,7 @@ import { CursorLabel } from "./CursorLabel";
 import { Reveal } from "./Reveal";
 import { VideoLoadingSpinner } from "./VideoLoadingSpinner";
 import { useVideoReady } from "@/lib/useVideoReady";
+import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
 
 function accentStyle(accent: { light: string; dark: string }): CSSProperties {
   return {
@@ -72,6 +73,7 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
       className="relative col-span-4 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
     >
       <video
+        ref={ensureVideoMuted}
         src={preview.src}
         poster={preview.poster}
         autoPlay

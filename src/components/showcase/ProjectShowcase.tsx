@@ -7,6 +7,7 @@ import { ShowcaseHeadline } from "./ShowcaseHeadline";
 import { textStyles } from "@/lib/typography";
 import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 import { useVideoReady } from "@/lib/useVideoReady";
+import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
 import { VideoLoadingSpinner } from "../VideoLoadingSpinner";
 
 function ShowcaseImage({
@@ -103,6 +104,7 @@ function ShowcaseVideo({
       style={letterboxed ? { background: "linear-gradient(to bottom, #E9E8E6 0%, #DAD9D6 100%)" } : undefined}
     >
       <video
+        ref={ensureVideoMuted}
         src={src}
         poster={poster}
         autoPlay
