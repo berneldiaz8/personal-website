@@ -112,7 +112,18 @@ export function WorkTeaser() {
                     <div aria-hidden="true" className="hidden lg:col-span-1 lg:block" />
                     <div
                       data-cursor-video-zone
-                      className="relative col-span-4 aspect-[16/9] overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
+                      // lg:self-start overrides the parent's lg:items-stretch
+                      // for this box specifically — Safari resolves a stretched
+                      // grid item's aspect-ratio by computing height first (from
+                      // the row's stretch target) and deriving width backward
+                      // from that, producing a much narrower box than the
+                      // col-span-8 track actually allows. Chrome resolves the
+                      // same markup correctly (width from the grid track,
+                      // height derived forward from aspect-ratio). Opting this
+                      // item out of stretch removes the ambiguity outright
+                      // instead of depending on both engines agreeing on
+                      // resolution order.
+                      className="relative col-span-4 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
                     >
                       <video
                         src={preview.src}
