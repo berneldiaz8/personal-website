@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import type { MarqueeItem } from "@/data/galleryMarquee";
+import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 
 // Tuned so a full loop takes ~40s at a 1440x900 viewport (was 40px/s, ~144s)
 // — still a constant px/second, not a fixed duration, so this is a speed
@@ -62,6 +63,60 @@ const PX_PER_SECOND = 144;
  * flickered) collapses into a single render with the final, correct index —
  * never a visible flash back to "no tile."
  */
+
+/**
+ * Extracted so useFadeInOnLoad (a hook) can be called once per tile instance
+ * rather than inside the parent's .map() callback, which the Rules of Hooks
+ * disallow.
+ */
+function MarqueeTile({
+  item,
+  isActive,
+  priority,
+  onEnter,
+  onLeave,
+}: {
+  item: MarqueeItem;
+  isActive: boolean;
+  priority: boolean;
+  onEnter: () => void;
+  onLeave: () => void;
+}) {
+  const { loaded, onLoad } = useFadeInOnLoad(priority);
+  return (
+    <div
+      className="relative h-full shrink-0 overflow-hidden shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+    >
+      <Image
+        src={item.src}
+        alt={item.alt}
+        width={item.width}
+        height={item.height}
+        className={`h-full w-auto object-cover transition-opacity duration-500 motion-reduce:transition-none ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+        sizes={`${((item.width / item.height) * 45).toFixed(0)}vh`}
+        quality={90}
+        priority={priority}
+        onLoad={onLoad}
+      />
+      <div
+        className={`pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-4 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+          isActive ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <p className="whitespace-nowrap text-xs font-normal uppercase tracking-wide text-white">
+          {item.project}
+          {" — "}
+          {item.label}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const tweenRef = useRef<gsap.core.Tween | null>(null);
@@ -103,34 +158,14 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
     >
       <div ref={trackRef} className="flex h-full w-max items-center gap-4">
         {[...items, ...items].map((item, i) => (
-          <div
+          <MarqueeTile
             key={`${item.src}-${i}`}
-            className="relative h-full shrink-0 overflow-hidden shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-            onPointerEnter={() => setActiveIndex(i)}
-            onPointerLeave={() => setActiveIndex((current) => (current === i ? null : current))}
-          >
-            <Image
-              src={item.src}
-              alt={item.alt}
-              width={item.width}
-              height={item.height}
-              className="h-full w-auto object-cover"
-              sizes={`${((item.width / item.height) * 45).toFixed(0)}vh`}
-              quality={90}
-              priority={i < items.length}
-            />
-            <div
-              className={`pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-4 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
-                activeIndex === i ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <p className="whitespace-nowrap text-xs font-normal uppercase tracking-wide text-white">
-                {item.project}
-                {" — "}
-                {item.label}
-              </p>
-            </div>
-          </div>
+            item={item}
+            isActive={activeIndex === i}
+            priority={i < items.length}
+            onEnter={() => setActiveIndex(i)}
+            onLeave={() => setActiveIndex((current) => (current === i ? null : current))}
+          />
         ))}
       </div>
     </div>

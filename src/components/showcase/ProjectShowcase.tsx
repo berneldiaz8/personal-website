@@ -5,6 +5,7 @@ import { RevealWipe } from "../RevealWipe";
 import { Grid } from "./Grid";
 import { ShowcaseHeadline } from "./ShowcaseHeadline";
 import { textStyles } from "@/lib/typography";
+import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 
 function ShowcaseImage({
   src,
@@ -29,6 +30,7 @@ function ShowcaseImage({
    * split-stacked slot whose height comes from its flex parent. */
   className?: string;
 }) {
+  const { loaded, onLoad } = useFadeInOnLoad(priority);
   return (
     <div
       className={`relative w-full overflow-hidden bg-background ${aspect} ${
@@ -44,7 +46,10 @@ function ShowcaseImage({
         sizes={sizes}
         quality={90}
         priority={priority}
-        className={`object-cover ${position}`}
+        onLoad={onLoad}
+        className={`object-cover ${position} transition-opacity duration-500 motion-reduce:transition-none ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
       />
     </div>
   );
