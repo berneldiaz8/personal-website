@@ -1,3 +1,5 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,6 +7,8 @@ import type { Project } from "@/data/projects";
 import { projects } from "@/data/projects";
 import { CursorLabel } from "./CursorLabel";
 import { Reveal } from "./Reveal";
+import { VideoLoadingSpinner } from "./VideoLoadingSpinner";
+import { useVideoReady } from "@/lib/useVideoReady";
 
 function accentStyle(accent: { light: string; dark: string }): CSSProperties {
   return {
@@ -44,6 +48,51 @@ function previewFor(project: Project) {
     };
   }
   return project.media[0];
+}
+
+/**
+ * Extracted so useVideoReady (a hook) can be called once per project
+ * instance rather than inside the parent's .map() callback, which the Rules
+ * of Hooks disallow — same reasoning as GalleryMarquee.tsx's MarqueeTile.
+ */
+function TeaserVideo({ preview, projectName }: { preview: { src: string; poster: string }; projectName: string }) {
+  const { ready, onLoadedData } = useVideoReady();
+  return (
+    <div
+      data-cursor-video-zone
+      // lg:self-start overrides the parent's lg:items-stretch for this box
+      // specifically — Safari resolves a stretched grid item's aspect-ratio
+      // by computing height first (from the row's stretch target) and
+      // deriving width backward from that — producing a much narrower box
+      // than the col-span-8 track actually allows. Chrome resolves the same
+      // markup correctly (width from the grid track, height derived forward
+      // from aspect-ratio). Opting this item out of stretch removes the
+      // ambiguity outright instead of depending on both engines agreeing on
+      // resolution order.
+      className="relative col-span-4 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
+    >
+      <video
+        src={preview.src}
+        poster={preview.poster}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        aria-label={`${projectName} product walkthrough`}
+        onLoadedData={onLoadedData}
+        className="absolute inset-0 h-full w-full object-cover object-top motion-reduce:hidden"
+      />
+      <Image
+        src={preview.poster}
+        alt={`${projectName} preview`}
+        fill
+        sizes="(min-width: 1024px) 66vw, 100vw"
+        className="hidden object-cover object-top motion-reduce:block"
+      />
+      <VideoLoadingSpinner ready={ready} />
+    </div>
+  );
 }
 
 export function WorkTeaser() {
@@ -110,40 +159,7 @@ export function WorkTeaser() {
                         the site's 12-col grid (only meaningful at lg, where the
                         grid actually has 12 tracks — 3 text + 1 gap + 8 video). */}
                     <div aria-hidden="true" className="hidden lg:col-span-1 lg:block" />
-                    <div
-                      data-cursor-video-zone
-                      // lg:self-start overrides the parent's lg:items-stretch
-                      // for this box specifically — Safari resolves a stretched
-                      // grid item's aspect-ratio by computing height first (from
-                      // the row's stretch target) and deriving width backward
-                      // from that, producing a much narrower box than the
-                      // col-span-8 track actually allows. Chrome resolves the
-                      // same markup correctly (width from the grid track,
-                      // height derived forward from aspect-ratio). Opting this
-                      // item out of stretch removes the ambiguity outright
-                      // instead of depending on both engines agreeing on
-                      // resolution order.
-                      className="relative col-span-4 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
-                    >
-                      <video
-                        src={preview.src}
-                        poster={preview.poster}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="metadata"
-                        aria-label={`${project.name} product walkthrough`}
-                        className="absolute inset-0 h-full w-full object-cover object-top motion-reduce:hidden"
-                      />
-                      <Image
-                        src={preview.poster}
-                        alt={`${project.name} preview`}
-                        fill
-                        sizes="(min-width: 1024px) 66vw, 100vw"
-                        className="hidden object-cover object-top motion-reduce:block"
-                      />
-                    </div>
+                    <TeaserVideo preview={preview} projectName={project.name} />
                   </CursorLabel>
                 </Link>
               </div>

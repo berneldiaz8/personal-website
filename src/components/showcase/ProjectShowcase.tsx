@@ -6,6 +6,8 @@ import { Grid } from "./Grid";
 import { ShowcaseHeadline } from "./ShowcaseHeadline";
 import { textStyles } from "@/lib/typography";
 import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
+import { useVideoReady } from "@/lib/useVideoReady";
+import { VideoLoadingSpinner } from "../VideoLoadingSpinner";
 
 function ShowcaseImage({
   src,
@@ -86,6 +88,7 @@ function ShowcaseVideo({
   className?: string;
 }) {
   const letterboxed = fillHeight || fillWidth;
+  const { ready, onLoadedData } = useVideoReady();
   return (
     <div
       className={`relative w-full overflow-hidden ${letterboxed ? "" : "bg-background"} ${aspect} ${
@@ -108,6 +111,7 @@ function ShowcaseVideo({
         playsInline
         preload="metadata"
         aria-label={alt}
+        onLoadedData={onLoadedData}
         className={
           fillHeight
             ? "absolute left-1/2 top-0 h-full w-auto -translate-x-1/2 motion-reduce:hidden"
@@ -123,6 +127,7 @@ function ShowcaseVideo({
         sizes="(min-width: 1024px) 50vw, 100vw"
         className={`hidden motion-reduce:block ${letterboxed ? "object-contain" : "object-cover"}`}
       />
+      <VideoLoadingSpinner ready={ready} />
     </div>
   );
 }
