@@ -1,7 +1,6 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/data/projects";
 import { projects } from "@/data/projects";
@@ -83,14 +82,7 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
         preload="metadata"
         aria-label={`${projectName} product walkthrough`}
         onLoadedData={onLoadedData}
-        className="absolute inset-0 h-full w-full object-cover object-top motion-reduce:hidden"
-      />
-      <Image
-        src={preview.poster}
-        alt={`${projectName} preview`}
-        fill
-        sizes="(min-width: 1024px) 66vw, 100vw"
-        className="hidden object-cover object-top motion-reduce:block"
+        className="absolute inset-0 h-full w-full object-cover object-top"
       />
       <VideoLoadingSpinner ready={ready} />
     </div>
