@@ -123,11 +123,32 @@ manual visual sort — don't assume filename order maps to project boundaries. C
 56-292KB each. Rendered by `ImageGrid.tsx` in a `grid-cols-2 sm:grid-cols-3` layout, inserted in
 `CaseStudyDetail.tsx` after the Approach beat's clips, before Outcomes.
 
-The `<video autoPlay loop muted playsInline preload="metadata">` + `motion-reduce:` CSS-swap-to-
-poster pattern (pure CSS, no JS, so `prefers-reduced-motion` users never trigger the video at all)
-now has two call sites: the small always-visible thumbnail in each `WorkBrowser.tsx` row, and the
-full-width `InlineVideo` helper inside `CaseStudyDetail.tsx`. There's no standalone `Gallery`
-component — it was folded into `CaseStudyDetail` since it's only ever used there now.
+The `<video autoPlay loop muted playsInline preload="metadata">` pattern has two call sites today:
+`ShowcaseVideo` (`src/components/showcase/ProjectShowcase.tsx`, used on `/work`) and `TeaserVideo`
+(`src/components/WorkTeaser.tsx`, the homepage row). Both mute the `<video>`'s DOM property
+explicitly via a ref callback (`ensureVideoMuted`, `src/lib/`) in addition to the `muted`
+attribute — real iOS devices have been observed not reliably autoplaying muted video from React
+markup on the attribute alone. Both also show a small `VideoLoadingSpinner` overlay
+(`src/components/VideoLoadingSpinner.tsx`) while the video loads, driven by `useVideoReady`
+(`onLoadedData`) — the overlay never touches the video/poster's own opacity, since the poster is
+a valid Largest Contentful Paint candidate and gating its visibility on JS would delay when the
+browser counts it as painted.
+
+**Reduced motion, video, and the gallery marquee (2026-07-31):** video no longer has a
+`motion-reduce:hidden`/static-image swap — it plays for every visitor regardless of
+`prefers-reduced-motion`, and `GalleryMarquee.tsx`'s scroll likewise no longer gates its GSAP
+tween on that media query. This is a deliberate, explicit exception to this codebase's otherwise
+universal "full bypass under reduced motion" rule (see `Reveal.tsx`/`RevealWipe.tsx`/`CursorLabel.tsx`/
+`FooterWordmark.tsx`, all of which still fully respect it) — video and the marquee are presenting
+actual portfolio content, not a decorative motion effect, so they're treated like a static image
+would be (no reduced-motion opt-out needed) rather than like UI chrome. Root-caused via a real
+user report: Analytics showed a large share of iOS traffic, and a visitor with Reduce Motion
+enabled saw every video frozen on its poster and the marquee never scrolling — confirmed by
+toggling the OS setting live and watching both start working. Decorative motion tied to these
+same components (the per-tile fade-in-on-load, the marquee's hover-caption fade, the loading
+spinner's spin animation) still respects reduced motion as normal — only the core
+scroll/playback motion was exempted. Don't reintroduce the old gate without the same explicit
+re-ask this exception required.
 
 ## Work page architecture
 **Went through several shapes over two days, each an explicit user decision — don't

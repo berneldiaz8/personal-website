@@ -19,7 +19,12 @@ export function Footer() {
             edge. pt-3 below is the exact gap to the row content, independent of
             the Grid's own row-gap value. */}
         <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-        <Grid className="items-start pt-3 text-sm">
+        {/* gap-y-4 overrides Grid's own gap-3 (12px) row-gap on mobile to
+            16px — no sm: reset needed since that already matches Grid's own
+            sm:gap-4, so this cascades upward harmlessly. Column-gap is
+            untouched (irrelevant on mobile, where every item stacks in one
+            column anyway). */}
+        <Grid className="items-start pt-3 text-sm gap-y-4">
           {/* Contact now takes the wide leading slot the year used to sit in
               (swapped per request), and Connect/Snapshots each shift one slot
               earlier to follow it — Connect, Snapshots, and Contact are each
@@ -46,12 +51,21 @@ export function Footer() {
               Dribbble
             </NavLink>
           </div>
-          {/* Year moved to the trailing/rightmost slot and right-aligned
-              (items-end) — its column ends flush at the grid's true right
-              edge (col 12), the same edge the nav's clock sits flush against.
-              Wraps to its own row on sm since Contact+Connect+Snapshots
-              already fill all 8 columns in one row there. */}
-          <div className="col-span-4 flex flex-col items-end gap-1 text-xs sm:col-span-2 sm:col-start-7 lg:col-span-2 lg:col-start-11">
+          {/* Left-aligned (items-start) on mobile, matching
+              Contact/Connect/Snapshots above it — all four already stack as
+              individual full-width rows at this breakpoint, so this is
+              purely an alignment match, not a position change.
+              On tablet (sm) specifically: also left-aligned, and repositioned
+              to col-start-1 so it wraps directly under Contact rather than
+              under Snapshots (Contact+Connect+Snapshots already fill all 8
+              columns in one row there, so this always wraps to its own row
+              regardless of which column it starts at).
+              lg explicitly restores the original desktop treatment
+              (right-aligned, col-start-11, flush with the grid's true right
+              edge, the same edge the nav's clock sits flush against) — since
+              without that override it would otherwise inherit the sm
+              left-aligned/col-start-1 values upward. */}
+          <div className="col-span-4 flex flex-col items-start gap-1 text-xs sm:col-span-2 sm:col-start-1 sm:items-start lg:col-span-2 lg:col-start-11 lg:items-end">
             <p className="font-normal text-muted">&copy; {new Date().getFullYear()}</p>
             <p className="font-medium leading-[14px] text-foreground">Open to work</p>
           </div>

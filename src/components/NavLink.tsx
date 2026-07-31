@@ -18,18 +18,20 @@ export function NavLink({
   children,
   target,
   rel,
+  className = "",
 }: {
   href: string;
   children: ReactNode;
   target?: string;
   rel?: string;
+  className?: string;
 }) {
   return (
     <Link
       href={href}
       target={target}
       rel={rel}
-      className="group relative inline-block h-[14px] overflow-hidden leading-[14px]"
+      className={`group relative inline-block h-[14px] overflow-hidden leading-[14px] ${className}`}
     >
       <span className="block transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-full group-focus-visible:-translate-y-full motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-focus-visible:translate-y-0">
         {children}

@@ -27,10 +27,15 @@ const PX_PER_SECOND = 144;
  * stays constant regardless of how many items end up in the row, instead of
  * silently speeding up or slowing down whenever the item count changes.
  *
- * Reduced motion: full bypass via gsap.matchMedia(), matching every other
- * animation in this codebase — no tween is ever created, so the track just
- * sits at rest showing a static, unmoving row (naturally clipped to one
- * viewport's worth by the outer overflow-hidden, not scrolled).
+ * Reduced motion: deliberately NOT bypassed, unlike every other animation in
+ * this codebase (2026-07-31) — the scroll always runs regardless of
+ * prefers-reduced-motion. This marquee is presenting actual portfolio work,
+ * not a decorative motion effect, so it's treated the same as video content
+ * (see ShowcaseVideo/WorkTeaser, which similarly ignore reduced motion for
+ * the same reason) rather than pure UI chrome like the Hero fade-up or
+ * scroll-reveals, which still respect it. The per-tile fade-in-on-load and
+ * hover-caption transitions below are genuinely decorative, though, and
+ * still bypass for reduced motion as normal.
  *
  * Pause-on-hover: the whole track pauses while the pointer is anywhere over
  * the strip (not per-tile), then resumes on leave.
@@ -127,22 +132,18 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
       const track = trackRef.current;
       if (!track) return;
 
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const trackWidth = track.scrollWidth / 2;
-        const duration = trackWidth / PX_PER_SECOND;
-        tweenRef.current = gsap.to(track, {
-          xPercent: -50,
-          duration,
-          ease: "none",
-          repeat: -1,
-        });
-        return () => {
-          tweenRef.current?.kill();
-          tweenRef.current = null;
-        };
+      const trackWidth = track.scrollWidth / 2;
+      const duration = trackWidth / PX_PER_SECOND;
+      tweenRef.current = gsap.to(track, {
+        xPercent: -50,
+        duration,
+        ease: "none",
+        repeat: -1,
       });
-      return () => mm.revert();
+      return () => {
+        tweenRef.current?.kill();
+        tweenRef.current = null;
+      };
     },
     { scope: trackRef, dependencies: [items] },
   );

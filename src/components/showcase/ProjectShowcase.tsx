@@ -116,18 +116,11 @@ function ShowcaseVideo({
         onLoadedData={onLoadedData}
         className={
           fillHeight
-            ? "absolute left-1/2 top-0 h-full w-auto -translate-x-1/2 motion-reduce:hidden"
+            ? "absolute left-1/2 top-0 h-full w-auto -translate-x-1/2"
             : fillWidth
-              ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2 motion-reduce:hidden"
-              : "absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+              ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
+              : "absolute inset-0 h-full w-full object-cover"
         }
-      />
-      <Image
-        src={poster}
-        alt={alt}
-        fill
-        sizes="(min-width: 1024px) 50vw, 100vw"
-        className={`hidden motion-reduce:block ${letterboxed ? "object-contain" : "object-cover"}`}
       />
       <VideoLoadingSpinner ready={ready} />
     </div>

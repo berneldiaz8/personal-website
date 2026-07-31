@@ -7,11 +7,17 @@
  * browser counts it as painted). text-muted keeps this neutral/monochrome
  * (explicit user choice, 2026-07-30) rather than tracking the current
  * project's --accent — deliberate, don't swap this back to text-accent
- * without being asked again. motion-reduce:hidden — reduced-motion users get
- * a fully static poster-only fallback instead of the video at all (see the
- * motion-reduce:hidden already on the <video> itself in
- * ShowcaseVideo/WorkTeaser), so there's no in-progress state to show here
- * either.
+ * without being asked again.
+ *
+ * motion-reduce:hidden here is about this spinner's own rotation, not about
+ * hiding video from reduced-motion users — video plays for everyone
+ * regardless of that preference (product-demo video is content, not a
+ * decorative motion effect; see ShowcaseVideo/WorkTeaser, which no longer
+ * gate the <video> itself on prefers-reduced-motion, 2026-07-31). The
+ * spinner's continuous spin animation is still pure UI chrome though, so it
+ * keeps respecting reduced motion — those users just see the video's own
+ * poster during load with no spinner overlay, then the video plays once
+ * ready, same as everyone else.
  */
 export function VideoLoadingSpinner({ ready }: { ready: boolean }) {
   return (
