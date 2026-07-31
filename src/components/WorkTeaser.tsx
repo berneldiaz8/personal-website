@@ -91,7 +91,7 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
 
 export function WorkTeaser() {
   return (
-    <section className="px-6">
+    <section className="px-4 sm:px-5 lg:px-6">
       <h2 className="sr-only">Selected Work</h2>
 
       <div className="flex flex-col">

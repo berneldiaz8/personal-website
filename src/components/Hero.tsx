@@ -30,7 +30,7 @@ export function Hero() {
   );
 
   return (
-    <section ref={sectionRef} className="px-6 pt-10 pb-16 sm:pb-24 lg:pb-40">
+    <section ref={sectionRef} className="px-4 pt-10 pb-16 sm:px-5 sm:pb-24 lg:px-6 lg:pb-40">
       <h1 className="max-w-[923px] text-pretty text-3xl font-extralight leading-[1.15] tracking-[-0.5px] text-muted sm:text-4xl lg:text-[48px]">
         <span className="sr-only">berneldiaz</span>
         <Logo
