@@ -29,9 +29,9 @@ export function Nav() {
           <span className="-ml-2 sm:hidden" aria-hidden="true">
             ,
           </span>
-          <span className="sm:hidden">
-            <NavLink href="/gallery">Gallery</NavLink>
-          </span>
+          <NavLink href="/gallery" className="sm:hidden">
+            Gallery
+          </NavLink>
         </nav>
 
         {/* Gallery alone, replacing the clock's old slot (and, later, the
