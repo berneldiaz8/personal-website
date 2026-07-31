@@ -14,7 +14,7 @@ export function GalleryInfoRow() {
   return (
     <footer className="text-muted">
       <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-      <Grid className="items-start pt-3 pb-6 text-sm">
+      <Grid className="items-start pt-3 pb-6 text-sm gap-y-4">
         <div className="col-span-4 flex flex-col items-start gap-1 text-xs font-medium text-foreground sm:col-span-4 lg:col-span-6">
           <span className="text-xs font-normal uppercase text-muted">Contact</span>
           <NavLink href="mailto:diaz.bernel@gmail.com">diaz.bernel@gmail.com</NavLink>

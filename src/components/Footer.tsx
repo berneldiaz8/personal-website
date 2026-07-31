@@ -19,7 +19,12 @@ export function Footer() {
             edge. pt-3 below is the exact gap to the row content, independent of
             the Grid's own row-gap value. */}
         <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-        <Grid className="items-start pt-3 text-sm">
+        {/* gap-y-4 overrides Grid's own gap-3 (12px) row-gap on mobile to
+            16px — no sm: reset needed since that already matches Grid's own
+            sm:gap-4, so this cascades upward harmlessly. Column-gap is
+            untouched (irrelevant on mobile, where every item stacks in one
+            column anyway). */}
+        <Grid className="items-start pt-3 text-sm gap-y-4">
           {/* Contact now takes the wide leading slot the year used to sit in
               (swapped per request), and Connect/Snapshots each shift one slot
               earlier to follow it — Connect, Snapshots, and Contact are each
