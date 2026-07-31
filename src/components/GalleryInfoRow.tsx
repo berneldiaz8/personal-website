@@ -31,7 +31,7 @@ export function GalleryInfoRow() {
             Dribbble
           </NavLink>
         </div>
-        <div className="col-span-4 flex flex-col items-end gap-1 text-xs sm:col-span-2 sm:col-start-7 lg:col-span-2 lg:col-start-11">
+        <div className="col-span-4 flex flex-col items-start gap-1 text-xs sm:col-span-2 sm:col-start-1 sm:items-start lg:col-span-2 lg:col-start-11 lg:items-end">
           <p className="font-normal text-muted">&copy; {new Date().getFullYear()}</p>
           <p className="font-medium leading-[14px] text-foreground">Open to work</p>
         </div>
