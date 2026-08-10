@@ -21,12 +21,15 @@ export type MarqueeItem = {
  * shift while GalleryMarquee scales tiles by height only. Order within each
  * project (1 through 6) is preserved from the source filenames.
  *
- * The Dividend Tracker's gallery-1 through gallery-5 and FoodOps' gallery-6
- * went through two reuploads under these same "Media 3" filenames
- * (2026-08-10): the first reupload was removed entirely after the user
- * reported the live site still looked like the pre-reupload version despite
- * exhaustive server/cache/build verification finding nothing wrong; the
- * source files were then re-exported a second time and re-added here.
+ * The Dividend Tracker's images went through a churn of reuploads under
+ * these same "Media 3" filenames on 2026-08-10: gallery-1 through gallery-5
+ * were replaced once, removed after the user reported the live site still
+ * looked like the pre-reupload version despite exhaustive server/cache/
+ * build verification finding nothing wrong, then re-exported a second time
+ * and re-added. gallery-6 ("Homepage") was separately deleted after a
+ * leftover, never-wired-in G-DVT6.jpg was found sitting unused in the
+ * "Media 3" source folder and removed from there too — then restored here
+ * once the user reuploaded a fresh G-DVT6.jpg and asked for it back.
  */
 export const galleryMarqueeItems: MarqueeItem[] = [
   {

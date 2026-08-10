@@ -29,9 +29,11 @@ export const metadata: Metadata = {
  * preference) so the full viewport paints dark, not just the content inside.
  *
  * GalleryMarquee's wrapper has no explicit height (just w-full) — tiles are
- * now sized by a fixed width (TILE_WIDTH_PX in GalleryMarquee.tsx, tuned so
- * ~7 fit across the same 1440x900 reference viewport PX_PER_SECOND is
- * calibrated against), with height following per image's own aspect ratio,
+ * now sized by a responsive width (TILE_WIDTH_CSS in GalleryMarquee.tsx,
+ * calibrated so ~7 fit across the 1440x900 reference viewport PX_PER_SECOND
+ * is also calibrated against, then scaling up above that breakpoint so the
+ * same 7-tile fit holds on wider viewports too), with height following per
+ * image's own aspect ratio,
  * so the marquee's own height is however tall its tallest tile ends up
  * being — there's no longer a single fixed row height to assign here.
  * <main>'s items-center still vertically centers whatever that natural

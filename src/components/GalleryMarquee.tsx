@@ -15,12 +15,25 @@ import { CursorLabel } from "./CursorLabel";
 // viewport" (see the comment below on why duration is derived, not fixed).
 const PX_PER_SECOND = 144;
 
-// Fixed tile width, calibrated the same way: (1440 - 6 gaps of 16px) / 7, so
-// 7 tiles fit the same 1440x900 reference viewport PX_PER_SECOND already
-// targets. Every tile shares this exact width now — height is derived per
-// image from its own aspect ratio (see MarqueeTile below), the inverse of
+// Tile width is responsive, not a flat constant: at the 1440x900 reference
+// viewport PX_PER_SECOND is calibrated against, 7 tiles (with 6 gaps of
+// TILE_GAP_PX between them) exactly fill the width — (1440 - 6*16) / 7 = 192,
+// TILE_WIDTH_FLOOR_PX below. Above that 1440px breakpoint, width scales up
+// via `max(floor, calc((100vw - 6 gaps) / 7))` so the same "7 tiles fill the
+// screen" rule holds on larger viewports too (a 2560px display would
+// otherwise just show more than 7 tiles at the fixed 192px width, since nothing
+// about a wider viewport used to change tile size). Below 1440px, width stays
+// pinned at the floor — this was never asked to scale down for mobile, where
+// showing fewer than 7 tiles at a time is already the expected, unchanged
+// behavior. Every tile shares this exact computed width — height is derived
+// per image from its own aspect ratio (see MarqueeTile below), the inverse of
 // the original fixed-height/variable-width sizing.
-const TILE_WIDTH_PX = 192;
+const TILE_GAP_PX = 16; // matches `gap-4` on the track below
+const TILE_WIDTH_FLOOR_PX = 192;
+const TILE_WIDTH_CSS = `max(${TILE_WIDTH_FLOOR_PX}px, calc((100vw - ${TILE_GAP_PX * 6}px) / 7))`;
+// `sizes` can't use max(), only media conditions — same breakpoint expressed
+// the way next/image's `sizes` attribute actually supports it.
+const TILE_SIZES = `(min-width: 1440px) calc((100vw - ${TILE_GAP_PX * 6}px) / 7), ${TILE_WIDTH_FLOOR_PX}px`;
 
 /**
  * Infinite horizontal marquee for /gallery. The item list is rendered twice
@@ -76,19 +89,20 @@ const TILE_WIDTH_PX = 192;
  * handleClose (see its own comment below) is the only place that resumes it
  * while the lightbox is open or closing.
  *
- * Each tile is sized by width (w-[TILE_WIDTH_PX] h-auto), not height —
- * every tile is exactly TILE_WIDTH_PX wide regardless of the image's own
+ * Each tile is sized by width (TILE_WIDTH_CSS, h-auto), not height — every
+ * tile is exactly the same computed width regardless of the image's own
  * aspect ratio, with height following naturally from it. This is the
  * opposite of the marquee's original sizing (fixed height, variable width);
  * the row's own height is no longer fixed either, so it auto-sizes to
  * whatever the tallest tile ends up needing at that shared width, and
  * shorter tiles top-align within that (items-start on the track) rather
- * than centering — flush top edge, jagged bottom edge. Since
- * every tile now renders at the exact same CSS width, `sizes` is a flat
- * `${TILE_WIDTH_PX}px` for all of them — no per-item aspect-ratio math
- * needed the way the old height-based sizing required (a flat `sizes` value
- * back then was wrong specifically because rendered width varied per tile;
- * now it doesn't).
+ * than centering — flush top edge, jagged bottom edge. Since every tile
+ * always renders at the exact same CSS width as every other tile (even
+ * though that shared width itself now varies by viewport — see
+ * TILE_WIDTH_CSS above), `sizes` is a flat TILE_SIZES for all of them — no
+ * per-item aspect-ratio math needed the way the old height-based sizing
+ * required (a flat `sizes` value back then was wrong specifically because
+ * rendered width varied per tile; now it doesn't, at any one viewport).
  * quality={100} (75 is next/image's own default, deliberately not used
  * site-wide; 90 is ProjectShowcase.tsx's ShowcaseImage convention for
  * work-page media; 100 is used here specifically since these are dense
@@ -190,7 +204,7 @@ function MarqueeTile({
       <CursorLabel label="Focus" portal className="relative block">
         <div
           className="relative h-auto overflow-hidden shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-          style={{ width: TILE_WIDTH_PX }}
+          style={{ width: TILE_WIDTH_CSS }}
         >
           <Image
             src={item.src}
@@ -200,7 +214,7 @@ function MarqueeTile({
             className={`h-auto w-full object-cover transition-opacity duration-500 motion-reduce:transition-none ${
               loaded ? "opacity-100" : "opacity-0"
             }`}
-            sizes={`${TILE_WIDTH_PX}px`}
+            sizes={TILE_SIZES}
             quality={100}
             priority={priority}
             onLoad={onLoad}
