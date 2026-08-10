@@ -250,8 +250,7 @@ export function FooterWordmark() {
 
     // Rasterizes Logo.tsx's own path data (not system-font text, unlike the
     // reference) onto an offscreen canvas sized to the real device-pixel
-    // dimensions, in the current resolved --foreground color so it flips
-    // correctly with the site's light/dark theme.
+    // dimensions, in the current resolved --foreground color.
     const rasterize = () => {
       const w = Math.max(2, canvas.width);
       const h = Math.max(2, canvas.height);
@@ -371,13 +370,6 @@ export function FooterWordmark() {
     const ro = new ResizeObserver(resize);
     ro.observe(wrapper);
 
-    const colorScheme = window.matchMedia("(prefers-color-scheme: dark)");
-    const onColorSchemeChange = () => {
-      rasterize();
-      draw();
-    };
-    colorScheme.addEventListener("change", onColorSchemeChange);
-
     // ── Interactive layer (pointer tracking + physics loop) ───────────
     // Gated behind reduced-motion + real-mouse capability; everything above
     // this point (the static rasterized render) still applies regardless.
@@ -489,7 +481,6 @@ export function FooterWordmark() {
     return () => {
       mm.revert();
       ro.disconnect();
-      colorScheme.removeEventListener("change", onColorSchemeChange);
       gl.deleteBuffer(posBuf);
       gl.deleteBuffer(uvBuf);
       gl.deleteBuffer(dispBuf);
