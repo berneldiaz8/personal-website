@@ -8,28 +8,41 @@ export type MarqueeItem = {
 };
 
 /**
- * Full 24-image spread for the /gallery marquee — 6 real product screens per
- * case study (Lexora, FoodOps, The Dividend Tracker, Opinly, in that fixed
- * display order), sourced from the "Media 3" folder (G-{project}{1-6}.jpg)
- * rather than the showcase- or image-N assets ProjectShowcase.tsx and
- * projects.ts use — these are gallery-specific and don't appear elsewhere.
- * Converted into public/work/{slug}/gallery-{1-6}.jpg via the same
+ * Full 24-image spread for the /gallery marquee (Lexora, FoodOps, The
+ * Dividend Tracker, Opinly, in that fixed display order), sourced from the
+ * "Media 3" folder (G-{project}{N}.jpg) rather than the showcase- or
+ * image-N assets ProjectShowcase.tsx and projects.ts use — these are
+ * gallery-specific and don't appear elsewhere. Converted into
+ * public/work/{slug}/gallery-{N}.jpg via the same
  * `ffmpeg -vf "scale='min(1600,iw)':-2" -q:v 4` pipeline this codebase
  * already uses for projects.ts's imageGallery() (56-292KB each afterward).
  * width/height are each converted file's real pixel dimensions (verified
  * via `sips`), passed to next/image so it can reserve space without layout
  * shift while GalleryMarquee scales tiles by height only. Order within each
- * project (1 through 6) is preserved from the source filenames.
+ * project is preserved from the source filenames.
  *
- * The Dividend Tracker's images went through a churn of reuploads under
- * these same "Media 3" filenames on 2026-08-10: gallery-1 through gallery-5
- * were replaced once, removed after the user reported the live site still
- * looked like the pre-reupload version despite exhaustive server/cache/
- * build verification finding nothing wrong, then re-exported a second time
- * and re-added. gallery-6 ("Homepage") was separately deleted after a
- * leftover, never-wired-in G-DVT6.jpg was found sitting unused in the
- * "Media 3" source folder and removed from there too — then restored here
- * once the user reuploaded a fresh G-DVT6.jpg and asked for it back.
+ * The Dividend Tracker's file numbering has a gap: it runs gallery-1
+ * through gallery-5, then gallery-7 (no gallery-6) — still 6 images total,
+ * matching Lexora/FoodOps/Opinly. gallery-7 was originally added
+ * (2026-08-10) as a confirmed-duplicate 7th tile alongside gallery-6 — its
+ * source was byte-for-byte identical to gallery-6's own source (same MD5),
+ * both the same "Track your dividends. Maximize your wealth." homepage
+ * screenshot, added anyway per explicit user request after flagging the
+ * duplication. gallery-6 was then removed at the user's request, leaving
+ * gallery-7 as the sole surviving "Homepage" tile — the numbering gap is a
+ * byproduct of that removal, not a bug. gallery-6 itself had already gone
+ * back and forth more than once earlier the same day (removed after an
+ * unused leftover source turned up in the "Media 3" folder, restored after
+ * a reupload, removed again, restored again) before this final removal.
+ * The "Media 3" source file this built gallery-7.jpg is converted from was
+ * briefly renamed to G-DVT6.jpg and back to G-DVT7.jpg again shortly after
+ * — net no change, source and built filenames match as G-DVT7/gallery-7
+ * throughout. gallery-1 through gallery-5 separately went through their own
+ * reupload churn: replaced once, removed after the user reported the live
+ * site still looked like the pre-reupload version despite exhaustive
+ * server/cache/build verification finding nothing wrong, then re-exported
+ * a second time and re-added — those 5 are unaffected by gallery-6/7's own
+ * history.
  */
 export const galleryMarqueeItems: MarqueeItem[] = [
   {
@@ -62,7 +75,7 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1040,
     project: "Lexora",
-    label: "Meeting Notes",
+    label: "Meeting Session",
   },
   {
     src: "/work/lexora/gallery-5.jpg",
@@ -94,7 +107,7 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1164,
     project: "FoodOps",
-    label: "Product Detail Panel",
+    label: "Product Details",
   },
   {
     src: "/work/foodops/gallery-3.jpg",
@@ -134,7 +147,7 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1040,
     project: "The Dividend Tracker",
-    label: "Holdings Detail",
+    label: "Holding Details, Edit Holdings, Value Conversion",
   },
   {
     src: "/work/the-dividend-tracker/gallery-2.jpg",
@@ -142,7 +155,7 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1040,
     project: "The Dividend Tracker",
-    label: "Dividend Calendar",
+    label: "Watchlist, Dividend Calendar, Dividends Paid",
   },
   {
     src: "/work/the-dividend-tracker/gallery-3.jpg",
@@ -150,7 +163,7 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1904,
     project: "The Dividend Tracker",
-    label: "Portfolio Diversification",
+    label: "Payout Calendar, Portfolio Diversification",
   },
   {
     src: "/work/the-dividend-tracker/gallery-4.jpg",
@@ -158,7 +171,7 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1694,
     project: "The Dividend Tracker",
-    label: "Income Calculator",
+    label: "Dashboard, Income Calculator",
   },
   {
     src: "/work/the-dividend-tracker/gallery-5.jpg",
@@ -166,10 +179,10 @@ export const galleryMarqueeItems: MarqueeItem[] = [
     width: 1600,
     height: 1216,
     project: "The Dividend Tracker",
-    label: "Manage Portfolios",
+    label: "Manage Portfolios, Ideas, Holdings Financials",
   },
   {
-    src: "/work/the-dividend-tracker/gallery-6.jpg",
+    src: "/work/the-dividend-tracker/gallery-7.jpg",
     alt: "The Dividend Tracker marketing homepage reading 'Track your dividends. Maximize your wealth.'",
     width: 1600,
     height: 2116,

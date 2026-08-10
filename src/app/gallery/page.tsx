@@ -6,7 +6,8 @@ import { galleryMarqueeItems } from "@/data/galleryMarquee";
 
 export const metadata: Metadata = {
   title: "Bernel Diaz — Gallery",
-  description: "Gallery by Bernel Diaz.",
+  description:
+    "A closer look at real product screens from Bernel Diaz's case studies: Lexora, FoodOps, The Dividend Tracker, and Opinly.",
 };
 
 /**

@@ -261,6 +261,29 @@ function MarqueeTile({
  * keydown listener is document-level, not tied to any element); mouse users
  * close via the click-anywhere behavior above. Focus returns to the tile
  * that opened the dialog on close either way.
+ *
+ * The caption is a sibling of CursorLabel's flex container, not a child of
+ * it — absolutely positioned within the dialog rather than laid out in the
+ * flex row the image centers in. A flex sibling would steal horizontal space
+ * from the image's box (shrinking it, the opposite of what was asked); an
+ * absolutely positioned element is removed from flow entirely, so it can sit
+ * inside the same py-12 top band already reserved above the image without
+ * that band needing to grow or the image's h-full sizing math changing at
+ * all. `aria-hidden` since the dialog's own aria-label already announces the
+ * identical "Project — Label" text to screen readers — this is a sighted-only
+ * caption, not a second, redundant announcement. `pointer-events-none` keeps
+ * it from interfering with click-anywhere-to-close.
+ *
+ * Color is a hardcoded `#f4f4f5` (the primary/foreground token's own dark-mode
+ * value), not `text-foreground` — this dialog is portaled straight to
+ * document.body, landing outside the /gallery page's own data-force-dark div
+ * in the actual DOM tree. CSS custom properties only cascade through real DOM
+ * ancestry, not the React tree a portal preserves, so `--foreground` here
+ * would resolve against the visitor's own system prefers-color-scheme instead
+ * of the page's forced-dark theme — near-black text on this dialog's
+ * bg-black/90 for anyone with a light system preference. CursorLabel's own
+ * "Close" pill hits this identical problem and already solves it the same
+ * way (see its isInverted branch).
  */
 function GalleryLightbox({
   item,
@@ -301,6 +324,12 @@ function GalleryLightbox({
       className="fixed inset-0 z-[100] bg-black/90 focus:outline-none"
       onClick={onClose}
     >
+      <p
+        aria-hidden="true"
+        className="pointer-events-none absolute left-4 top-4 z-20 text-left text-xs uppercase tracking-wide text-[#f4f4f5] sm:left-5 lg:left-6"
+      >
+        {item.project} — {item.label}
+      </p>
       <CursorLabel
         label="Close"
         className="relative flex h-full w-full cursor-pointer items-center justify-center py-12"
