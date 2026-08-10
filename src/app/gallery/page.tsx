@@ -28,21 +28,22 @@ export const metadata: Metadata = {
  * otherwise still resolve to the light tokens under a light system
  * preference) so the full viewport paints dark, not just the content inside.
  *
- * GalleryMarquee gets a fixed 45% of <main>'s height, centered — leaves
- * generous breathing room top/bottom (matching the reference composition)
- * regardless of viewport height, since it's a percentage of the flex-1 area
- * rather than a fixed px/vh value.
+ * GalleryMarquee is fixed at 19vh, centered in <main> — tuned so ~6 tiles
+ * (at this data set's mixed landscape/portrait aspect ratios, see the sizes
+ * comment in GalleryMarquee.tsx) are visible on screen at once at the same
+ * 1440x900 viewport GalleryMarquee.tsx's PX_PER_SECOND is calibrated
+ * against, rather than the ~2-3 that a taller strip showed. A fixed vh
+ * (not a percentage of <main>'s flex-1 height) keeps the tile count tied to
+ * viewport width/height directly instead of also drifting with Nav/
+ * GalleryInfoRow's own height.
  */
 export default function GalleryPage() {
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground" data-force-dark>
       <Nav />
-      {/* min-h-0 overrides flex's default min-height: auto, which would
-          otherwise let the marquee grow past its flex-1 share and overflow
-          the h-dvh budget. */}
       <main className="flex min-h-0 flex-1 items-center">
         <h1 className="sr-only">Gallery</h1>
-        <div className="h-[45%] w-full">
+        <div className="h-[19vh] w-full">
           <GalleryMarquee items={galleryMarqueeItems} />
         </div>
       </main>
