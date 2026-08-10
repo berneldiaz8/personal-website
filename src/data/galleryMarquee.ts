@@ -8,109 +8,217 @@ export type MarqueeItem = {
 };
 
 /**
- * Representative spread across all 4 case studies for the /gallery marquee —
- * pulled from the real device-mockup `showcase-*` assets already used in
- * ProjectShowcase.tsx (not the flat `image-N.jpg` set in projects.ts, which
- * is uniformly landscape and wouldn't give the marquee's mixed portrait/
- * landscape rhythm). width/height are each file's real pixel dimensions
- * (verified via `sips`), passed to next/image so it can reserve space
- * without layout shift while GalleryMarquee scales tiles by height only.
+ * Full 24-image spread for the /gallery marquee — 6 real product screens per
+ * case study (Lexora, FoodOps, The Dividend Tracker, Opinly, in that fixed
+ * display order), sourced from the "Media 3" folder (G-{project}{1-6}.jpg)
+ * rather than the showcase- or image-N assets ProjectShowcase.tsx and
+ * projects.ts use — these are gallery-specific and don't appear elsewhere.
+ * Converted into public/work/{slug}/gallery-{1-6}.jpg via the same
+ * `ffmpeg -vf "scale='min(1600,iw)':-2" -q:v 4` pipeline this codebase
+ * already uses for projects.ts's imageGallery() (56-292KB each afterward).
+ * width/height are each converted file's real pixel dimensions (verified
+ * via `sips`), passed to next/image so it can reserve space without layout
+ * shift while GalleryMarquee scales tiles by height only. Order within each
+ * project (1 through 6) is preserved from the source filenames.
+ *
+ * The Dividend Tracker's gallery-1 through gallery-5 and FoodOps' gallery-6
+ * went through two reuploads under these same "Media 3" filenames
+ * (2026-08-10): the first reupload was removed entirely after the user
+ * reported the live site still looked like the pre-reupload version despite
+ * exhaustive server/cache/build verification finding nothing wrong; the
+ * source files were then re-exported a second time and re-added here.
  */
 export const galleryMarqueeItems: MarqueeItem[] = [
   {
-    src: "/work/opinly/showcase-secondary-hero.jpg",
-    alt: "Opinly Content Studio blog content list",
-    width: 2896,
-    height: 1720,
-    project: "Opinly",
-    label: "Content Studio",
-  },
-  {
-    src: "/work/opinly/showcase-audit.jpg",
-    alt: "Opinly site audit modal showing a score of 93 out of 100",
-    width: 1448,
-    height: 1720,
-    project: "Opinly",
-    label: "Site Audit",
-  },
-  {
-    src: "/work/opinly/showcase-idea-ads.jpg",
-    alt: "Opinly promotional ad copy generator",
-    width: 2896,
-    height: 1720,
-    project: "Opinly",
-    label: "Ad Copy Generator",
-  },
-  {
-    src: "/work/lexora/showcase-speakup.jpg",
-    alt: "Lexora Speak Up Program confidentiality policy page",
-    width: 2896,
-    height: 1720,
+    src: "/work/lexora/gallery-1.jpg",
+    alt: "Lexora case report detail view showing report CR-01192, a criminal report under review",
+    width: 1600,
+    height: 1180,
     project: "Lexora",
-    label: "Speak Up Program",
+    label: "Case Report Detail",
   },
   {
-    src: "/work/lexora/showcase-speakup-detail.jpg",
-    alt: "Lexora Speak Up Program confidentiality policy page",
-    width: 1448,
-    height: 1720,
+    src: "/work/lexora/gallery-2.jpg",
+    alt: "Lexora closed case final assessment document with evidence collected and conclusion sections",
+    width: 1600,
+    height: 1766,
     project: "Lexora",
-    label: "Confidentiality Policy",
+    label: "Final Case Assessment",
   },
   {
-    src: "/work/lexora/showcase-case-report.jpg",
-    alt: "Lexora case report detail view showing report CR-01192",
-    width: 2896,
-    height: 1720,
+    src: "/work/lexora/gallery-3.jpg",
+    alt: "Lexora analytics dashboard with reports distribution, case manager assignments, and request trends",
+    width: 1600,
+    height: 1476,
     project: "Lexora",
-    label: "Case Report",
+    label: "Analytics Dashboard",
   },
   {
-    src: "/work/the-dividend-tracker/showcase-signin.jpg",
-    alt: "The Dividend Tracker sign-in screen reading 'Welcome back! Your dividends are waiting.'",
-    width: 1448,
-    height: 1720,
-    project: "The Dividend Tracker",
-    label: "Sign In",
+    src: "/work/lexora/gallery-4.jpg",
+    alt: "Lexora video call interface with a live meeting notes panel",
+    width: 1600,
+    height: 1040,
+    project: "Lexora",
+    label: "Meeting Notes",
   },
   {
-    src: "/work/the-dividend-tracker/showcase-watchlist-calendar.jpg",
-    alt: "The Dividend Tracker watchlist, dividend calendar, and dividends payout screens",
-    width: 2896,
-    height: 1720,
-    project: "The Dividend Tracker",
-    label: "Dividend Calendar",
+    src: "/work/lexora/gallery-5.jpg",
+    alt: "Lexora report submission form with an accompanying reporting guide",
+    width: 1512,
+    height: 1216,
+    project: "Lexora",
+    label: "Report Submission",
   },
   {
-    src: "/work/the-dividend-tracker/showcase-holdings-detail.jpg",
+    src: "/work/lexora/gallery-6.jpg",
+    alt: "Lexora marketing homepage reading 'A safer way to report concerns. Built for compliance.'",
+    width: 1600,
+    height: 2116,
+    project: "Lexora",
+    label: "Homepage",
+  },
+  {
+    src: "/work/foodops/gallery-1.jpg",
+    alt: "FoodOps incoming shipments table listing products pending receipt scan",
+    width: 1600,
+    height: 1214,
+    project: "FoodOps",
+    label: "Incoming Shipments",
+  },
+  {
+    src: "/work/foodops/gallery-2.jpg",
+    alt: "FoodOps product detail panel for Eggs/Oeufs BrownShell with traceability lot code information",
+    width: 1600,
+    height: 1164,
+    project: "FoodOps",
+    label: "Product Detail Panel",
+  },
+  {
+    src: "/work/foodops/gallery-3.jpg",
+    alt: "FoodOps spreadsheet generator with food traceability list and lot code filters",
+    width: 1600,
+    height: 1040,
+    project: "FoodOps",
+    label: "Spreadsheet Generator",
+  },
+  {
+    src: "/work/foodops/gallery-4.jpg",
+    alt: "FoodOps traceability plan document for Riverside Grill",
+    width: 1600,
+    height: 1186,
+    project: "FoodOps",
+    label: "Traceability Plan",
+  },
+  {
+    src: "/work/foodops/gallery-5.jpg",
+    alt: "FoodOps preparation of new product form recording a transformation event",
+    width: 1600,
+    height: 1520,
+    project: "FoodOps",
+    label: "Product Preparation Form",
+  },
+  {
+    src: "/work/foodops/gallery-6.jpg",
+    alt: "FoodOps mobile app barcode scan flow from scan prompt to product receipt",
+    width: 1600,
+    height: 1040,
+    project: "FoodOps",
+    label: "Barcode Scan Flow",
+  },
+  {
+    src: "/work/the-dividend-tracker/gallery-1.jpg",
     alt: "The Dividend Tracker holdings detail, edit holdings, and retirement value conversion screens",
-    width: 2896,
-    height: 1720,
+    width: 1600,
+    height: 1040,
     project: "The Dividend Tracker",
     label: "Holdings Detail",
   },
   {
-    src: "/work/foodops/showcase-prep-product.jpg",
-    alt: "FoodOps Preparation of new product form",
-    width: 1448,
-    height: 1720,
-    project: "FoodOps",
-    label: "Preparation Form",
+    src: "/work/the-dividend-tracker/gallery-2.jpg",
+    alt: "The Dividend Tracker watchlist, dividend calendar, and dividends payout screens",
+    width: 1600,
+    height: 1040,
+    project: "The Dividend Tracker",
+    label: "Dividend Calendar",
   },
   {
-    src: "/work/foodops/showcase-product-details-panel.jpg",
-    alt: "FoodOps product details panel with traceability information",
-    width: 1448,
-    height: 1720,
-    project: "FoodOps",
-    label: "Traceability Panel",
+    src: "/work/the-dividend-tracker/gallery-3.jpg",
+    alt: "The Dividend Tracker payout calendar and portfolio diversification breakdown screens",
+    width: 1600,
+    height: 1904,
+    project: "The Dividend Tracker",
+    label: "Portfolio Diversification",
   },
   {
-    src: "/work/foodops/showcase-products.jpg",
-    alt: "FoodOps Products incoming shipments table",
-    width: 2896,
-    height: 1720,
-    project: "FoodOps",
-    label: "Shipments Table",
+    src: "/work/the-dividend-tracker/gallery-4.jpg",
+    alt: "The Dividend Tracker dashboard and dividend income goal calculator screens",
+    width: 1600,
+    height: 1694,
+    project: "The Dividend Tracker",
+    label: "Income Calculator",
+  },
+  {
+    src: "/work/the-dividend-tracker/gallery-5.jpg",
+    alt: "The Dividend Tracker manage portfolios, most popular stocks, and financials screens",
+    width: 1600,
+    height: 1216,
+    project: "The Dividend Tracker",
+    label: "Manage Portfolios",
+  },
+  {
+    src: "/work/the-dividend-tracker/gallery-6.jpg",
+    alt: "The Dividend Tracker marketing homepage reading 'Track your dividends. Maximize your wealth.'",
+    width: 1600,
+    height: 2116,
+    project: "The Dividend Tracker",
+    label: "Homepage",
+  },
+  {
+    src: "/work/opinly/gallery-1.jpg",
+    alt: "Opinly sign-in screen beside a preview of SEO dashboard cards",
+    width: 1600,
+    height: 1040,
+    project: "Opinly",
+    label: "Sign In",
+  },
+  {
+    src: "/work/opinly/gallery-2.jpg",
+    alt: "Opinly main dashboard with traffic, keywords, backlinks, and site audit summary",
+    width: 1600,
+    height: 1642,
+    project: "Opinly",
+    label: "Dashboard Overview",
+  },
+  {
+    src: "/work/opinly/gallery-3.jpg",
+    alt: "Opinly keywords page with search intent distribution and tracked keyword table",
+    width: 1600,
+    height: 1324,
+    project: "Opinly",
+    label: "Keyword Research",
+  },
+  {
+    src: "/work/opinly/gallery-4.jpg",
+    alt: "Opinly Content Studio blog content list with a content calendar sidebar",
+    width: 1600,
+    height: 1214,
+    project: "Opinly",
+    label: "Content Studio",
+  },
+  {
+    src: "/work/opinly/gallery-5.jpg",
+    alt: "Opinly competitor analytics with organic traffic comparison and long-term trend charts",
+    width: 1600,
+    height: 1160,
+    project: "Opinly",
+    label: "Competitor Analytics",
+  },
+  {
+    src: "/work/opinly/gallery-6.jpg",
+    alt: "Opinly marketing homepage reading 'Grow SEO & LLM Traffic on Auto-Pilot'",
+    width: 1600,
+    height: 2116,
+    project: "Opinly",
+    label: "Homepage",
   },
 ];

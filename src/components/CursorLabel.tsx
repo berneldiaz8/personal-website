@@ -50,15 +50,26 @@ function getServerSnapshot() {
  * trails above-right of the cursor, and its corner radius is asymmetric —
  * full-rounded on top-left/top-right/bottom-right, square (no rounding) on
  * bottom-left (`rounded-tl-full rounded-tr-full rounded-br-full
- * rounded-bl-none` below), rather than `rounded-full` on all four.
+ * rounded-bl-none` below), rather than `rounded-full` on all four. That
+ * square corner is deliberate, not cosmetic: it's the corner meant to sit
+ * near the cursor, and the pill is anchored by it (`xPercent: 0, yPercent:
+ * -100` below sets the tracked (x, y) point to the pill's bottom-left
+ * corner, not its center). Anchoring by a corner instead of the center is
+ * what makes the cursor-to-pill gap consistent across instances whose label
+ * text — and therefore pill width — differs ("View Project" vs "Focus" vs
+ * "Close"): a center anchor combined with a fixed offset means a wider pill
+ * pushes its near edge closer to the cursor and a narrower one pushes it
+ * farther, so the same offsetX reads as a different gap depending on the
+ * label. Anchoring the edge itself removes width from the equation entirely
+ * — offsetX/offsetY become a literal, constant pixel gap from the cursor to
+ * the pill's corner, regardless of how long the label is.
  *
- * offsetX/offsetY are overridable per instance (default matches the
- * reference screenshot, unchanged for WorkTeaser's homepage usage) — a
- * consumer wrapping a much smaller target than that ~1000px+ homepage row
- * (GalleryMarquee's tiles, some under 150px wide) needs a tighter trail or
- * the pill visibly overshoots proportionally further from the cursor, and
- * gets clipped by any overflow-hidden ancestor closer than the homepage's
- * roomy row container.
+ * offsetX/offsetY are overridable per instance, but every current usage
+ * (WorkTeaser, both GalleryMarquee pills) relies on the shared default
+ * precisely so they stay visually consistent — don't reintroduce a
+ * per-instance override to compensate for pill width the way an earlier
+ * version of GalleryMarquee's "Focus" pill did; that was working around the
+ * old center-anchor behavior, which corner-anchoring now makes unnecessary.
  *
  * portal renders the pill itself into document.body via createPortal,
  * instead of as a normal absolutely-positioned child of this component's own
@@ -97,8 +108,8 @@ function getServerSnapshot() {
  * tracked area, so it needs enough headroom to clear Nav if the two ever
  * visually overlap.
  */
-const DEFAULT_OFFSET_X = 66;
-const DEFAULT_OFFSET_Y = 22;
+const DEFAULT_OFFSET_X = 2;
+const DEFAULT_OFFSET_Y = 4;
 
 /**
  * Module-level "which instance is currently shown" registry — multiple
@@ -156,7 +167,7 @@ export function CursorLabel({
   useGSAP(
     () => {
       if (!labelRef.current) return;
-      gsap.set(labelRef.current, { xPercent: -50, yPercent: -50 });
+      gsap.set(labelRef.current, { xPercent: 0, yPercent: -100 });
 
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -165,7 +176,21 @@ export function CursorLabel({
       });
       return () => mm.revert();
     },
-    { scope: containerRef },
+    // isClient is required here for portal mode: the pill only actually
+    // mounts into the DOM once isClient flips true (see the isClient doc
+    // comment above), so on the very first run labelRef.current is still
+    // null and this effect bails out via its own guard above. Without
+    // isClient in this array, that bailout is permanent — effects don't
+    // re-run just because a ref's target changes later, so quickX/quickY
+    // would stay null forever and every reposition() call after the first
+    // hover would silently no-op via its own null guard, freezing the pill
+    // at wherever handleMouseEnter's repositionInstant last placed it (that
+    // one only checks labelRef.current directly, so it still works — this
+    // mismatch is what made the bug look like "the pill positions once on
+    // enter, then never tracks further mousemove," specifically for portal
+    // instances). Listing it here makes the effect re-run right after the
+    // portal mounts, correctly picking up the now-valid labelRef.current.
+    { scope: containerRef, dependencies: [isClient] },
   );
 
   const updateInverted = useCallback((target: EventTarget | Element | null) => {

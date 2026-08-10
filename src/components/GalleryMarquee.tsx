@@ -15,6 +15,13 @@ import { CursorLabel } from "./CursorLabel";
 // viewport" (see the comment below on why duration is derived, not fixed).
 const PX_PER_SECOND = 144;
 
+// Fixed tile width, calibrated the same way: (1440 - 6 gaps of 16px) / 7, so
+// 7 tiles fit the same 1440x900 reference viewport PX_PER_SECOND already
+// targets. Every tile shares this exact width now — height is derived per
+// image from its own aspect ratio (see MarqueeTile below), the inverse of
+// the original fixed-height/variable-width sizing.
+const TILE_WIDTH_PX = 192;
+
 /**
  * Infinite horizontal marquee for /gallery. The item list is rendered twice
  * back-to-back in one flex track, then the track is tweened from xPercent 0
@@ -39,23 +46,55 @@ const PX_PER_SECOND = 144;
  * hover-caption transitions below are genuinely decorative, though, and
  * still bypass for reduced motion as normal.
  *
- * Pause-on-hover: the whole track pauses while the pointer is anywhere over
- * the strip (not per-tile), then resumes on leave.
+ * Pause-on-hover is scoped per-tile, not to the row as a whole: pause/play
+ * live in each tile's own onEnter/onLeave (passed down to MarqueeTile below,
+ * shared with the dim-on-hover activeIndex logic), not on the row wrapper's
+ * onMouseEnter. A tile's button has no explicit size of its own — it just
+ * shrink-wraps around the image-sized div inside it — so its hoverable box
+ * is already exactly the rendered image, nothing more; scoping pause there
+ * instead of the row means hovering the gaps between tiles, or the empty
+ * space below a shorter tile now that tiles are top-aligned at varying
+ * heights (see items-start below), does *not* pause the scroll, only
+ * hovering actual image content does. The row wrapper keeps a defensive
+ * onMouseLeave (play + clear activeIndex) as a safety net matching the same
+ * "leaving a tile might not always fire cleanly" reasoning activeIndex's own
+ * per-tile guard already relies on.
  *
- * Each tile is sized by height (h-full w-auto), not width, so a flat `sizes`
- * value on the <Image> would be wrong for half the row: landscape tiles
- * (~1.68:1) render noticeably wider than portrait ones (~0.84:1) at the same
- * height, and a value tuned for one systematically under-serves the other,
- * which next/image's optimizer resolves by picking a smaller srcset
- * candidate than the tile actually needs — a real, confirmed cause of
- * visibly blurry tiles here (the browser then upscales that undersized
- * source via CSS). `sizes` is computed per item instead, from its own real
- * aspect ratio against the page's marquee area height (see gallery/page.tsx's
- * `h-[19vh]`) — if that value changes, this multiplier should move with it.
- * quality={90} matches ProjectShowcase.tsx's
- * ShowcaseImage convention (75 is next/image's own default, deliberately
- * not used site-wide per next.config.ts's own comment on the two allowed
- * qualities).
+ * Every play() call above is guarded with `if (!selected)` — the lightbox
+ * being open must be the one source of truth for "the marquee is stopped,"
+ * not an accident of whether a tile's own leave/blur happens to fire while
+ * it's open. It doesn't always: the clicked tile's onBlur (wired to the same
+ * onLeave, for keyboard focus parity — see MarqueeTile below) fires
+ * reliably the instant GalleryLightbox's own mount effect steals focus via
+ * dialogRef.current.focus(), since blur isn't blocked by occlusion the way
+ * pointer events are — but only if the tile actually held focus at click
+ * time, which itself is browser-dependent (Chromium/Firefox focus a button
+ * on click, Safari historically doesn't). Without the guard, that
+ * inconsistency meant the strip could silently resume scrolling underneath
+ * an open lightbox on some browsers and not others — confusing on close,
+ * since tiles would've moved from wherever the user remembered clicking.
+ * handleClose (see its own comment below) is the only place that resumes it
+ * while the lightbox is open or closing.
+ *
+ * Each tile is sized by width (w-[TILE_WIDTH_PX] h-auto), not height —
+ * every tile is exactly TILE_WIDTH_PX wide regardless of the image's own
+ * aspect ratio, with height following naturally from it. This is the
+ * opposite of the marquee's original sizing (fixed height, variable width);
+ * the row's own height is no longer fixed either, so it auto-sizes to
+ * whatever the tallest tile ends up needing at that shared width, and
+ * shorter tiles top-align within that (items-start on the track) rather
+ * than centering — flush top edge, jagged bottom edge. Since
+ * every tile now renders at the exact same CSS width, `sizes` is a flat
+ * `${TILE_WIDTH_PX}px` for all of them — no per-item aspect-ratio math
+ * needed the way the old height-based sizing required (a flat `sizes` value
+ * back then was wrong specifically because rendered width varied per tile;
+ * now it doesn't).
+ * quality={100} (75 is next/image's own default, deliberately not used
+ * site-wide; 90 is ProjectShowcase.tsx's ShowcaseImage convention for
+ * work-page media; 100 is used here specifically since these are dense
+ * screenshots of real UI — small text and thin borders show compression
+ * artifacts more readily than photography does at 90. All three values are
+ * explicitly allowlisted in next.config.ts's images.qualities).
  *
  * Click-to-open: each tile is a real <button>, not a div with an onClick, so
  * it's reachable and activatable by keyboard for free. The lightbox itself
@@ -78,21 +117,42 @@ const PX_PER_SECOND = 144;
  * CursorLabel's own module-level "one visible at a time" registry already
  * handles the resulting fast enter/leave races between adjacent tiles.
  *
- * CursorLabel gets a tighter offsetX/offsetY here (24/16) than its 66/22
- * default: that default was tuned against WorkTeaser's ~1000px+ wide row, and
- * on a tile as narrow as ~150px (a portrait item at this marquee's 19vh
- * height) it read as disproportionately far from the actual cursor. Tighter
- * offset alone wasn't enough to avoid clipping, though — the tile's own
- * overflow-hidden was moved off the CursorLabel-tracked button onto an inner
- * wrapper around just the Image/caption, so the pill is never clipped by the
- * tile's own edge, but the marquee row itself is *also* overflow-hidden (it
- * has to be, to hide the looping track's off-screen half) and exactly 19vh
- * tall — hovering near the row's top or bottom edge still pushes the pill
- * past that outer boundary and clips it there instead. `portal` (see
- * CursorLabel.tsx) fixes this the same way GalleryLightbox already escapes
- * its own overflow-hidden ancestor: it renders the pill into document.body
- * via createPortal rather than positioning it inside the row at all.
+ * This CursorLabel uses the shared default offsetX/offsetY (see
+ * CursorLabel.tsx) rather than a tile-specific override — an earlier version
+ * tightened it to compensate for the tile's small size, back when the pill
+ * was anchored by its center; corner-anchoring (also in CursorLabel.tsx)
+ * made that compensation unnecessary; the cursor-to-pill gap is now the same
+ * fixed distance everywhere regardless of tile or label width, so this pill
+ * and WorkTeaser's/GalleryLightbox's all read as one consistent affordance.
  *
+ * The row's own overflow-hidden (necessary to hide the looping track's
+ * off-screen half) is a separate clipping hazard the offset alone can't
+ * fix: the tile's own overflow-hidden was moved off the CursorLabel-tracked
+ * button onto an inner wrapper around just the Image, so the pill is never
+ * clipped by the tile's own edge, but with every tile top-aligned (see
+ * items-start above), every tile's top edge touches the row's own top
+ * bound exactly, not just the tallest one's — hovering near any tile's top
+ * can push the pill past that row-level boundary, while there's still
+ * headroom below shorter tiles since only the tallest one reaches the row's
+ * bottom edge. `portal` (see CursorLabel.tsx) fixes this the same way
+ * GalleryLightbox already escapes its own overflow-hidden ancestor: it
+ * renders the pill into document.body rather than positioning it inside the
+ * row at all.
+ *
+ * Spotlight dim-on-hover: hovering (or focusing) one tile dims every other
+ * tile in the track — including the off-screen half of the loop, since this
+ * is explicit per-tile React state (activeIndex), not a CSS effect scoped to
+ * the visible viewport. Deliberately index-based, not keyed by item identity
+ * (e.g. item.src): the doubled track renders each image as two independent
+ * DOM tiles (index i and i + items.length) for the seamless loop, and
+ * hovering one does *not* also exempt its own duplicate elsewhere in the
+ * strip from dimming — matching how every other per-tile behavior here
+ * (fade-in-on-load, the CursorLabel instance, focus state) already treats
+ * the two copies as fully independent elements, not a linked pair.
+ * setActiveIndex on leave uses the same "only clear if this tile is still
+ * the active one" guard the old hover-caption's activeIndex used, so a leave
+ * on one tile immediately followed by an enter on the next (adjacent-tile
+ * races) can't stomp the new tile's just-set active state.
  */
 
 /**
@@ -103,34 +163,53 @@ const PX_PER_SECOND = 144;
 function MarqueeTile({
   item,
   priority,
+  isDimmed,
+  onEnter,
+  onLeave,
   onSelect,
 }: {
   item: MarqueeItem;
   priority: boolean;
+  isDimmed: boolean;
+  onEnter: () => void;
+  onLeave: () => void;
   onSelect: (trigger: HTMLButtonElement) => void;
 }) {
   const { loaded, onLoad } = useFadeInOnLoad(priority);
   return (
     <button
       type="button"
-      className="relative block h-full shrink-0 cursor-pointer appearance-none border-0 bg-transparent p-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      className="relative block shrink-0 cursor-pointer appearance-none border-0 bg-transparent p-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+      onFocus={onEnter}
+      onBlur={onLeave}
       onClick={(event) => onSelect(event.currentTarget)}
       aria-label={`View ${item.project} — ${item.label} full size`}
     >
-      <CursorLabel label="Focus" offsetX={24} offsetY={16} portal className="relative block h-full">
-        <div className="relative h-full w-auto overflow-hidden shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]">
+      <CursorLabel label="Focus" portal className="relative block">
+        <div
+          className="relative h-auto overflow-hidden shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+          style={{ width: TILE_WIDTH_PX }}
+        >
           <Image
             src={item.src}
             alt={item.alt}
             width={item.width}
             height={item.height}
-            className={`h-full w-auto object-cover transition-opacity duration-500 motion-reduce:transition-none ${
+            className={`h-auto w-full object-cover transition-opacity duration-500 motion-reduce:transition-none ${
               loaded ? "opacity-100" : "opacity-0"
             }`}
-            sizes={`${((item.width / item.height) * 19).toFixed(0)}vh`}
-            quality={90}
+            sizes={`${TILE_WIDTH_PX}px`}
+            quality={100}
             priority={priority}
             onLoad={onLoad}
+          />
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 bg-black transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+              isDimmed ? "opacity-75" : "opacity-0"
+            }`}
           />
         </div>
       </CursorLabel>
@@ -144,6 +223,12 @@ function MarqueeTile({
  * `fill` + `object-contain` inside that box scales the image down to fit
  * within it while preserving aspect ratio, so it's correct for both the wide
  * landscape and tall portrait tiles in this data set without separate cases.
+ * That padding lives on CursorLabel's own container, not the outer dialog
+ * div — CursorLabel only tracks mouse events within its own box, so padding
+ * placed on an ancestor instead would shrink that box and leave the padding
+ * strips outside it, silently hiding the pill while hovering there (a real
+ * bug this used to have). Keeping the padding on CursorLabel itself means
+ * its tracked area is the full `fixed inset-0` dialog, padding included.
  *
  * Click-anywhere-to-close: unlike a typical lightbox, clicking the image
  * itself also closes, not just the surrounding backdrop — there's no
@@ -199,12 +284,12 @@ function GalleryLightbox({
       aria-modal="true"
       aria-label={`${item.project} — ${item.label}`}
       tabIndex={-1}
-      className="fixed inset-0 z-[100] bg-black/90 py-12 focus:outline-none"
+      className="fixed inset-0 z-[100] bg-black/90 focus:outline-none"
       onClick={onClose}
     >
       <CursorLabel
         label="Close"
-        className="relative flex h-full w-full cursor-pointer items-center justify-center"
+        className="relative flex h-full w-full cursor-pointer items-center justify-center py-12"
       >
         <div className="relative h-full w-full">
           <Image
@@ -212,7 +297,7 @@ function GalleryLightbox({
             alt={item.alt}
             fill
             sizes="100vw"
-            quality={90}
+            quality={100}
             className="object-contain"
           />
         </div>
@@ -226,6 +311,7 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
   const tweenRef = useRef<gsap.core.Tween | null>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [selected, setSelected] = useState<MarqueeItem | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   function handleSelect(item: MarqueeItem, trigger: HTMLButtonElement) {
     lastTriggerRef.current = trigger;
@@ -235,7 +321,61 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
 
   function handleClose() {
     setSelected(null);
-    tweenRef.current?.play();
+    // Deliberately not a flat "clear activeIndex, resume the tween" — the
+    // cursor may genuinely still be sitting on the tile that opened the
+    // lightbox (e.g. it closed via clicking the enlarged image at a point
+    // that happens to land on the underlying tile's screen position), in
+    // which case it should stay spotlighted and paused, exactly as if the
+    // user were freshly hovering it. requestAnimationFrame defers this
+    // check to after React actually removes the portaled dialog from the
+    // DOM — checked synchronously in this same tick, the tile would still
+    // read as occluded (the dialog is still the topmost element there) and
+    // :hover wouldn't match it yet. Using the browser's own live :hover
+    // state instead of tracking mouse coordinates ourselves means this
+    // works regardless of *how* the lightbox closed (backdrop click, image
+    // click, or Escape) and correctly resolves to whichever tile (if any)
+    // the cursor actually ends up over — including a *different* tile than
+    // the one that was open, not just re-checking the original trigger.
+    // This single resync is also why the tile's onFocus doesn't need its
+    // own guard against GalleryLightbox's returnFocusRef refocus: that
+    // still fires synchronously and can transiently re-pause/re-highlight
+    // the wrong thing, but this rAF callback runs after it and overwrites
+    // whatever it set with the real answer.
+    requestAnimationFrame(() => {
+      const buttons = trackRef.current ? Array.from(trackRef.current.querySelectorAll("button")) : [];
+      const hoveredIndex = buttons.findIndex((button) => button.matches(":hover"));
+      if (hoveredIndex === -1) {
+        setActiveIndex(null);
+        tweenRef.current?.play();
+        return;
+      }
+      setActiveIndex(hoveredIndex);
+      tweenRef.current?.pause();
+      // The tile's own onPointerLeave can't be trusted to ever fire after
+      // this — confirmed directly: :hover correctly flips back to false once
+      // the cursor genuinely moves off, but the DOM leave event silently
+      // never dispatches. Browsers only recompute *and dispatch* pointer
+      // enter/leave in response to an actual pointer-movement event; the
+      // dialog's removal just now was a pure DOM mutation, not a movement,
+      // so the tile never received a fresh pointerenter from the event
+      // system's own bookkeeping — meaning it can't later "leave" something
+      // it was never marked as having entered, even though it visibly is
+      // hovered right now. This one-off listener bridges exactly that gap:
+      // on the next real pointer movement anywhere, it re-checks :hover
+      // directly and corrects state once the cursor has actually left. The
+      // `current === hoveredIndex` guard makes it safe even if the user has
+      // since moved on to genuinely hovering a different tile (which fires
+      // its own onEnter normally) — this only clears activeIndex if it's
+      // still pointing at the same stale tile, never a newer one.
+      const hoveredButton = buttons[hoveredIndex];
+      function recheckHover() {
+        if (hoveredButton.matches(":hover")) return;
+        setActiveIndex((current) => (current === hoveredIndex ? null : current));
+        tweenRef.current?.play();
+        document.removeEventListener("pointermove", recheckHover);
+      }
+      document.addEventListener("pointermove", recheckHover);
+    });
   }
 
   useGSAP(
@@ -261,16 +401,27 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
 
   return (
     <div
-      className="relative h-full w-full overflow-hidden"
-      onMouseEnter={() => tweenRef.current?.pause()}
-      onMouseLeave={() => tweenRef.current?.play()}
+      className="relative w-full overflow-hidden"
+      onMouseLeave={() => {
+        if (!selected) tweenRef.current?.play();
+        setActiveIndex(null);
+      }}
     >
-      <div ref={trackRef} className="flex h-full w-max items-center gap-4">
+      <div ref={trackRef} className="flex w-max items-start gap-4">
         {[...items, ...items].map((item, i) => (
           <MarqueeTile
             key={`${item.src}-${i}`}
             item={item}
             priority={i < items.length}
+            isDimmed={activeIndex !== null && activeIndex !== i}
+            onEnter={() => {
+              setActiveIndex(i);
+              tweenRef.current?.pause();
+            }}
+            onLeave={() => {
+              setActiveIndex((current) => (current === i ? null : current));
+              if (!selected) tweenRef.current?.play();
+            }}
             onSelect={(trigger) => handleSelect(item, trigger)}
           />
         ))}
