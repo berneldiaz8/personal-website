@@ -12,7 +12,7 @@ import { useState } from "react";
  * in this codebase.
  *
  * priority=true starts already "loaded" (no fade) — protects LCP-critical
- * images (the deep-linked project's hero, a marquee's first tile) from being
+ * images (the deep-linked project's hero, a carousel's first tile) from being
  * hidden behind a JS-gated opacity transition, which would otherwise delay
  * when the browser counts them as painted for Largest Contentful Paint.
  */

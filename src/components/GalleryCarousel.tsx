@@ -7,7 +7,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
-import type { MarqueeItem } from "@/data/galleryMarquee";
+import type { CarouselItem } from "@/data/galleryCarousel";
 import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 import { textStyles } from "@/lib/typography";
 import { CursorLabel } from "./CursorLabel";
@@ -26,7 +26,7 @@ gsap.registerPlugin(Draggable, InertiaPlugin);
 // width stays pinned at the floor — this was never asked to scale down for
 // mobile, where showing fewer than 7 tiles at a time is already the
 // expected, unchanged behavior. Every tile shares this exact computed width
-// — height is derived per image from its own aspect ratio (see MarqueeTile
+// — height is derived per image from its own aspect ratio (see CarouselTile
 // below), the inverse of the original fixed-height/variable-width sizing.
 //
 // TILE_SIDE_MARGIN_PX is subtracted from the available width the "7 tiles"
@@ -64,7 +64,7 @@ function prefersReducedMotion() {
 }
 
 /**
- * Infinite horizontal drag-scroll marquee for /gallery, with a slight
+ * Infinite horizontal drag-scroll carousel for /gallery, with a slight
  * parallelogram-style skew that follows drag direction and springs back
  * level on release — modeled on a reference GSAP "skew on drag" effect
  * (top/bottom edges stay horizontal, only the left/right edges lean, unlike
@@ -102,7 +102,7 @@ function prefersReducedMotion() {
  *   what computed it — not a workaround).
  *
  * Reduced motion is narrower here than the old autoplay version's blanket
- * bypass (see CLAUDE.md's "Reduced motion, video, and the gallery marquee"
+ * bypass (see CLAUDE.md's "Reduced motion, video, and the gallery carousel"
  * section for the historical context and the explicit re-ask that changed
  * it): direct dragging (1:1 pointer tracking, wrap-on-drag) stays exempt
  * regardless of the setting, since it's fully user-initiated, not the
@@ -190,12 +190,12 @@ function prefersReducedMotion() {
  * which is nearly the whole track), Draggable's own built-in press/release
  * handling already fires a real click on the target when the pointer never
  * moves past its minimum-movement threshold, and suppresses any click
- * shortly after an actual drag. MarqueeTile's existing onClick just works.
+ * shortly after an actual drag. CarouselTile's existing onClick just works.
  *
  * Each tile is sized by width (TILE_WIDTH_CSS, h-auto), not height — every
  * tile is exactly the same computed width regardless of the image's own
  * aspect ratio, with height following naturally from it. This is the
- * opposite of the marquee's original sizing (fixed height, variable width);
+ * opposite of the carousel's original sizing (fixed height, variable width);
  * the row's own height is no longer fixed either, so it auto-sizes to
  * whatever the tallest tile ends up needing at that shared width, and
  * shorter tiles top-align within that (items-start on the track) rather
@@ -270,12 +270,12 @@ function prefersReducedMotion() {
  * rather than inside the parent's .map() callback, which the Rules of Hooks
  * disallow.
  */
-function MarqueeTile({
+function CarouselTile({
   item,
   priority,
   onSelect,
 }: {
-  item: MarqueeItem;
+  item: CarouselItem;
   priority: boolean;
   onSelect: (trigger: HTMLButtonElement) => void;
 }) {
@@ -362,7 +362,7 @@ function MarqueeTile({
  * stopPropagation on the image wrapper, so every click bubbles to the
  * dialog's own onClick={onClose}. A CursorLabel (label="Close", default
  * offset — this tracked area is viewport-sized, the same scale as
- * WorkTeaser's row, not GalleryMarquee's tight per-tile offset) spans the
+ * WorkTeaser's row, not GalleryCarousel's tight per-tile offset) spans the
  * whole dialog so the cursor-follow pill communicates that everywhere, not
  * just close via a click.
  *
@@ -403,7 +403,7 @@ function GalleryLightbox({
   onClose,
   returnFocusRef,
 }: {
-  item: MarqueeItem;
+  item: CarouselItem;
   onClose: () => void;
   returnFocusRef: React.RefObject<HTMLButtonElement | null>;
 }) {
@@ -462,7 +462,7 @@ function GalleryLightbox({
   );
 }
 
-export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
+export function GalleryCarousel({ items }: { items: CarouselItem[] }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const skewRef = useRef<HTMLDivElement>(null);
@@ -471,9 +471,9 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
   const restXRef = useRef(0);
   const wrapXRef = useRef<((value: number) => number) | null>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const [selected, setSelected] = useState<MarqueeItem | null>(null);
+  const [selected, setSelected] = useState<CarouselItem | null>(null);
 
-  function handleSelect(item: MarqueeItem, trigger: HTMLButtonElement) {
+  function handleSelect(item: CarouselItem, trigger: HTMLButtonElement) {
     lastTriggerRef.current = trigger;
     setSelected(item);
   }
@@ -781,7 +781,7 @@ export function GalleryMarquee({ items }: { items: MarqueeItem[] }) {
               GPU/compositor side those two don't touch. */}
           <div ref={trackRef} className="flex w-max items-start gap-4 will-change-transform">
             {[...items, ...items].map((item, i) => (
-              <MarqueeTile
+              <CarouselTile
                 key={`${item.src}-${i}`}
                 item={item}
                 priority={i < items.length}

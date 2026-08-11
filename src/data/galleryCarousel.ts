@@ -1,4 +1,4 @@
-export type MarqueeItem = {
+export type CarouselItem = {
   src: string;
   alt: string;
   width: number;
@@ -8,7 +8,7 @@ export type MarqueeItem = {
 };
 
 /**
- * Full 24-image spread for the /gallery marquee (Lexora, FoodOps, The
+ * Full 24-image spread for the /gallery carousel (Lexora, FoodOps, The
  * Dividend Tracker, Opinly, in that fixed display order), sourced from the
  * "Media 3" folder (G-{project}{N}.jpg) rather than the showcase- or
  * image-N assets ProjectShowcase.tsx and projects.ts use — these are
@@ -18,7 +18,7 @@ export type MarqueeItem = {
  * already uses for projects.ts's imageGallery() (56-292KB each afterward).
  * width/height are each converted file's real pixel dimensions (verified
  * via `sips`), passed to next/image so it can reserve space without layout
- * shift while GalleryMarquee scales tiles by height only. Order within each
+ * shift while GalleryCarousel scales tiles by height only. Order within each
  * project is preserved from the source filenames.
  *
  * The Dividend Tracker's file numbering has a gap: it runs gallery-1
@@ -44,7 +44,7 @@ export type MarqueeItem = {
  * a second time and re-added — those 5 are unaffected by gallery-6/7's own
  * history.
  */
-export const galleryMarqueeItems: MarqueeItem[] = [
+export const galleryCarouselItems: CarouselItem[] = [
   {
     src: "/work/lexora/gallery-1.jpg",
     alt: "Lexora case report detail view showing report CR-01192, a criminal report under review",

@@ -147,9 +147,9 @@ video (the loading spinner's spin animation) still respects reduced motion as no
 playback itself was exempted. Don't reintroduce the old gate without the same explicit re-ask this
 exception required.
 
-**Reduced motion and the gallery marquee (2026-07-31, narrowed 2026-08-11):** originally a full
+**Reduced motion and the gallery carousel (2026-07-31, narrowed 2026-08-11):** originally a full
 bypass matching video's exemption above (autoplay scroll, presenting real content, not decorative
-chrome). `GalleryMarquee.tsx` was later rebuilt from an autoplaying GSAP tween into a GSAP
+chrome). `GalleryCarousel.tsx` was later rebuilt from an autoplaying GSAP tween into a GSAP
 Draggable-driven drag-to-scroll carousel with a skew-on-drag effect (an explicit user request
 to make the interaction fully user-initiated instead of autonomous; skewX replaced an initial
 rotation-based version of this same effect shortly after, since rotating the full doubled track
