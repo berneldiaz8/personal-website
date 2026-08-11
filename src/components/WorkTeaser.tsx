@@ -53,7 +53,7 @@ function previewFor(project: Project) {
 /**
  * Extracted so useVideoReady (a hook) can be called once per project
  * instance rather than inside the parent's .map() callback, which the Rules
- * of Hooks disallow — same reasoning as GalleryMarquee.tsx's MarqueeTile.
+ * of Hooks disallow — same reasoning as GalleryCarousel.tsx's CarouselTile.
  */
 function TeaserVideo({ preview, projectName }: { preview: { src: string; poster: string }; projectName: string }) {
   const { ready, onLoadedData } = useVideoReady();

@@ -65,16 +65,16 @@ function getServerSnapshot() {
  * the pill's corner, regardless of how long the label is.
  *
  * offsetX/offsetY are overridable per instance, but every current usage
- * (WorkTeaser, both GalleryMarquee pills) relies on the shared default
+ * (WorkTeaser, both GalleryCarousel pills) relies on the shared default
  * precisely so they stay visually consistent — don't reintroduce a
  * per-instance override to compensate for pill width the way an earlier
- * version of GalleryMarquee's "Focus" pill did; that was working around the
+ * version of GalleryCarousel's "Focus" pill did; that was working around the
  * old center-anchor behavior, which corner-anchoring now makes unnecessary.
  *
  * portal renders the pill itself into document.body via createPortal,
  * instead of as a normal absolutely-positioned child of this component's own
  * container — for a tracked area that sits inside a short overflow-hidden
- * ancestor (GalleryMarquee's marquee row, clipped so the looping track's
+ * ancestor (GalleryCarousel's carousel row, clipped so the looping track's
  * off-screen half stays hidden), the pill's own vertical offset can push it
  * above/below that row's bounds while the cursor is still near the row's top
  * or bottom edge, getting silently clipped — same failure mode the tile's

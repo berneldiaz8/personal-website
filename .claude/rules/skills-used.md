@@ -26,11 +26,17 @@ it covers.
   reversal of the site-wide ban — don't propagate em-dashes elsewhere (body copy, meta text, UI
   strings) without the same explicit ask. Two further explicit, scoped exceptions since: page
   `<title>` tags site-wide use the `"Bernel Diaz — [Page]"` pattern (`src/app/layout.tsx` and each
-  route's own `metadata.title`), and `GalleryMarquee.tsx`'s per-tile hover caption combines the
-  project name and label onto one line as `"Project — Label"` (spaced on both sides — unlike
-  `ShowcaseHeadline`'s tight, no-space convention; asked for explicitly after first trying the
-  tight version). Each was a separate explicit user request, not a blanket lift of the ban — still
-  don't add an em-dash anywhere else without the same explicit ask.
+  route's own `metadata.title`), and `GalleryCarousel.tsx` combines a tile's project name and label
+  onto one line as `"Project — Label"` (spaced on both sides — unlike `ShowcaseHeadline`'s tight,
+  no-space convention; asked for explicitly after first trying the tight version). This pattern
+  shows up three places in that file: each tile's own `aria-label` (screen-reader only, not
+  visible), the lightbox dialog's `aria-label`, and the lightbox's visible sighted-only caption
+  (`{item.project} — {item.label}`) — there is no per-tile hover caption on the carousel itself;
+  an earlier autoplaying version of this component had one, but it was replaced by the current
+  drag-driven carousel (see CLAUDE.md's "Reduced motion and the gallery carousel" section), which
+  uses `CursorLabel`'s "Focus"/"Close" pills instead, not project/label text. Each em-dash use was
+  a separate explicit user request, not a blanket lift of the ban — still don't add an em-dash
+  anywhere else without the same explicit ask.
 - `make-interfaces-feel-better` — polish pass: scroll-reveal motion via the `Reveal` component
   (respects `prefers-reduced-motion`), image containers use inset box-shadow outlines
   (`rgba(0,0,0,.1)` light / `rgba(255,255,255,.1)` dark) not tinted borders, `text-balance`
