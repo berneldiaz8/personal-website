@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Nav } from "@/components/Nav";
 import { GalleryInfoRow } from "@/components/GalleryInfoRow";
-import { GalleryMarquee } from "@/components/GalleryMarquee";
-import { galleryMarqueeItems } from "@/data/galleryMarquee";
+import { GalleryCarousel } from "@/components/GalleryCarousel";
+import { galleryCarouselItems } from "@/data/galleryCarousel";
 
 export const metadata: Metadata = {
   title: "Bernel Diaz — Gallery",
-  description: "Gallery by Bernel Diaz.",
+  description:
+    "A closer look at real product screens from Bernel Diaz's case studies: Lexora, FoodOps, The Dividend Tracker, and Opinly.",
 };
 
 /**
@@ -28,22 +29,25 @@ export const metadata: Metadata = {
  * otherwise still resolve to the light tokens under a light system
  * preference) so the full viewport paints dark, not just the content inside.
  *
- * GalleryMarquee gets a fixed 45% of <main>'s height, centered — leaves
- * generous breathing room top/bottom (matching the reference composition)
- * regardless of viewport height, since it's a percentage of the flex-1 area
- * rather than a fixed px/vh value.
+ * GalleryCarousel's wrapper has no explicit height (just w-full) — tiles are
+ * now sized by a responsive width (TILE_WIDTH_CSS in GalleryCarousel.tsx,
+ * calibrated so ~7 fit across the 1440x900 reference viewport PX_PER_SECOND
+ * is also calibrated against, then scaling up above that breakpoint so the
+ * same 7-tile fit holds on wider viewports too), with height following per
+ * image's own aspect ratio,
+ * so the carousel's own height is however tall its tallest tile ends up
+ * being — there's no longer a single fixed row height to assign here.
+ * <main>'s items-center still vertically centers whatever that natural
+ * height comes out to within the flex-1 area.
  */
 export default function GalleryPage() {
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground" data-force-dark>
       <Nav />
-      {/* min-h-0 overrides flex's default min-height: auto, which would
-          otherwise let the marquee grow past its flex-1 share and overflow
-          the h-dvh budget. */}
       <main className="flex min-h-0 flex-1 items-center">
         <h1 className="sr-only">Gallery</h1>
-        <div className="h-[45%] w-full">
-          <GalleryMarquee items={galleryMarqueeItems} />
+        <div className="w-full">
+          <GalleryCarousel items={galleryCarouselItems} />
         </div>
       </main>
       <GalleryInfoRow />
