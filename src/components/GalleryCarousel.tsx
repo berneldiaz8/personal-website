@@ -457,30 +457,14 @@ function GalleryLightbox({
         label="Close"
         className="relative flex h-full w-full cursor-pointer items-center justify-center py-12"
       >
-        {/* Sized to the image's own intrinsic aspect ratio (item.width/height —
-            already-known static data, the same values CarouselTile's own
-            Image already uses, not a runtime measurement) and capped by
-            max-h-full/max-w-full, rather than the previous plain h-full
-            w-full box — that box was the *entire* available area, with
-            object-contain letterboxing the image down to fit inside it
-            purely at the pixel/paint level; a skeleton sized to that outer
-            box (the previous version) covered empty letterbox space on
-            either side of the actual image for anything not exactly
-            viewport-shaped. Replicating object-contain's own sizing as a
-            real, differently-sized DOM box instead means the skeleton
-            (inset-0 within it) exactly matches the image's own final
-            footprint. object-contain stays on the Image itself as a safe
-            no-op fallback for any float-rounding mismatch between this
-            aspect-ratio box and the image's true one, not because it's
-            still doing the primary sizing work. CursorLabel's own
-            flex/items-center/justify-center (on its outer className,
-            unchanged) centers this now-correctly-sized box the same way it
-            centered the old full-size one. */}
-        <div
-          className="relative max-h-full max-w-full"
-          style={{ aspectRatio: `${item.width} / ${item.height}`, width: item.width, height: item.height }}
-        >
-          <ImageSkeleton loaded={loaded} forceDark />
+        <div className="relative h-full w-full">
+          {/* width/height put ImageSkeleton into its SVG object-fit:contain
+              mode (see its own doc comment for why a plain inset-0 fill isn't
+              enough here) — this box stays a plain h-full w-full fill, same
+              as the real Image below; the skeleton sizes its own painted
+              content to match the image's letterboxed footprint internally,
+              nothing about this wrapper needs to change to accommodate it. */}
+          <ImageSkeleton loaded={loaded} forceDark width={item.width} height={item.height} />
           <Image
             src={item.src}
             alt={item.alt}
