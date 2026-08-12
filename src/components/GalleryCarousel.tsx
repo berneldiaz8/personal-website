@@ -227,7 +227,7 @@ function prefersReducedMotion() {
  * during server rendering.
  *
  * Each tile also gets its own CursorLabel (the same cursor-follow pill
- * WorkTeaser.tsx uses for "View Project"), labeled "Focus" to signal the
+ * WorkTeaser.tsx uses for "More"), labeled "Focus" to signal the
  * click-to-open interaction. One instance per tile (48, given the doubled
  * track) rather than one shared instance for the whole strip, so the pill
  * only appears over an actual image, not the small gaps between tiles.
@@ -243,13 +243,18 @@ function prefersReducedMotion() {
  * threading an `isDragging` flag down to swap the label to "Drag" while
  * active, not yet built since the source read suggests it isn't needed.
  *
- * This CursorLabel uses the shared default offsetX/offsetY (see
- * CursorLabel.tsx) rather than a tile-specific override — an earlier version
- * tightened it to compensate for the tile's small size, back when the pill
- * was anchored by its center; corner-anchoring (also in CursorLabel.tsx)
- * made that compensation unnecessary; the cursor-to-pill gap is now the same
- * fixed distance everywhere regardless of tile or label width, so this pill
- * and WorkTeaser's/GalleryLightbox's all read as one consistent affordance.
+ * This CursorLabel overrides offsetX/offsetY (12, -30) instead of taking the
+ * shared default (see CursorLabel.tsx) — a different reason than the old
+ * tile-size compensation an earlier version needed (corner-anchoring made
+ * that one unnecessary, and this pill still shares the same anchor math
+ * everywhere). This tile's button is `cursor-grab` (`cursor-grabbing` while
+ * dragging), not the plain arrow/pointer WorkTeaser's Link and the
+ * lightbox's dialog use — the browser/OS-rendered grab-hand glyph has a
+ * different visual size and hotspot placement than the arrow, which isn't
+ * something CSS or JS can query, so the *raw* cursor-to-label pixel offset
+ * being identical to the other two instances doesn't mean the *visible* gap
+ * reads the same. Tightened here, confirmed by eye against the arrow-cursor
+ * instances rather than computed from a spec.
  *
  * The row's own overflow-hidden (necessary to hide the looping track's
  * off-screen half) is a separate clipping hazard the offset alone can't
@@ -288,7 +293,7 @@ function CarouselTile({
       onClick={(event) => onSelect(event.currentTarget)}
       aria-label={`View ${item.project} — ${item.label} full size`}
     >
-      <CursorLabel label="Focus" portal className="relative block">
+      <CursorLabel label="Focus" portal offsetX={12} offsetY={-30} className="relative block">
         <div
           className="relative h-auto overflow-hidden shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
           style={{ width: TILE_WIDTH_CSS }}
@@ -397,8 +402,9 @@ function CarouselTile({
  * would resolve against the visitor's own system prefers-color-scheme instead
  * of the page's forced-dark theme — near-black text on this dialog's
  * bg-black/90 for anyone with a light system preference. CursorLabel's own
- * "Close" pill hits this identical problem and already solves it the same
- * way (see its isInverted branch).
+ * "Close" label doesn't hit this problem: its color is a static `text-white`
+ * plus `mix-blend-mode: difference`, not a `--foreground` token, so there's
+ * no custom-property cascade to break through the portal boundary.
  */
 function GalleryLightbox({
   item,

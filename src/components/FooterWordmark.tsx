@@ -2,12 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { CursorLabel } from "./CursorLabel";
 import { Logo, LOGO_PATH_D, LOGO_VIEWBOX } from "./Logo";
+
+const EMAIL = "diaz.bernel@gmail.com";
 
 /**
  * Large decorative wordmark strip in the footer. Purely visual — aria-hidden,
  * mouse-driven only, no keyboard interaction expected (the real accessible
- * "berneldiaz" link lives in Nav.tsx).
+ * "berneldiaz" link lives in Nav.tsx). A click-to-copy-email bonus
+ * interaction rides on top of the same aria-hidden, mouse-only surface for
+ * the identical reason: Footer.tsx's own Contact block, directly above this,
+ * already exposes the email as a real accessible mailto link plus visible
+ * selectable text, so this is a redundant shortcut for mouse users, not the
+ * only way to get the address.
  *
  * Hover interaction: a faithful port of originkit.dev's "Mesh Text Hover"
  * component (source supplied directly by the user, not reverse-engineered
@@ -141,6 +149,27 @@ export function FooterWordmark() {
   // rather than throwing. Either way, falls back to the plain SVG Logo
   // rather than risk an opaque black block sitting in the footer.
   const [useFallback, setUseFallback] = useState(false);
+  // "Email Copied" feedback on the CursorLabel after a click, reverting to
+  // "Copy Email" after a delay — a plain setTimeout, not GSAP, since this is
+  // just a label-text swap, not a tweened value. copiedTimeoutRef lets a
+  // second click within the delay window restart the timer instead of the
+  // first click's timeout firing early and reverting the label out from
+  // under a still-fresh copy.
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
+    };
+  }, []);
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(EMAIL).catch(() => {});
+    setCopied(true);
+    if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
+    copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -494,14 +523,20 @@ export function FooterWordmark() {
   }, []);
 
   return (
-    <div aria-hidden="true" className="px-6 py-6 text-foreground">
-      <div ref={wrapperRef} className="relative w-full" style={{ aspectRatio: "79 / 14" }}>
-        {useFallback ? (
-          <Logo className="block h-full w-full" />
-        ) : (
-          <canvas ref={canvasRef} className="block h-full w-full" />
-        )}
-      </div>
+    <div aria-hidden="true" className="cursor-pointer px-6 py-6 text-foreground" onClick={handleCopyEmail}>
+      <CursorLabel
+        label={copied ? "Email Copied" : "Copy Email"}
+        reverse={!copied}
+        className="relative block w-full"
+      >
+        <div ref={wrapperRef} className="relative w-full" style={{ aspectRatio: "79 / 14" }}>
+          {useFallback ? (
+            <Logo className="block h-full w-full" />
+          ) : (
+            <canvas ref={canvasRef} className="block h-full w-full" />
+          )}
+        </div>
+      </CursorLabel>
     </div>
   );
 }

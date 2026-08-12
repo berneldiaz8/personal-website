@@ -27,98 +27,116 @@ function getServerSnapshot() {
 }
 
 /**
- * Cursor-follow label — a small pill that trails the mouse while hovering
- * the wrapped content, fading in/out on enter/leave. GSAP quickTo drives the
+ * Cursor-follow label — bare text that trails the mouse while hovering the
+ * wrapped content, fading in/out on enter/leave. GSAP quickTo drives the
  * trailing motion (matching the rest of the site's GSAP-only approach — see
  * Reveal.tsx's note on dropping motion/react as a redundant second engine).
  * quickTo is GSAP's purpose-built utility for this exact case: repeated
  * rapid tweens (one per mousemove) without stacking/queuing.
  *
- * The pill stays visible across the whole wrapped area, not just over any
- * media inside it — but it switches appearance depending on what's under the
- * cursor: theme-adaptive (bg-background/text-foreground) while over an
- * element marked data-cursor-video-zone (the video, where content varies and
- * a page-background-colored pill stays legible), forced dark everywhere else
- * in the wrapped area (the plain page background, where a fixed dark pill
- * reads as a deliberate UI element rather than blending into a light theme).
+ * Color: `mix-blend-mode: difference` on white text, not a solid background
+ * pill. Per-pixel, the browser composites `abs(255 - backdrop)`, so the label
+ * self-inverts against literally whatever is underneath it — dark on a white
+ * page background, light on a dark video frame, a shifted hue mid-word if the
+ * cursor crosses a color boundary — with no JS needed to classify what's
+ * beneath it. Reverse-engineered from a reference recording
+ * (Recordings/Cursor.mov, a dothings.co-style site) that does the same thing;
+ * confirmed by cropping frames where the label crossed from a white page
+ * background onto an orange product bottle — the text went from near-black to
+ * a blue-shifted hue, matching abs(255-white)=black and
+ * abs(255-orange)=blue-ish exactly. This replaced an earlier version that
+ * force-swapped between two hardcoded colors via a `data-cursor-video-zone`
+ * attribute check (only binary: "is the cursor over the one video element in
+ * this tracked area, or not") — mix-blend-mode gets continuous, per-pixel
+ * correctness for free and needed zero markup changes at any call site.
  *
  * Reduced motion gets a full bypass, not a shortened version, matching every
  * other animation in this codebase — the label never appears at all, since
  * a cursor-follow affordance has no meaningful non-motion equivalent.
  *
- * Offset and shape both match a supplied reference screenshot: the pill
- * trails above-right of the cursor, and its corner radius is asymmetric —
- * full-rounded on top-left/top-right/bottom-right, square (no rounding) on
- * bottom-left (`rounded-tl-full rounded-tr-full rounded-br-full
- * rounded-bl-none` below), rather than `rounded-full` on all four. That
- * square corner is deliberate, not cosmetic: it's the corner meant to sit
- * near the cursor, and the pill is anchored by it (`xPercent: 0, yPercent:
- * -100` below sets the tracked (x, y) point to the pill's bottom-left
- * corner, not its center). Anchoring by a corner instead of the center is
- * what makes the cursor-to-pill gap consistent across instances whose label
- * text — and therefore pill width — differs ("View Project" vs "Focus" vs
- * "Close"): a center anchor combined with a fixed offset means a wider pill
- * pushes its near edge closer to the cursor and a narrower one pushes it
- * farther, so the same offsetX reads as a different gap depending on the
- * label. Anchoring the edge itself removes width from the equation entirely
- * — offsetX/offsetY become a literal, constant pixel gap from the cursor to
- * the pill's corner, regardless of how long the label is.
+ * Offset matches a supplied reference screenshot: the label trails
+ * above-right of the cursor. `xPercent: 0, yPercent: -100` anchors the
+ * tracked (x, y) point to the label's own bottom-left corner rather than its
+ * center — what makes the cursor-to-label gap consistent across instances
+ * whose text differs ("More" vs "Focus" vs "Close"): a center anchor
+ * combined with a fixed offset means a wider label pushes its near edge
+ * closer to the cursor and a narrower one pushes it farther, so the same
+ * offsetX would read as a different gap depending on the label. Anchoring the
+ * corner instead removes text width from the equation entirely — offsetX/
+ * offsetY become a literal, constant pixel gap from the cursor to that
+ * corner, regardless of how long the label is.
  *
  * offsetX/offsetY are overridable per instance, but every current usage
- * (WorkTeaser, both GalleryCarousel pills) relies on the shared default
+ * (WorkTeaser, both GalleryCarousel labels) relies on the shared default
  * precisely so they stay visually consistent — don't reintroduce a
- * per-instance override to compensate for pill width the way an earlier
- * version of GalleryCarousel's "Focus" pill did; that was working around the
+ * per-instance override to compensate for label width the way an earlier
+ * version of GalleryCarousel's "Focus" label did; that was working around the
  * old center-anchor behavior, which corner-anchoring now makes unnecessary.
  *
- * portal renders the pill itself into document.body via createPortal,
+ * portal renders the label itself into document.body via createPortal,
  * instead of as a normal absolutely-positioned child of this component's own
- * container — for a tracked area that sits inside a short overflow-hidden
- * ancestor (GalleryCarousel's carousel row, clipped so the looping track's
- * off-screen half stays hidden), the pill's own vertical offset can push it
- * above/below that row's bounds while the cursor is still near the row's top
- * or bottom edge, getting silently clipped — same failure mode the tile's
- * own overflow-hidden caused before it moved to an inner wrapper, just one
- * level up, at the row rather than the tile. Portaling escapes it the same
- * way GalleryLightbox already does. In portal mode the pill switches from
+ * container. Two independent reasons a call site needs it:
+ *
+ * 1. Overflow clipping — for a tracked area that sits inside a short
+ * overflow-hidden ancestor (GalleryCarousel's carousel row, clipped so the
+ * looping track's off-screen half stays hidden), the label's own vertical
+ * offset can push it above/below that row's bounds while the cursor is still
+ * near the row's top or bottom edge, getting silently clipped — same failure
+ * mode the tile's own overflow-hidden caused before it moved to an inner
+ * wrapper, just one level up, at the row rather than the tile.
+ *
+ * 2. mix-blend-mode isolation — `mix-blend-mode: difference` only blends
+ * against content painted within the same CSS stacking context. Any ancestor
+ * with a non-"none" `transform` (or opacity<1, filter, isolation: isolate,
+ * etc.) creates a new one, trapping the blend inside it. WorkTeaser's rows
+ * are wrapped in Reveal.tsx, which leaves a GSAP-applied transform on the row
+ * even after its scroll-reveal animation finishes — without portal, hovering
+ * genuinely empty space within that row (no other painted content in that
+ * exact spot, inside the isolated subtree) left the label with nothing local
+ * to diff against, so it painted its literal white source color, invisible
+ * against the real page's white background. Portaling to document.body moves
+ * the label outside that transformed ancestor entirely, so it blends against
+ * whatever's actually beneath it in the real page paint.
+ *
+ * Portaling escapes both the same way GalleryLightbox already does for the
+ * first one. In portal mode the label switches from
  * `position: absolute` (positioned via a transform offset from its
  * container's own rect) to `position: fixed` (viewport-relative, so the
  * transform is just the raw cursor position plus offset — no rect
- * subtraction needed, see reposition/repositionInstant below). The
- * The isClient guard (useSyncExternalStore, module-level subscribeNoop/
- * getClientSnapshot/getServerSnapshot above) exists because this label
- * renders on every pass (hidden at opacity 0, not gated behind interaction
- * the way GalleryLightbox's own portal is), so unlike that one, this can't
- * rely on being skipped server-side by a click-only state that's guaranteed
- * false on both the server and the client's first paint. A naive
- * `typeof document !== "undefined"` check doesn't work here even though it
- * looks equivalent: it's false during SSR but true from the very first
- * client render (document exists as soon as JS runs), so the server and the
- * client disagree about whether the portal's child slot exists at all —
- * React's hydration reconciler diffs a portal's presence against its owner's
- * other children the same as a normal child, even though the portal's actual
- * DOM insertion point is elsewhere, so this really did throw a hydration
- * mismatch when tried. useSyncExternalStore's getServerSnapshot/getSnapshot
- * split is the mechanism React provides specifically for this: it forces the
- * first client render to also report false (matching the server), then
- * flips true on the next render, safely after hydration has already
- * reconciled. z-index also bumps from z-10 to z-[60] in portal mode —
- * appended to document.body, the pill now competes in the site's top-level
- * stacking context (Nav is z-50) instead of a local one scoped to its own
- * tracked area, so it needs enough headroom to clear Nav if the two ever
- * visually overlap.
+ * subtraction needed, see reposition/repositionInstant below). The isClient
+ * guard (useSyncExternalStore, module-level subscribeNoop/getClientSnapshot/
+ * getServerSnapshot above) exists because this label renders on every pass
+ * (hidden at opacity 0, not gated behind interaction the way GalleryLightbox's
+ * own portal is), so unlike that one, this can't rely on being skipped
+ * server-side by a click-only state that's guaranteed false on both the
+ * server and the client's first paint. A naive `typeof document !==
+ * "undefined"` check doesn't work here even though it looks equivalent: it's
+ * false during SSR but true from the very first client render (document
+ * exists as soon as JS runs), so the server and the client disagree about
+ * whether the portal's child slot exists at all — React's hydration
+ * reconciler diffs a portal's presence against its owner's other children the
+ * same as a normal child, even though the portal's actual DOM insertion point
+ * is elsewhere, so this really did throw a hydration mismatch when tried.
+ * useSyncExternalStore's getServerSnapshot/getSnapshot split is the mechanism
+ * React provides specifically for this: it forces the first client render to
+ * also report false (matching the server), then flips true on the next
+ * render, safely after hydration has already reconciled. z-index also bumps
+ * from z-10 to z-[60] in portal mode — appended to document.body, the label
+ * now competes in the site's top-level stacking context (Nav is z-50) instead
+ * of a local one scoped to its own tracked area, so it needs enough headroom
+ * to clear Nav if the two ever visually overlap.
  */
-const DEFAULT_OFFSET_X = 2;
-const DEFAULT_OFFSET_Y = 4;
+const DEFAULT_OFFSET_X = 16;
+const DEFAULT_OFFSET_Y = -36;
 
 /**
  * Module-level "which instance is currently shown" registry — multiple
  * CursorLabel instances exist at once (one per project row on the
  * homepage), and on fast switching between adjacent rows, their
  * mouseenter/mouseleave can race (the new row's enter firing before the old
- * row's leave settles, or vice versa), briefly leaving two pills visible at
+ * row's leave settles, or vice versa), briefly leaving two labels visible at
  * once. Every mouseenter force-hides whatever instance was previously
- * registered as active before showing itself, so at most one pill can ever
+ * registered as active before showing itself, so at most one label can ever
  * be visible, regardless of event ordering. Identity is tracked by a
  * per-instance Symbol (stable across renders via useRef) rather than by
  * comparing the hide callback itself, since that callback is recreated
@@ -134,6 +152,7 @@ export function CursorLabel({
   offsetX = DEFAULT_OFFSET_X,
   offsetY = DEFAULT_OFFSET_Y,
   portal = false,
+  reverse = false,
 }: {
   children: ReactNode;
   label: string;
@@ -141,24 +160,73 @@ export function CursorLabel({
   offsetX?: number;
   offsetY?: number;
   portal?: boolean;
+  // Flips the direction of the label text-slide (see the useGSAP block
+  // below): false (default) exits upward/enters from below, true exits
+  // downward/enters from above — mirroring NavLink.tsx's own hover-out,
+  // which reverses direction rather than replaying the hover-in motion
+  // backward-in-time-but-same-direction. Callers with a two-state toggle
+  // (FooterWordmark's "Copy Email" / "Email Copied") pass the inverse of
+  // whichever boolean drives the label, so the "forward" change (e.g. to
+  // "Email Copied") slides one way and reverting slides the other.
+  reverse?: boolean;
 }) {
   const isClient = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
   const containerRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
   const quickX = useRef<gsap.QuickToFunc | null>(null);
   const quickY = useRef<gsap.QuickToFunc | null>(null);
-  const invertedRef = useRef(false);
   const isHoveringRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const instanceId = useRef(Symbol("cursor-label")).current;
-  const [isInverted, setIsInverted] = useState(false);
+  // Decoupled from the `label` prop on purpose — the DOM text only ever
+  // updates from inside the timeline below, at the exact moment the old text
+  // has slid out of view. Binding the span directly to `label` would have
+  // React repaint the new text immediately on prop change (React commits
+  // before this component's effects run), which would already show the new
+  // text during what's supposed to be the *old* text's exit animation.
+  const [displayedLabel, setDisplayedLabel] = useState(label);
+  const prevLabelRef = useRef(label);
+
+  // NavLink.tsx-style slide: the current text slides up out of view, then
+  // (once offscreen, past the overflow-hidden clip on the pill below) the
+  // new text is swapped in below the fold and slides up into place — same
+  // motion as NavLink's hover swap, just driven by a prop change through one
+  // element instead of two elements toggled by CSS hover. Only ever fires
+  // today for FooterWordmark's "Copy Email" / "Email Copied" swap; every
+  // other CursorLabel usage passes a static label for its whole mount, so
+  // label === prevLabelRef.current there and this never runs.
+  useGSAP(
+    () => {
+      if (label === prevLabelRef.current) return;
+      prevLabelRef.current = label;
+      if (!textRef.current) {
+        setDisplayedLabel(label);
+        return;
+      }
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap
+          .timeline()
+          .to(textRef.current, { yPercent: reverse ? 100 : -100, duration: 0.16, ease: "power2.in" })
+          .call(() => setDisplayedLabel(label))
+          .set(textRef.current, { yPercent: reverse ? -100 : 100 })
+          .to(textRef.current, { yPercent: 0, duration: 0.16, ease: "power2.out" });
+      });
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        setDisplayedLabel(label);
+      });
+      return () => mm.revert();
+    },
+    { dependencies: [label, reverse] },
+  );
 
   function hideInstantly() {
     isHoveringRef.current = false;
     // Unlike .to()/.fromTo(), gsap.set() does not auto-overwrite an in-flight
     // tween on the same properties — without killTweensOf, a still-running
     // enter fade-in (gsap.to opacity 0→1) keeps ticking after this "set" and
-    // silently drags opacity back up, which read as a second pill staying
+    // silently drags opacity back up, which read as a second label staying
     // visible after its row was left.
     gsap.killTweensOf(labelRef.current, "opacity,scale");
     gsap.set(labelRef.current, { opacity: 0, scale: 0.85 });
@@ -176,31 +244,22 @@ export function CursorLabel({
       });
       return () => mm.revert();
     },
-    // isClient is required here for portal mode: the pill only actually
+    // isClient is required here for portal mode: the label only actually
     // mounts into the DOM once isClient flips true (see the isClient doc
     // comment above), so on the very first run labelRef.current is still
     // null and this effect bails out via its own guard above. Without
     // isClient in this array, that bailout is permanent — effects don't
     // re-run just because a ref's target changes later, so quickX/quickY
     // would stay null forever and every reposition() call after the first
-    // hover would silently no-op via its own null guard, freezing the pill
+    // hover would silently no-op via its own null guard, freezing the label
     // at wherever handleMouseEnter's repositionInstant last placed it (that
     // one only checks labelRef.current directly, so it still works — this
-    // mismatch is what made the bug look like "the pill positions once on
+    // mismatch is what made the bug look like "the label positions once on
     // enter, then never tracks further mousemove," specifically for portal
     // instances). Listing it here makes the effect re-run right after the
     // portal mounts, correctly picking up the now-valid labelRef.current.
     { scope: containerRef, dependencies: [isClient] },
   );
-
-  const updateInverted = useCallback((target: EventTarget | Element | null) => {
-    const overVideo = target instanceof Element && target.closest("[data-cursor-video-zone]") != null;
-    const shouldInvert = !overVideo;
-    if (shouldInvert !== invertedRef.current) {
-      invertedRef.current = shouldInvert;
-      setIsInverted(shouldInvert);
-    }
-  }, []);
 
   function reposition(clientX: number, clientY: number) {
     if (!quickX.current || !quickY.current) return;
@@ -242,7 +301,6 @@ export function CursorLabel({
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     lastMouseRef.current = { x: e.clientX, y: e.clientY };
     reposition(e.clientX, e.clientY);
-    updateInverted(e.target);
   }
 
   function handleMouseEnter(e: React.MouseEvent<HTMLDivElement>) {
@@ -257,12 +315,11 @@ export function CursorLabel({
     isHoveringRef.current = true;
     lastMouseRef.current = { x: e.clientX, y: e.clientY };
     // Instant position on entry, not the eased trailing tween — otherwise a
-    // pill re-entering from a stale previous position (a prior hover
+    // label re-entering from a stale previous position (a prior hover
     // elsewhere, or its default corner) slides into place while also fading
     // in, which reads as a janky "flying label" instead of a clean reveal.
     // The eased quickTo trail only kicks back in on the next real mousemove.
     repositionInstant(e.clientX, e.clientY);
-    updateInverted(e.target);
     gsap.to(labelRef.current, { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" });
   }
 
@@ -276,7 +333,7 @@ export function CursorLabel({
 
   // Scrolling (via Lenis, which drives real window scroll — see
   // SmoothScroll.tsx) moves the row under a stationary cursor without firing
-  // any mouse events, so the pill would otherwise stay frozen at its
+  // any mouse events, so the label would otherwise stay frozen at its
   // last-computed position and visibly drift away from the actual cursor.
   // Re-syncing on scroll, using the last known cursor position plus a fresh
   // container rect, keeps it glued to the cursor while hovering through a
@@ -289,21 +346,22 @@ export function CursorLabel({
       if (!isHoveringRef.current) return;
       const { x, y } = lastMouseRef.current;
       repositionInstant(x, y);
-      updateInverted(document.elementFromPoint(x, y));
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [repositionInstant, updateInverted]);
+  }, [repositionInstant]);
 
   const pill = (
     <div
       ref={labelRef}
       aria-hidden="true"
-      className={`pointer-events-none ${portal ? "fixed z-[60]" : "absolute z-10"} left-0 top-0 scale-90 whitespace-nowrap rounded-tl-full rounded-tr-full rounded-br-full rounded-bl-none px-4 py-3 text-xs font-medium uppercase tracking-wide opacity-0 shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition-colors duration-200 ${
-        isInverted ? "bg-[#0c0c0d] text-[#f4f4f5]" : "bg-background text-foreground"
-      }`}
+      className={`pointer-events-none select-none ${
+        portal ? "fixed z-[60]" : "absolute z-10"
+      } left-0 top-0 scale-90 overflow-hidden whitespace-nowrap text-xs font-medium uppercase leading-4 tracking-wide text-white opacity-0 [mix-blend-mode:difference]`}
     >
-      {label}
+      <span ref={textRef} className="block">
+        {displayedLabel}
+      </span>
     </div>
   );
 

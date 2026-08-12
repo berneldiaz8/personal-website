@@ -59,7 +59,6 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
   const { ready, onLoadedData } = useVideoReady();
   return (
     <div
-      data-cursor-video-zone
       // lg:self-start overrides the parent's lg:items-stretch for this box
       // specifically — Safari resolves a stretched grid item's aspect-ratio
       // by computing height first (from the row's stretch target) and
@@ -109,7 +108,8 @@ export function WorkTeaser() {
               <div className="border-t border-border pb-[184px]">
                 <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
                   <CursorLabel
-                    label="View Project"
+                    label="More"
+                    portal
                     className="relative grid grid-cols-4 gap-y-6 pt-4 sm:grid-cols-8 lg:grid-cols-12 lg:items-stretch lg:gap-x-4"
                   >
                     <div className="col-span-4 flex flex-col gap-4 sm:col-span-8 lg:col-span-3 lg:justify-between">
