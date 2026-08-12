@@ -9,6 +9,7 @@ import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 import { useVideoReady } from "@/lib/useVideoReady";
 import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
 import { VideoLoadingSpinner } from "../VideoLoadingSpinner";
+import { ImageSkeleton } from "../ImageSkeleton";
 
 function ShowcaseImage({
   src,
@@ -42,6 +43,15 @@ function ShowcaseImage({
           : ""
       } ${className}`}
     >
+      {/* No `forceDark`/width/height — unlike GalleryCarousel's lightbox
+          usage, this renders in the normal tree (no portal to escape the
+          site's token cascade) and this image is `object-cover` (always
+          fills its box exactly, no letterboxing to replicate), so the
+          plain inset-0 fill is correct as-is. bg-border resolves to the
+          site's one fixed light-mode value (#e5e1d9) — the main site no
+          longer has a dark palette to accidentally pick up (see
+          globals.css; only /gallery's [data-force-dark] still does). */}
+      <ImageSkeleton loaded={loaded} />
       <Image
         src={src}
         alt={alt}
