@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Project } from "@/data/projects";
 import { Reveal } from "../Reveal";
+import { RevealText } from "../RevealText";
 import { RevealWipe } from "../RevealWipe";
 import { Grid } from "./Grid";
 import { ShowcaseHeadline } from "./ShowcaseHeadline";
@@ -255,10 +256,10 @@ export function ProjectShowcase({
         )}
       </RevealWipe>
 
-      {/* ── HEADLINE ── mixed-weight "Name—description" display line. */}
-      <Reveal>
-        <ShowcaseHeadline name={project.name} description={headline} />
-      </Reveal>
+      {/* ── HEADLINE ── mixed-weight "Name—description" display line. Owns
+          its own bespoke scroll-reveal internally (two-beat word-mask), no
+          Reveal/RevealText wrapper needed here. */}
+      <ShowcaseHeadline name={project.name} description={headline} />
 
       {/* ── META ROW ── Role / Services / Scope. */}
       <Reveal>
@@ -343,10 +344,12 @@ export function ProjectShowcase({
         </div>
       )}
 
-      {/* ── CONTEXT ── labeled ParagraphPair, project.context. */}
-      <Reveal>
+      {/* ── CONTEXT ── labeled ParagraphPair, project.context. Line-mask
+          reveal (RevealText) rather than Reveal's whole-block fade — this is
+          narrative prose, the flagship case for the per-line treatment. */}
+      <RevealText>
         <ParagraphPair bodies={[project.context]} label="Context" />
-      </Reveal>
+      </RevealText>
 
       {/* ── OVERVIEW / STATS ── Overview label + the 3 outcome stats. */}
       <Reveal>
@@ -584,14 +587,15 @@ export function ProjectShowcase({
         </Grid>
       </Reveal>
 
-      {/* ── NARRATIVE ── merged Approach/Challenge/Reflection ParagraphPair. */}
-      <Reveal>
+      {/* ── NARRATIVE ── merged Approach/Challenge/Reflection ParagraphPair.
+          Line-mask reveal (RevealText), same reasoning as Context above. */}
+      <RevealText>
         <ParagraphPair
           bodies={[project.approach.body, project.challenge.body, project.reflection.body]}
           pb="pb-20"
           showBorder={false}
         />
-      </Reveal>
+      </RevealText>
 
       {/* ── MEDIA GROUP B ── placeholder (full-bleed) → Image pair 1
           (audit/mockup, 2-paired) → placeholder (full-bleed) → closing video
