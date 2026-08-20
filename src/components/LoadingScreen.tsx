@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { lenisInstance } from "@/components/SmoothScroll";
+import { markPageReady } from "@/lib/pageReady";
 
 /**
  * Full-viewport preloader shown on every hard page load. Mounted in root
@@ -59,6 +60,13 @@ import { lenisInstance } from "@/components/SmoothScroll";
  * wheel/touchmove preventDefault fallback for input Lenis doesn't fully
  * own (a direct scrollbar-thumb drag, or reduced-motion visits where
  * SmoothScroll never even constructs a Lenis instance).
+ *
+ * Calls markPageReady() (src/lib/pageReady.ts) at the same point it calls
+ * setVisible(false) in both branches below — the shared scroll-reveal
+ * primitives (RevealText/ShowcaseHeadline) await that
+ * signal before creating their ScrollTrigger, so anything above the fold
+ * doesn't finish revealing invisibly behind this overlay. See that module's
+ * own comment for the full mechanism.
  *
  * The scroll lock lives in its own plain useEffect, deliberately not inside
  * the useGSAP block above — useGSAP runs its setup via useLayoutEffect
@@ -131,12 +139,16 @@ export function LoadingScreen() {
             .timeline()
             .to(progress, { value: 100, duration: 0.35, ease: "power2.out", onUpdate: updateText })
             .to(containerRef.current, { opacity: 0, duration: 0.5, ease: "power1.out" }, "+=0.2")
-            .call(() => setVisible(false));
+            .call(() => {
+              setVisible(false);
+              markPageReady();
+            });
         });
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
         setVisible(false);
+        markPageReady();
       });
 
       return () => mm.revert();

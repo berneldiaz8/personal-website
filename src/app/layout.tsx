@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -90,6 +91,19 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
+        {/* Browsers restore the previous scroll position on a hard refresh
+            (and on back/forward) via `history.scrollRestoration: "auto"`,
+            which fights SmoothScroll.tsx's own top-on-mount reset and can
+            leave a refreshed page landing mid-scroll instead of at the top.
+            `strategy="beforeInteractive"` runs this before Next.js hydrates
+            and before the browser's own restoration would otherwise kick
+            in, so setting it to "manual" here reliably wins the race —
+            confirmed this needs to run this early: a plain useEffect in a
+            regular client component (SmoothScroll.tsx) fires after the
+            browser has already committed its own restored scrollY. */}
+        <Script id="disable-scroll-restoration" strategy="beforeInteractive">
+          {`if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }`}
+        </Script>
         <SmoothScroll />
         <LoadingScreen />
         {children}

@@ -28,7 +28,7 @@ export let lenisInstance: Lenis | null = null;
 
 /**
  * Non-rendering — mounts Lenis (smooth/inertia scroll) and wires it to GSAP's ticker
- * so ScrollTrigger-driven animations (RevealWipe.tsx) stay in sync with the smoothed
+ * so ScrollTrigger-driven animations (RevealText.tsx) stay in sync with the smoothed
  * scroll position instead of native scroll events. Standard GSAP+Lenis pairing:
  * Lenis drives off gsap.ticker (one shared clock) rather than its own rAF loop, and
  * every Lenis scroll tick notifies ScrollTrigger.
@@ -74,7 +74,7 @@ export let lenisInstance: Lenis | null = null;
  * via `usePathname()`, since a known navigation event is a strictly more
  * reliable signal than waiting for a debounced observer to notice. Staggered at
  * 0/100/300ms rather than a single call: new route content (this site's many
- * `ProjectShowcase`/`RevealWipe` instances) doesn't necessarily finish mounting
+ * `ProjectShowcase`/`RevealText` instances) doesn't necessarily finish mounting
  * in the same tick the pathname updates, and unlike a single rAF (tried first,
  * insufficient), several cheap staggered attempts don't require guessing the
  * exact right moment.

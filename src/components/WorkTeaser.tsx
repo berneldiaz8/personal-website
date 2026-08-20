@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Project } from "@/data/projects";
 import { projects } from "@/data/projects";
 import { CursorLabel } from "./CursorLabel";
-import { Reveal } from "./Reveal";
+import { RevealText } from "./RevealText";
 import { VideoLoadingSpinner } from "./VideoLoadingSpinner";
 import { useVideoReady } from "@/lib/useVideoReady";
 import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
@@ -94,70 +94,61 @@ export function WorkTeaser() {
       <h2 className="sr-only">Selected Work</h2>
 
       <div className="flex flex-col">
-        {projects.map((project, i) => {
+        {projects.map((project) => {
           const preview = previewFor(project);
 
           return (
-            <Reveal key={project.slug} delay={i * 0.08}>
-              {/* border-t + the 184px gap to the next row live on this plain
-                  wrapper, not the Link itself — a Link's hover/click box
-                  covers its own padding too, so putting that spacing directly
-                  on the Link made hovering the empty space below each row
-                  trigger the cursor-follow label. This keeps the Link's box
-                  tight to its actual visible content (text + video). */}
-              <div className="border-t border-border pb-[184px]">
-                <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
-                  <CursorLabel
-                    label="More"
-                    portal
-                    className="relative grid grid-cols-4 gap-y-6 pt-4 sm:grid-cols-8 lg:grid-cols-12 lg:items-stretch lg:gap-x-4"
-                  >
-                    <div className="col-span-4 flex flex-col gap-4 sm:col-span-8 lg:col-span-3 lg:justify-between">
-                      <h3 className="text-balance text-3xl font-medium leading-[1.1] tracking-[-0.4px] sm:text-4xl">
-                        {project.slug === "the-dividend-tracker" ? (
-                          <>
-                            The Dividend
-                            <br />
-                            Tracker
-                          </>
-                        ) : (
-                          project.name
-                        )}
-                      </h3>
-                      <div className="flex flex-col gap-5">
-                        <p className="w-full text-pretty text-xs font-medium uppercase leading-[18px] text-foreground">
-                          {project.slug === "foodops" ? (
-                            "Product. Design System. PRD Documentation."
-                          ) : project.slug === "opinly" ? (
-                            <>
-                              Product. Website. Design System.
-                              <br />
-                              Digital Creatives
-                            </>
-                          ) : project.slug === "lexora" ? (
-                            <>
-                              Product. Website. Design System.
-                              <br />
-                              Digital Creatives.
-                            </>
-                          ) : (
-                            project.areas
-                          )}
-                        </p>
-                        <p className="w-full text-pretty text-xs font-normal uppercase leading-[18px] text-foreground">
-                          {project.tagline}
-                        </p>
-                      </div>
-                    </div>
-                    {/* 1-column gap between the text and video columns, matching
-                        the site's 12-col grid (only meaningful at lg, where the
-                        grid actually has 12 tracks — 3 text + 1 gap + 8 video). */}
-                    <div aria-hidden="true" className="hidden lg:col-span-1 lg:block" />
-                    <TeaserVideo preview={preview} projectName={project.name} />
-                  </CursorLabel>
-                </Link>
-              </div>
-            </Reveal>
+            // border-t + the 184px gap to the next row live on this plain
+            // wrapper, not the Link itself — a Link's hover/click box
+            // covers its own padding too, so putting that spacing directly
+            // on the Link made hovering the empty space below each row
+            // trigger the cursor-follow label. This keeps the Link's box
+            // tight to its actual visible content (text + video).
+            <div key={project.slug} className="border-t border-border pb-[184px]">
+              <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
+                <CursorLabel
+                  label="More"
+                  portal
+                  className="relative grid grid-cols-4 gap-y-6 pt-4 sm:grid-cols-8 lg:grid-cols-12 lg:items-stretch lg:gap-x-4"
+                >
+                  <div className="col-span-4 flex flex-col gap-4 sm:col-span-8 lg:col-span-3 lg:justify-between">
+                    <RevealText
+                      as="h3"
+                      // leading-[1.2], not 1.1 — same descender-clipping fix as
+                      // ShowcaseHeadline.tsx/Hero.tsx (see ShowcaseHeadline's own
+                      // comment for the mechanism): SplitText's mask wrapper has
+                      // no explicit height, so it inherits its box purely from
+                      // line-height, with none of the overflow allowance normal
+                      // unmasked text gets for descenders (e.g. Opinly's "p"/"y").
+                      className="text-balance text-3xl font-medium leading-[1.2] tracking-[-0.4px] sm:text-4xl"
+                    >
+                      {project.slug === "the-dividend-tracker" ? (
+                        <>
+                          The Dividend
+                          <br />
+                          Tracker
+                        </>
+                      ) : (
+                        project.name
+                      )}
+                    </RevealText>
+                    <RevealText as="div" className="flex flex-col gap-5">
+                      <p className="w-full text-pretty text-xs font-medium uppercase leading-[18px] text-foreground">
+                        {project.ownership}
+                      </p>
+                      <p className="w-full text-pretty text-xs font-normal uppercase leading-[18px] text-foreground">
+                        {project.tagline}
+                      </p>
+                    </RevealText>
+                  </div>
+                  {/* 1-column gap between the text and video columns, matching
+                      the site's 12-col grid (only meaningful at lg, where the
+                      grid actually has 12 tracks — 3 text + 1 gap + 8 video). */}
+                  <div aria-hidden="true" className="hidden lg:col-span-1 lg:block" />
+                  <TeaserVideo preview={preview} projectName={project.name} />
+                </CursorLabel>
+              </Link>
+            </div>
           );
         })}
       </div>

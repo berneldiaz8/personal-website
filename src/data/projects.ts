@@ -25,15 +25,21 @@ export type Project = {
   number: string;
   name: string;
   tagline: string;
+  /** NDA disclosure shown under the headline. Omit when the project isn't under NDA. */
+  ndaCaption?: string;
   industryTag: string;
   role: string;
-  areas: string;
-  scope: string;
+  ownership: string;
+  team: string;
+  timeline: string;
   context: string;
-  challenge: Beat;
-  approach: Beat;
+  problem: string;
+  outcomeSummary: string;
+  /** "The Work" section's 3 paragraphs, in render order: workIntro, workDetail, workClosing. */
+  workIntro: Beat;
+  workDetail: Beat;
   outcomes: [Outcome, Outcome, Outcome];
-  reflection: Beat;
+  workClosing: Beat;
   /** Looping muted product-walkthrough clips, converted from the source Figma exports. */
   media: MediaItem[];
   /** Static supporting visuals (mockups, ad creatives, UI detail shots) from the source Figma deck. */
@@ -67,193 +73,26 @@ function imageGallery(slug: string, count: number, name: string): ImageItem[] {
 
 export const projects: Project[] = [
   {
-    slug: "opinly",
-    number: "01",
-    name: "Opinly",
-    tagline:
-      "Rebuilt an AI-powered competitive intelligence platform from the ground up, turning a tool users avoided into one they built their workflow around.",
-    industryTag: "SEO AI Startup",
-    role: "UI/UX Designer",
-    areas: "Product. Website. Design System. Digital Creatives",
-    scope:
-      "Full product overhaul. Design system. Website redesign. Launch campaign assets.",
-    context:
-      "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
-    challenge: {
-      heading: "A Platform Full of Data and Empty of Direction",
-      body: "Every screen now answers one question: what does this user need to do next. Tasks dropped to 3-4 steps. 70+ flows redesigned. One design system, built from scratch, carried the same order into the brand, the website, and the campaigns launched around the product.",
-    },
-    // Content assigned to match the merged ParagraphPair's render order in
-    // ProjectShowcase.tsx (`[approach.body, challenge.body, reflection.body]`
-    // — approach displays FIRST, challenge SECOND) rather than each field's
-    // own semantic label, since `Beat.heading` is never rendered anywhere
-    // (confirmed) — no user-visible inconsistency, just an internal one.
-    approach: {
-      heading: "Restructuring Around the User's Next Action",
-      body: "The platform handed users dense data with no hierarchy and no stated next step. Core tasks ran 9+ steps deep. Sessions ended before a single action, not because a feature was missing, but because nothing ever said what to do next.",
-    },
-    outcomes: [
-      {
-        stat: "9 to 3-4",
-        title: "Steps",
-        description:
-          "Steps to complete a core task. Complexity reduced so users could finally act with confidence.",
-      },
-      {
-        stat: "Zero to One",
-        title: "Design System",
-        description:
-          "First design system built from scratch, unifying the UI and giving engineering faster, cleaner builds.",
-      },
-      {
-        stat: "Full Circle",
-        title: "One Partner",
-        description:
-          "Product, brand, website, and campaigns delivered by one creative partner. Retention, leads, and demo requests grew.",
-      },
-    ],
-    reflection: {
-      heading: "Direction Is a Design Decision",
-      body: "Hierarchy earned what more features never did.",
-    },
-    media: videoMedia("opinly", 4, "Opinly"),
-    images: imageGallery("opinly", 8, "Opinly"),
-    accent: { light: "#c2410c", dark: "#fb923c" },
-  },
-  {
-    slug: "lexora",
-    number: "02",
-    name: "Lexora",
-    tagline:
-      "Scaled a governance, risk, and compliance platform from a five-person MVP to over one million users as the sole designer across every phase of growth.",
-    industryTag: "Compliance Startup",
-    role: "UI/UX Designer",
-    areas: "Product. Website. Design System. Digital Creatives.",
-    scope:
-      "Full product design across four phases. Design system. Website. Pitch decks. Marketing collaterals.",
-    context:
-      "Lexora is a secure compliance platform helping organizations resolve sensitive reports across whistleblowing, grievances, conflict of interest, and fraud. I joined as the sole design partner on a five-person team and stayed through every phase of growth until the platform reached over one million users.",
-    // Content assigned to match the merged ParagraphPair's render order in
-    // ProjectShowcase.tsx (`[approach.body, challenge.body, reflection.body]`
-    // — approach displays FIRST, challenge SECOND) rather than each field's
-    // own semantic label, since `Beat.heading` is never rendered anywhere —
-    // no user-visible inconsistency, just an internal one. Same convention
-    // as Opinly.
-    challenge: {
-      heading: "High Stakes, Zero Margin for Confusion",
-      body: "Every flow was designed to feel human, guided, and safe. Sensitive reports were stripped to their simplest path. Case management was restructured so officers never lost direction under deadline pressure. As the product scaled across four phases and the team grew from 5 to 13, one design system stayed the single source of truth.",
-    },
-    approach: {
-      heading: "Designing a System That Grew Without Breaking",
-      body: "Lexora handled sensitive investigations under strict regulatory deadlines for 515,000+ companies bound by the EU Whistleblowing Directive. A compliance officer could not afford to lose their place. A whistleblower had to feel safe enough to report misconduct against someone senior.",
-    },
-    outcomes: [
-      {
-        stat: "1M+",
-        title: "Users",
-        description:
-          "Users reached on a platform grown from a five-person MVP to a full-scale compliance suite.",
-      },
-      {
-        stat: "Zero Doubt",
-        title: "Precision",
-        description:
-          "Compliance officers and whistleblowers completed critical tasks with speed and precision. No confusion. No hesitation. No room for error.",
-      },
-      {
-        stat: "Built to Scale",
-        title: "Design System",
-        description:
-          "Design system built from scratch. Engineers moved faster and shipped with consistency across every phase.",
-      },
-    ],
-    reflection: {
-      heading: "Clarity Is the Most Protective Design Decision",
-      body: "Clarity is protection. Every guided step made someone safer.",
-    },
-    media: videoMedia("lexora", 5, "Lexora"),
-    images: imageGallery("lexora", 7, "Lexora"),
-    accent: { light: "#1d4ed8", dark: "#60a5fa" },
-  },
-  {
-    slug: "the-dividend-tracker",
-    number: "03",
-    name: "The Dividend Tracker",
-    tagline:
-      "Transformed an outdated, frustrating investment tracking app into a modern product both seasoned investors and beginners return to with confidence.",
-    industryTag: "Fintech",
-    role: "UI/UX Designer",
-    areas: "Product. Website. Digital Creatives.",
-    scope:
-      "Full mobile app redesign. Web app pages. Website revamp. App store listings. Digital creatives.",
-    context:
-      "The Dividend Tracker is a portfolio tracking app helping investors monitor dividend income across 500+ brokers and 15+ exchanges worldwide. I joined as sole design partner to turn an outdated, frustrating product into one both seasoned investors and first-time users could trust and return to.",
-    // Content assigned to match the merged ParagraphPair's render order in
-    // ProjectShowcase.tsx (`[approach.body, challenge.body, reflection.body]`
-    // — approach displays FIRST, challenge SECOND) rather than each field's
-    // own semantic label, since `Beat.heading` is never rendered anywhere —
-    // no user-visible inconsistency, just an internal one. Same convention
-    // as Opinly/Lexora.
-    challenge: {
-      heading: "An App Investors Used Because They Had To",
-      body: "Data hierarchy was rebuilt across 50+ flows, cutting core portfolio viewing from 4-5 steps to 2. Progressive disclosure replaced the overwhelming data views. Copy was rewritten to speak to both experts and beginners without intimidation. Onboarding, empty states, and feedback systems were designed from scratch.",
-    },
-    approach: {
-      heading: "Rebuilding Trust Through Clarity and Modern Design",
-      body: "Financial data appeared without hierarchy, leaving users unable to understand their portfolios at a glance. Core tasks were buried under 4-5 steps. Onboarding did not exist. Two completely different user types shared one product, and neither one was served well.",
-    },
-    outcomes: [
-      {
-        stat: "50+",
-        title: "Flows Rebuilt",
-        description:
-          "Outdated flows rebuilt into clear, guided experiences that made tracking feel modern and accessible.",
-      },
-      {
-        stat: "Rebuilt",
-        title: "Every Screen",
-        description:
-          "Every screen overhauled. Investors who once avoided the app now return to it with ease and confidence.",
-      },
-      {
-        stat: "Clarity First",
-        title: "Progressive Disclosure",
-        description:
-          "Financial data restructured with progressive disclosure so users felt informed and in control at every step.",
-      },
-    ],
-    reflection: {
-      heading: "Good Design Makes Complex Things Feel Simple",
-      body: "The shift from a product users tolerate to one they return to happens in decisions invisible to the user.",
-    },
-    media: videoMedia("the-dividend-tracker", 5, "The Dividend Tracker"),
-    images: imageGallery("the-dividend-tracker", 7, "The Dividend Tracker"),
-    accent: { light: "#047857", dark: "#34d399" },
-  },
-  {
     slug: "foodops",
-    number: "04",
+    number: "01",
     name: "FoodOps",
     tagline:
-      "Designed an FDA-compliant food traceability platform from scratch, delivering a launch-ready MVP in six weeks with a concept-to-prototype in 2 days.",
+      "Translated dense FDA recordkeeping requirements into a food traceability platform restaurant staff could actually use under pressure, delivered from scratch as a launch-ready MVP.",
+    ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Food Tech Startup",
     role: "Product Designer",
-    areas: "Product. Design System. PRD Documentation.",
-    scope:
-      "Full product design from scratch. Web portal. Mobile app. Design system. PRD preparation.",
+    ownership: "Web portal, mobile app, design system, and PRD documentation",
+    team: "1 designer alongside a product manager and stakeholders",
+    timeline: "6 weeks, concept to launch-ready MVP",
     context:
-      "FoodOps is a food traceability platform helping restaurants comply with FDA FSMA Rule 204 requirements. I worked directly with stakeholders to turn a complex regulatory idea into a fully functional MVP within a six-week agile delivery.",
-    // Content assigned to match the merged ParagraphPair's render order in
-    // ProjectShowcase.tsx (`[approach.body, challenge.body, reflection.body]`
-    // — approach displays FIRST, challenge SECOND) rather than each field's
-    // own semantic label, since `Beat.heading` is never rendered anywhere —
-    // no user-visible inconsistency, just an internal one. Same convention
-    // as Opinly/Lexora/The Dividend Tracker.
-    challenge: {
+      "FoodOps is a food traceability platform built for restaurants. Under FDA FSMA Rule 204, restaurants must track and document every step of their food supply chain and produce that data to the FDA on request. The people responsible for executing this daily are kitchen staff and restaurant managers, each with completely different needs from the same system.",
+    problem:
+      "No product existed. Just a brief and a federal regulation that kitchen staff had to execute daily. The people responsible for FDA compliance weren't compliance officers. They were line workers in the middle of a busy shift, with no time to learn a complex system and no tolerance for friction. The design problem wasn't just building something that met the regulation. It was building something that worked for the person least equipped to deal with it.",
+    workDetail: {
       heading: "Regulatory Complexity in the Hands of Kitchen Staff",
       body: "Every user flow was mapped from scratch, stripping the mobile experience to its core: open app, scan, done. Complex transformation and shipping flows were broken into structured steps with pre-populated fields and copy written for non-technical users. The design system, the full PRD, and a launch-ready MVP shipped within six weeks.",
     },
-    approach: {
+    workIntro: {
       heading: "Turning Regulatory Requirements Into Simple, Guided Actions",
       body: "FSMA Rule 204 required restaurants to record Critical Tracking Events across their food supply chain, with regulatory consequences for errors. The people executing these tasks were kitchen staff with low to moderate tech experience, working under time pressure. Complex regulatory data had to stay simple enough for someone scanning a barcode during a busy service.",
     },
@@ -277,13 +116,174 @@ export const projects: Project[] = [
           "Concept to testable prototype in 2 days instead of 1 week through AI-assisted research and rapid prototyping.",
       },
     ],
-    reflection: {
+    workClosing: {
       heading: "Simplicity Is the Most Powerful Compliance Tool",
       body: "A kitchen worker needs a clear next step, not a regulation to interpret.",
     },
+    outcomeSummary:
+      "A platform that translates a federal regulation most restaurant staff have never read into two workflows they can actually execute. Kitchen staff scan and receive without needing to understand the compliance layer underneath. Restaurant managers produce audit-ready exports in minutes instead of manual data pulls. The structural gap that would have broken the compliance chain was caught before engineering started, not discovered later.",
     media: videoMedia("foodops", 3, "FoodOps"),
     images: imageGallery("foodops", 5, "FoodOps"),
     accent: { light: "#b45309", dark: "#fbbf24" },
+  },
+  {
+    slug: "lexora",
+    number: "02",
+    name: "Lexora",
+    tagline:
+      "Built the design foundation of a governance, risk, and compliance platform from scratch, as the sole designer across four phases of product growth from MVP to enterprise-ready system.",
+    ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
+    industryTag: "Compliance Startup",
+    role: "UI/UX Designer",
+    ownership: "Product, website, and design system",
+    team: "1 designer alongside engineers and stakeholders",
+    timeline: "1+ years, across four phases of product growth",
+    context:
+      "Lexora is a secure compliance platform built for organizations managing sensitive internal reports. Reporters submit concerns anonymously across whistleblowing, grievances, conflict of interest, and fraud. Case managers investigate and resolve those reports. Organizations use the platform to demonstrate regulatory compliance with audit-ready documentation.",
+    problem:
+      "No product. No design. No system. A dense compliance brief and a hard regulatory deadline. The brief defined what the platform needed to do but left every structural decision open. How does an anonymous whistleblower maintain access to their own report without an account? Who sees what inside a sensitive case involving potential retaliation? How does a case move from submission to audit-ready closure without breaking the chain of confidentiality? These weren't edge cases. They were the core of the product.",
+    workDetail: {
+      heading: "High Stakes, Zero Margin for Confusion",
+      body: "The hardest problem was identity without an account. An anonymous whistleblower needs to access their own report, receive updates, and communicate with investigators, all without creating a traceable account. I designed a report key system as the identity mechanism, giving reporters persistent access without compromising their anonymity.",
+    },
+    workIntro: {
+      heading: "Designing a System That Grew Without Breaking",
+      body: "Every structural decision the brief left undefined was mine to make before engineering wrote a line of code.",
+    },
+    outcomes: [
+      {
+        stat: "1M+",
+        title: "Users",
+        description:
+          "Users reached on a platform grown from a five-person MVP to a full-scale compliance suite.",
+      },
+      {
+        stat: "Zero Doubt",
+        title: "Precision",
+        description:
+          "Compliance officers and whistleblowers completed critical tasks with speed and precision. No confusion. No hesitation. No room for error.",
+      },
+      {
+        stat: "Built to Scale",
+        title: "Design System",
+        description:
+          "Design system built from scratch. Engineers moved faster and shipped with consistency across every phase.",
+      },
+    ],
+    workClosing: {
+      heading: "Clarity Is the Most Protective Design Decision",
+      body: "From there: a role-based permission model defining exactly what assignees, followers, and admins see and can do. A full case lifecycle from submission through three distinct closure types. Three separate interfaces for whistleblowers, company users, and back office administration. A design system built from scratch and maintained solo across four phases of growth.",
+    },
+    outcomeSummary:
+      "A compliance system that didn't exist, built from a brief by one designer. Anonymous reporters access their cases without a traceable account. Case managers work within a permission structure that protects confidentiality at every stage. Compliance officers close cases with documentation that holds up to regulatory scrutiny. Four phases of growth, 10+ engineers, one design foundation that held.",
+    media: videoMedia("lexora", 5, "Lexora"),
+    images: imageGallery("lexora", 7, "Lexora"),
+    accent: { light: "#1d4ed8", dark: "#60a5fa" },
+  },
+  {
+    slug: "opinly",
+    number: "03",
+    name: "Opinly",
+    tagline:
+      "Rebuilt an AI-powered competitive intelligence platform from the ground up, overhauling a data-heavy tool that left users without direction into one with clear structure and guided actions.",
+    industryTag: "SEO AI Startup",
+    role: "UI/UX Designer",
+    ownership: "Product, website, and design system",
+    team: "1 designer alongside founders and engineers",
+    timeline: "9 months",
+    context:
+      "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
+    problem:
+      "Every feature worked. Nothing told users what to do with them. Core tasks ran 9+ steps deep, and sessions ended before a single action was taken, not because a feature was missing, but because nothing on screen ever said what to do next. The design problem wasn't a missing feature. It was a platform full of data and empty of direction.",
+    workDetail: {
+      heading: "A Platform Full of Data and Empty of Direction",
+      body: "Every screen now answers one question: what does this user need to do next. Tasks dropped to 3-4 steps. 70+ flows redesigned. One design system, built from scratch, carried the same order into the brand, the website, and the campaigns launched around the product.",
+    },
+    workIntro: {
+      heading: "Restructuring Around the User's Next Action",
+      body: "The platform handed users dense data with no hierarchy and no stated next step. Core tasks ran 9+ steps deep. Sessions ended before a single action, not because a feature was missing, but because nothing ever said what to do next.",
+    },
+    outcomes: [
+      {
+        stat: "9 to 3-4",
+        title: "Steps",
+        description:
+          "Steps to complete a core task. Complexity reduced so users could finally act with confidence.",
+      },
+      {
+        stat: "Zero to One",
+        title: "Design System",
+        description:
+          "First design system built from scratch, unifying the UI and giving engineering faster, cleaner builds.",
+      },
+      {
+        stat: "Full Circle",
+        title: "One Partner",
+        description:
+          "Product, brand, website, and campaigns delivered by one creative partner. Retention, leads, and demo requests grew.",
+      },
+    ],
+    workClosing: {
+      heading: "Direction Is a Design Decision",
+      body: "Hierarchy earned what more features never did.",
+    },
+    outcomeSummary: "Placeholder",
+    media: videoMedia("opinly", 4, "Opinly"),
+    images: imageGallery("opinly", 8, "Opinly"),
+    accent: { light: "#c2410c", dark: "#fb923c" },
+  },
+  {
+    slug: "the-dividend-tracker",
+    number: "04",
+    name: "The Dividend Tracker",
+    tagline:
+      "Overhauled an outdated mobile dividend tracking app end to end, identifying every structural problem before redesigning the entire product.",
+    industryTag: "Fintech",
+    role: "UI/UX Designer",
+    ownership: "Product and website",
+    team: "1 designer alongside engineers",
+    timeline: "2 months",
+    context:
+      "The Dividend Tracker is a mobile investment app built for dividend investors. It tracks portfolio performance, monitors upcoming dividend payouts, forecasts future income, and helps investors set and track financial goals, all in one place. From someone receiving their first dividend to someone managing a complex multi-portfolio strategy, the app is built to make passive income visible and manageable.",
+    problem:
+      "I audited the app first. Structural problems ran across every surface from onboarding to the most complex features in the product. A first-time investor trying to add their first portfolio hit a screen with no guidance and no clear starting point. The payout calendar showed dividend data without telling them what to do with it. Edge cases were missing throughout, so empty states, loading screens, and errors left users stranded at critical moments. The product had the features. The structure to use them didn't exist.",
+    workDetail: {
+      heading: "An App Investors Used Because They Had To",
+      body: "Portfolio creation went from a single overloaded screen to a guided experience with four distinct paths. The payout calendar became a layered structure moving from yearly forecast to monthly calendar to individual stock payouts by date. Premium features were shown in context before asking for payment, so free users understood what they were missing before being asked to upgrade. Showing value before asking for payment is progressive disclosure applied to the business model, not just the interface.",
+    },
+    workIntro: {
+      heading: "Rebuilding Trust Through Clarity and Modern Design",
+      body: "The structural problems had one root cause: the product presented everything at once with no system for guiding users through complexity. I redesigned the entire product around one principle: progressive disclosure.",
+    },
+    outcomes: [
+      {
+        stat: "50+",
+        title: "Flows Rebuilt",
+        description:
+          "Outdated flows rebuilt into clear, guided experiences that made tracking feel modern and accessible.",
+      },
+      {
+        stat: "Rebuilt",
+        title: "Every Screen",
+        description:
+          "Every screen overhauled. Investors who once avoided the app now return to it with ease and confidence.",
+      },
+      {
+        stat: "Clarity First",
+        title: "Progressive Disclosure",
+        description:
+          "Financial data restructured with progressive disclosure so users felt informed and in control at every step.",
+      },
+    ],
+    workClosing: {
+      heading: "Good Design Makes Complex Things Feel Simple",
+      body: "Empty states, loading states, and error states were designed across every flow so no moment in the product was left unhandled. One principle. Applied across an entire product.",
+    },
+    outcomeSummary:
+      "An outdated app with no structural system became a product with a clear principle applied consistently across every surface. A first-time investor adding their first portfolio follows a guided path with a clear starting point. The payout calendar layers annual forecast, monthly calendar, and individual stock payouts in one screen so any level of detail is reachable without switching views. Every empty state, loading state, and error state has a handled response. The structure that was missing now exists.",
+    media: videoMedia("the-dividend-tracker", 5, "The Dividend Tracker"),
+    images: imageGallery("the-dividend-tracker", 7, "The Dividend Tracker"),
+    accent: { light: "#047857", dark: "#34d399" },
   },
 ];
 
