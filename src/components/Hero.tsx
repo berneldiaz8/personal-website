@@ -37,9 +37,8 @@ export function Hero() {
           aria-hidden="true"
           className="mr-3 inline-block h-[0.73em] w-auto translate-y-[calc(0.05em_-_1px)] align-baseline text-foreground"
         />
-        is a designer who brings structure and clarity to complex
-        products, from early stage startups to platforms serving over a
-        million people.
+        is a UI/UX designer who takes complex products with no design
+        foundation and ships them end to end.
       </h1>
     </section>
   );

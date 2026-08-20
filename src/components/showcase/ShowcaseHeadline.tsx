@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { REVEAL_EASE } from "@/lib/gsapEase";
+import { textStyles } from "@/lib/typography";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -33,11 +34,15 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 export function ShowcaseHeadline({
   name,
   description,
+  caption,
 }: {
   name: string;
   description: string;
+  /** Optional NDA disclosure line, rendered 24px below the headline, one line. */
+  caption?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
   const hasPlayed = useRef(false);
 
   useGSAP(
@@ -45,9 +50,15 @@ export function ShowcaseHeadline({
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const root = containerRef.current;
-        if (!root) return;
+        const headline = headlineRef.current;
+        if (!root || !headline) return;
 
-        SplitText.create(root, {
+        // Split only the headline text, not `root` — `root` also contains the
+        // optional NDA caption below, and SplitText would otherwise sweep its
+        // words into `self.words`, hide them via the gsap.set below, and never
+        // animate them back (only nameWords/descriptionWords get revealed),
+        // leaving the caption permanently invisible.
+        SplitText.create(headline, {
           type: "words",
           mask: "words",
           autoSplit: true,
@@ -119,13 +130,19 @@ export function ShowcaseHeadline({
 
   return (
     <div ref={containerRef} className="px-4 pt-6 pb-[136px] sm:px-5 lg:px-6">
-      <div className="max-w-[60rem] text-balance text-4xl font-medium leading-[1.1] tracking-[-0.5px] text-foreground sm:text-5xl">
+      <div
+        ref={headlineRef}
+        className="max-w-[60rem] text-balance text-4xl font-medium leading-[1.1] tracking-[-0.5px] text-foreground sm:text-5xl"
+      >
         <span data-headline-part="name">{name}</span>
         <span data-headline-part="description" className="font-extralight text-muted">
           {"—"}
           {description}
         </span>
       </div>
+      {caption && (
+        <p className={`mt-6 max-w-[60rem] ${textStyles.showcaseCaption}`}>{caption}</p>
+      )}
     </div>
   );
 }

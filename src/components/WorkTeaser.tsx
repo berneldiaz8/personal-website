@@ -126,23 +126,7 @@ export function WorkTeaser() {
                       </h3>
                       <div className="flex flex-col gap-5">
                         <p className="w-full text-pretty text-xs font-medium uppercase leading-[18px] text-foreground">
-                          {project.slug === "foodops" ? (
-                            "Product. Design System. PRD Documentation."
-                          ) : project.slug === "opinly" ? (
-                            <>
-                              Product. Website. Design System.
-                              <br />
-                              Digital Creatives
-                            </>
-                          ) : project.slug === "lexora" ? (
-                            <>
-                              Product. Website. Design System.
-                              <br />
-                              Digital Creatives.
-                            </>
-                          ) : (
-                            project.areas
-                          )}
+                          {project.ownership}
                         </p>
                         <p className="w-full text-pretty text-xs font-normal uppercase leading-[18px] text-foreground">
                           {project.tagline}

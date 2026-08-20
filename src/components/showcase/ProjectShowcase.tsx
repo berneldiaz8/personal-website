@@ -141,27 +141,37 @@ function ShowcaseVideo({
 function ParagraphPair({
   bodies,
   label,
+  pt = "pt-20",
   pb = "pb-[136px]",
   showBorder = true,
 }: {
   bodies: string[];
   label?: string;
+  /** Top padding override — defaults to the original 80px. */
+  pt?: string;
   /** Bottom padding override — defaults to the original 136px. */
   pb?: string;
   /** Set false to omit the full-bleed border above this block. */
   showBorder?: boolean;
 }) {
   return (
-    <div className={`flex flex-col gap-3 px-6 pt-20 ${pb}`}>
+    <div className={`flex flex-col gap-3 px-6 ${pt} ${pb}`}>
       {/* Border spans full-bleed within this section's own inset (px-6 on the
           outer wrapper), not scoped to just the paragraph's own column — a
           12px gap (gap-3 on this wrapper) to the label/paragraph row below. */}
       {showBorder && <div className="border-t border-border" />}
       <Grid margin={false}>
         {label ? (
-          <p className={`col-span-4 sm:col-span-4 lg:col-span-6 ${textStyles.labelXs}`}>{label}</p>
+          <p
+            className={`col-span-4 sm:col-span-4 lg:col-span-3 lg:col-start-4 ${textStyles.labelXs}`}
+          >
+            {label}
+          </p>
         ) : (
-          <div aria-hidden="true" className="col-span-4 hidden sm:col-span-4 sm:block lg:col-span-6" />
+          <div
+            aria-hidden="true"
+            className="col-span-4 hidden sm:col-span-4 sm:block lg:col-span-3 lg:col-start-4"
+          />
         )}
         <div className="col-span-4 flex max-w-[65ch] flex-col gap-4 text-sm leading-relaxed text-muted sm:col-span-4 lg:col-span-3 lg:col-start-7">
           {bodies.map((body, i) => (
@@ -259,32 +269,52 @@ export function ProjectShowcase({
       {/* ── HEADLINE ── mixed-weight "Name—description" display line. Owns
           its own bespoke scroll-reveal internally (two-beat word-mask), no
           Reveal/RevealText wrapper needed here. */}
-      <ShowcaseHeadline name={project.name} description={headline} />
+      <ShowcaseHeadline name={project.name} description={headline} caption={project.ndaCaption} />
 
-      {/* ── META ROW ── Role / Services / Scope. */}
+      {/* ── META ROW ── Role / Services / Scope / Timeline, four even columns
+          filling the full row width (no inner 6/6 grouping) — each item gets
+          an equal share instead of Role/Services and Scope/Timeline competing
+          for space within their own half. */}
       <Reveal>
-        {/* Inset to match the Grid's own margin (px-4 sm:px-5 lg:px-6) rather than
-            full-bleed — same separator pattern as Footer.tsx / the /info page's
-            Experience section. gap-3 (12px) to the meta row content below. */}
-        <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-        <Grid as="dl" className="pt-3 pb-2">
-          <div className="col-span-4 grid grid-cols-1 gap-6 sm:col-span-8 sm:grid-cols-6 lg:col-span-6">
-            <div className="sm:col-span-2">
+        <div className="pt-6">
+          {/* Inset to match the Grid's own margin (px-4 sm:px-5 lg:px-6) rather than
+              full-bleed — same separator pattern as Footer.tsx / the /info page's
+              Experience section. gap-3 (12px) to the meta row content below. */}
+          <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
+          <Grid as="dl" className="pt-3 pb-2">
+            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
               <dt className={textStyles.showcaseMetaLabel}>Role</dt>
-              <dd className={textStyles.showcaseMetaValue}>{project.role}</dd>
+              {/* 1 column wide (col-span-1 of this row's own 4-col grid), 16px
+                  gap (gap-x-4) to the value on its left — same spacer pattern
+                  as the Outcomes row below. */}
+              <div className="grid grid-cols-4 gap-x-4">
+                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.role}</dd>
+                <div aria-hidden="true" className="col-span-1" />
+              </div>
             </div>
-            <div className="sm:col-span-4">
-              <dt className={textStyles.showcaseMetaLabel}>Services</dt>
-              <dd className={textStyles.showcaseMetaValue}>{project.areas}</dd>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+              <dt className={textStyles.showcaseMetaLabel}>Ownership</dt>
+              <div className="grid grid-cols-4 gap-x-4">
+                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.ownership}</dd>
+                <div aria-hidden="true" className="col-span-1" />
+              </div>
             </div>
-          </div>
-          <div className="col-span-4 sm:col-span-8 lg:col-span-6">
-            <dt className={textStyles.showcaseMetaLabel}>Scope</dt>
-            <dd className={`xl:whitespace-nowrap ${textStyles.showcaseMetaValue}`}>
-              {project.scope}
-            </dd>
-          </div>
-        </Grid>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+              <dt className={textStyles.showcaseMetaLabel}>Team</dt>
+              <div className="grid grid-cols-4 gap-x-4">
+                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.team}</dd>
+                <div aria-hidden="true" className="col-span-1" />
+              </div>
+            </div>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+              <dt className={textStyles.showcaseMetaLabel}>Timeline</dt>
+              <div className="grid grid-cols-4 gap-x-4">
+                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.timeline}</dd>
+                <div aria-hidden="true" className="col-span-1" />
+              </div>
+            </div>
+          </Grid>
+        </div>
       </Reveal>
 
       {/* ── MEDIA SINGLE ── directly below the meta row. Opinly and Lexora
@@ -348,39 +378,16 @@ export function ProjectShowcase({
           reveal (RevealText) rather than Reveal's whole-block fade — this is
           narrative prose, the flagship case for the per-line treatment. */}
       <RevealText>
-        <ParagraphPair bodies={[project.context]} label="Context" />
+        <ParagraphPair bodies={[project.context]} label="The Context" />
       </RevealText>
 
-      {/* ── OVERVIEW / STATS ── Overview label + the 3 outcome stats. */}
-      <Reveal>
-        <div className="flex flex-col gap-3 px-4 pt-6 pb-20 sm:px-5 lg:px-6">
-          {/* Same full-bleed border pattern as the "Context" label/ParagraphPair
-              above — spans the section's full inset width, 12px gap (gap-3 on
-              this wrapper) to the Overview/stats row below. */}
-          <div className="border-t border-border" />
-          <Grid margin={false}>
-            {/* Narrower than the stat blocks (lg:col-span-2, not matching
-                their lg:col-span-3) — sits to the left, before the first
-                stat. */}
-            <div className="col-span-4 sm:col-span-8 lg:col-span-2">
-              <p className={textStyles.labelXs}>Overview</p>
-            </div>
-            {project.outcomes.map((outcome) => (
-              <div key={outcome.title} className="col-span-4 flex flex-col sm:col-span-8 lg:col-span-3">
-                <p className={textStyles.showcaseStat}>{outcome.stat}</p>
-                <div className="mt-1 grid grid-cols-4 gap-x-4">
-                  <p className={`col-span-3 ${textStyles.showcaseCaption}`}>
-                    {outcome.description}
-                  </p>
-                  {/* 1 column wide (col-span-1 of this row's own 4-col grid),
-                      16px gap (gap-x-4) to the caption on its left. */}
-                  <div aria-hidden="true" className="col-span-1" />
-                </div>
-              </div>
-            ))}
-          </Grid>
-        </div>
-      </Reveal>
+      {/* ── THE PROBLEM ── labeled ParagraphPair, project.problem. Same
+          treatment as Context above (line-mask reveal via RevealText) —
+          replaced the old Overview/stats row so this reads as narrative
+          prose instead of a stat block. */}
+      <RevealText>
+        <ParagraphPair bodies={[project.problem]} label="The Problem" pt="pt-6" pb="pb-20" />
+      </RevealText>
 
       {/* ── MEDIA GROUP A ── secondary hero (full-bleed) → idea-ads/table
           (2-paired split-width) → slide-video (full-bleed), all sharing one
@@ -587,13 +594,25 @@ export function ProjectShowcase({
         </Grid>
       </Reveal>
 
-      {/* ── NARRATIVE ── merged Approach/Challenge/Reflection ParagraphPair.
-          Line-mask reveal (RevealText), same reasoning as Context above. */}
+      {/* ── THE WORK ── merged workIntro/workDetail/workClosing ParagraphPair,
+          in that render order. Line-mask reveal (RevealText), same reasoning
+          as Context above. */}
       <RevealText>
         <ParagraphPair
-          bodies={[project.approach.body, project.challenge.body, project.reflection.body]}
-          pb="pb-20"
-          showBorder={false}
+          bodies={[project.workIntro.body, project.workDetail.body, project.workClosing.body]}
+          label="The Work"
+        />
+      </RevealText>
+
+      {/* ── THE OUTCOME ── labeled ParagraphPair, project.outcomeSummary. Same
+          treatment as The Work above. Lexora-only: pb-20 (80px) instead of
+          the shared default pb-[136px]. */}
+      <RevealText>
+        <ParagraphPair
+          bodies={[project.outcomeSummary]}
+          label="The Outcome"
+          pt="pt-6"
+          pb={project.slug === "lexora" ? "pb-20" : undefined}
         />
       </RevealText>
 
