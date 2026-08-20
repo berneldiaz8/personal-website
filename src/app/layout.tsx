@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -90,6 +91,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
         <SmoothScroll />
+        <LoadingScreen />
         {children}
         <Analytics />
         <SpeedInsights />

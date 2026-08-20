@@ -11,9 +11,10 @@ export const metadata: Metadata = {
 };
 
 const paragraphs = [
-  "I was drawn to design before I knew what to call it. Fashion, music, and art taught me early that the best things are always made with intention. That instinct never left. It just found a new medium.",
-  "When I join a project I take full ownership. I ask the hard questions early, make decisions with confidence, and stay close until the work is right. I have tripled goal completion on a platform that was losing users daily, scaled a compliance product from five people to over a million users, and shipped a regulatory MVP in six weeks.",
-  "I do not just ship screens. I change how products perform.",
+  "UI/UX Designer based in the Philippines.",
+  "On most of my projects, I've been the only designer on the team.",
+  "Most of my work has started before the structure was settled. I'm drawn to products at that stage, where someone has to decide how the thing actually works, not just how it looks.",
+  "I find what's broken, define the structure, and ship it end to end. Across B2B SaaS, startups, and enterprise software.",
 ];
 
 export default function InfoPage() {

@@ -4,7 +4,8 @@ import { WorkBrowser } from "@/components/WorkBrowser";
 
 export const metadata: Metadata = {
   title: "Bernel Diaz — Work",
-  description: "Selected product design case studies by Bernel Diaz.",
+  description:
+    "In-depth product design case studies by Bernel Diaz covering Lexora, FoodOps, The Dividend Tracker, and Opinly, from early challenges to measurable outcomes.",
 };
 
 export default function WorkPage() {

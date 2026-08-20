@@ -134,21 +134,53 @@ markup on the attribute alone. Both also show a small `VideoLoadingSpinner` over
 a valid Largest Contentful Paint candidate and gating its visibility on JS would delay when the
 browser counts it as painted.
 
-**Reduced motion, video, and the gallery marquee (2026-07-31):** video no longer has a
-`motion-reduce:hidden`/static-image swap — it plays for every visitor regardless of
-`prefers-reduced-motion`, and `GalleryMarquee.tsx`'s scroll likewise no longer gates its GSAP
-tween on that media query. This is a deliberate, explicit exception to this codebase's otherwise
-universal "full bypass under reduced motion" rule (see `Reveal.tsx`/`RevealWipe.tsx`/`CursorLabel.tsx`/
-`FooterWordmark.tsx`, all of which still fully respect it) — video and the marquee are presenting
-actual portfolio content, not a decorative motion effect, so they're treated like a static image
-would be (no reduced-motion opt-out needed) rather than like UI chrome. Root-caused via a real
-user report: Analytics showed a large share of iOS traffic, and a visitor with Reduce Motion
-enabled saw every video frozen on its poster and the marquee never scrolling — confirmed by
-toggling the OS setting live and watching both start working. Decorative motion tied to these
-same components (the per-tile fade-in-on-load, the marquee's hover-caption fade, the loading
-spinner's spin animation) still respects reduced motion as normal — only the core
-scroll/playback motion was exempted. Don't reintroduce the old gate without the same explicit
-re-ask this exception required.
+**Reduced motion and video (2026-07-31):** video no longer has a `motion-reduce:hidden`/
+static-image swap — it plays for every visitor regardless of `prefers-reduced-motion`. This is a
+deliberate, explicit exception to this codebase's otherwise universal "full bypass under reduced
+motion" rule (see `Reveal.tsx`/`RevealWipe.tsx`/`CursorLabel.tsx`/`FooterWordmark.tsx`, all of
+which still fully respect it) — video is presenting actual portfolio content, not a decorative
+motion effect, so it's treated like a static image would be (no reduced-motion opt-out needed)
+rather than like UI chrome. Root-caused via a real user report: Analytics showed a large share of
+iOS traffic, and a visitor with Reduce Motion enabled saw every video frozen on its poster —
+confirmed by toggling the OS setting live and watching it start working. Decorative motion tied to
+video (the loading spinner's spin animation) still respects reduced motion as normal — only
+playback itself was exempted. Don't reintroduce the old gate without the same explicit re-ask this
+exception required.
+
+**Reduced motion and the gallery carousel (2026-07-31, narrowed 2026-08-11):** originally a full
+bypass matching video's exemption above (autoplay scroll, presenting real content, not decorative
+chrome). `GalleryCarousel.tsx` was later rebuilt from an autoplaying GSAP tween into a GSAP
+Draggable-driven drag-to-scroll carousel with a skew-on-drag effect (an explicit user request
+to make the interaction fully user-initiated instead of autonomous; skewX replaced an initial
+rotation-based version of this same effect shortly after, since rotating the full doubled track
+around its own far-off transform-origin caused a large, disorienting vertical swing — skewX's
+shear is driven by vertical distance from the origin instead, which stays well-behaved regardless
+of the track's width) — at that point the original full-bypass rationale stopped fitting cleanly,
+since two genuinely new pieces of *autonomous* motion were introduced that didn't exist before: the
+momentum coast after releasing a drag, and a skew spring-back-to-level tween. The bypass is now
+narrower: direct dragging (the track tracking the pointer 1:1, including the doubled-track
+wrap-around) stays exempt regardless of `prefers-reduced-motion`, since it's fully user-controlled,
+not the ambient motion the setting exists to suppress — but under reduced motion, releasing a drag
+skips the momentum tween entirely (the position is already exactly where the last drag frame left
+it) and snaps skew straight to 0 with `gsap.set` instead of animating it via the `gsap.to(...,
+{ skewX: 0, duration: 1.2, ease: "elastic.out(0.5, 0.5)" })` spring-back that plays otherwise —
+under reduced motion the settle is always instant/non-wobbling regardless of which ease the
+animated version uses. That animated version's ease went through several rounds: `power3.out`,
+then REVEAL_EASE (both fully restrained, no overshoot, but read as too mechanical/stiff), then
+`elastic.out(1, 0.65)` (closer, but read as one spring flex rather than real settling), then
+`gsap/CustomWiggle` (tried for a multi-swing decay, but a real bug — its generated eases always
+end at value 0 regardless of the tween's actual target, since CustomWiggle is built for in-place
+shake effects that return to their own starting value, not for tweening to a specific target;
+using it here meant skewX never actually reached level, it wiggled back to roughly its starting
+angle instead), then `elastic.out(1, 0.4)` (a shorter period than 0.65, correctly converges to
+exactly 0 since elastic eases always reach their target unlike CustomWiggle, and produces several
+visible decaying swings — but read as too pronounced/bouncy once it actually worked), landing on
+`elastic.out(0.5, 0.5)` — reduced amplitude for a subtler overshoot, still multi-swing. This is
+deliberately scoped to the release moment only — an ambient, always-on per-tile idle sway
+using this same underlying idea was tried and reverted after the user clarified sway should only
+happen right after releasing a drag, never continuously at rest. Don't reintroduce a full bypass,
+a non-overshooting release ease, or an ambient/idle version, without the same explicit re-ask
+this required.
 
 ## Work page architecture
 **Went through several shapes over two days, each an explicit user decision — don't

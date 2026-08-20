@@ -8,16 +8,6 @@
   --border: #e5e1d9;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0c0d;
-    --foreground: #f4f4f5;
-    --muted: #a1a1aa;
-    --accent: #fb923c;
-    --border: #27272a;
-  }
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -46,28 +36,20 @@ html {
   overflow-y: scroll;
 }
 
-/* Per-project accent override: case study pages set --accent-light/--accent-dark
-   inline, this resolves them against the same light/dark switch as the global
-   --accent so the rest of the component tree doesn't need to know the difference. */
+/* Per-project accent override: case study pages set --accent-light inline,
+   this resolves it against the global --accent so the rest of the component
+   tree doesn't need to know the difference. (--accent-dark is still set
+   alongside it in WorkBrowser.tsx but unused now that the site no longer
+   switches on prefers-color-scheme.) */
 [data-project-accent] {
   --accent: var(--accent-light);
 }
 
-@media (prefers-color-scheme: dark) {
-  [data-project-accent] {
-    --accent: var(--accent-dark);
-  }
-}
-
-/* Forces the dark-mode token values unconditionally (no @media guard) — for
-   /gallery, which stays dark regardless of the visitor's system light/dark
-   preference, unlike the rest of the site which follows prefers-color-scheme
-   as normal. Values are duplicated from the dark half of :root above rather
-   than introduced as new tokens, matching how this file already duplicates
-   light/dark values rather than sharing a light/dark variable pair for the
-   base tokens (only --accent gets that treatment, for per-project overrides).
-   color-scheme is set too so any native form/scroll UI within this scope
-   also renders dark. */
+/* /gallery stays dark unconditionally, by deliberate design, independent of
+   the rest of the site's (fixed light) palette — see src/app/gallery/page.tsx.
+   Values are duplicated from the site's former dark palette rather than
+   introduced as new tokens. color-scheme is set too so any native
+   form/scroll UI within this scope also renders dark. */
 [data-force-dark] {
   --background: #0c0c0d;
   --foreground: #f4f4f5;
