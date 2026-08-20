@@ -9,9 +9,10 @@ import type { ReactNode } from "react";
  * `group-focus-visible` pairing (site convention, see
  * .claude/rules/skills-used.md's a11y rule) covers keyboard users for free.
  * Eased with the same "premium" curve as the site's scroll reveals
- * (Reveal.tsx's `[0.16, 1, 0.3, 1]`), expressed as the equivalent CSS
- * cubic-bezier. `motion-reduce:` disables the transform entirely rather than
- * shortening it, matching every other animation in this codebase.
+ * (gsapEase.ts's REVEAL_EASE, `[0.16, 1, 0.3, 1]`), expressed as the
+ * equivalent CSS cubic-bezier. `motion-reduce:` disables the transform
+ * entirely rather than shortening it, matching every other animation in this
+ * codebase.
  */
 export function NavLink({
   href,

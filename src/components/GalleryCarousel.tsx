@@ -11,6 +11,7 @@ import type { CarouselItem } from "@/data/galleryCarousel";
 import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 import { textStyles } from "@/lib/typography";
 import { CursorLabel } from "./CursorLabel";
+import { RevealText } from "./RevealText";
 import { Grid } from "./showcase/Grid";
 import { ImageSkeleton } from "./ImageSkeleton";
 
@@ -453,12 +454,23 @@ function GalleryLightbox({
       className="fixed inset-0 z-[100] bg-black/90 focus:outline-none"
       onClick={onClose}
     >
-      <p
-        aria-hidden="true"
-        className="pointer-events-none absolute left-4 top-4 z-20 text-left text-xs uppercase tracking-wide text-[#f4f4f5] sm:left-5 lg:left-6"
+      <RevealText
+        as="div"
+        className="pointer-events-none absolute left-4 top-4 z-20 sm:left-5 lg:left-6"
+        // A deliberate pause before this starts revealing, rather than in
+        // lockstep with the dialog opening/image fading in (transition-
+        // opacity duration-500 below) — makes the caption read as its own
+        // distinct beat instead of blending into the rest of the lightbox
+        // appearing, per explicit user request.
+        delay={0.4}
       >
-        {item.project} — {item.label}
-      </p>
+        <p
+          aria-hidden="true"
+          className="text-left text-xs uppercase tracking-wide text-[#f4f4f5]"
+        >
+          {item.project} — {item.label}
+        </p>
+      </RevealText>
       <CursorLabel
         label="Close"
         className="relative flex h-full w-full cursor-pointer items-center justify-center py-12"
@@ -769,11 +781,12 @@ export function GalleryCarousel({ items }: { items: CarouselItem[] }) {
           hex. Not aria-hidden: this is genuinely informative (the drag
           affordance isn't otherwise announced anywhere), not decorative. */}
       <Grid className="pointer-events-none absolute inset-x-0 bottom-full mb-4">
-        <p
-          className={`col-span-2 col-start-3 whitespace-nowrap sm:col-span-2 sm:col-start-5 lg:col-span-3 lg:col-start-7 ${textStyles.showcaseCaption}`}
+        <RevealText
+          as="div"
+          className="col-span-2 col-start-3 whitespace-nowrap sm:col-span-2 sm:col-start-5 lg:col-span-3 lg:col-start-7"
         >
-          Drag to explore
-        </p>
+          <p className={textStyles.showcaseCaption}>Drag to explore</p>
+        </RevealText>
       </Grid>
       {/* pl-* only, deliberately not pr-* — matches Grid.tsx's own left
           margin scale (px-4/5/6) so the row's own content box (i.e. where

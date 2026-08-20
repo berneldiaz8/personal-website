@@ -1,8 +1,6 @@
 import Image from "next/image";
 import type { Project } from "@/data/projects";
-import { Reveal } from "../Reveal";
 import { RevealText } from "../RevealText";
-import { RevealWipe } from "../RevealWipe";
 import { Grid } from "./Grid";
 import { ShowcaseHeadline } from "./ShowcaseHeadline";
 import { textStyles } from "@/lib/typography";
@@ -239,83 +237,104 @@ export function ProjectShowcase({
 
   return (
     <div className="flex flex-col">
-      {/* ── HERO ── opening full-bleed image/video, the page's LCP candidate. */}
-      <RevealWipe>
-        {hasHeroImage ? (
-          <ShowcaseImage
-            src={`${base}/showcase-hero.jpg`}
-            alt={
-              project.slug === "the-dividend-tracker"
-                ? `${project.name} dashboard shown on a phone, held next to a card`
-                : project.slug === "foodops"
-                  ? `${project.name} products dashboard shown on a tablet`
-                  : `${project.name} dashboard shown on a laptop screen`
-            }
-            aspect="aspect-[16/10]"
-            bordered={false}
-            priority={priority}
-          />
-        ) : (
-          <ShowcaseVideo
-            src={pick(project.media, 0).src}
-            poster={pick(project.media, 0).poster}
-            alt={pick(project.media, 0).alt}
-            aspect="aspect-[16/10]"
-            bordered={false}
-          />
-        )}
-      </RevealWipe>
+      {/* ── HERO ── opening full-bleed image/video, the page's LCP candidate.
+          Renders statically, no fade-on-scroll — the scroll-reveal fade
+          (Reveal.tsx) was removed site-wide per explicit user request,
+          alongside RevealWipe.tsx before it. */}
+      {hasHeroImage ? (
+        <ShowcaseImage
+          src={`${base}/showcase-hero.jpg`}
+          alt={
+            project.slug === "the-dividend-tracker"
+              ? `${project.name} dashboard shown on a phone, held next to a card`
+              : project.slug === "foodops"
+                ? `${project.name} products dashboard shown on a tablet`
+                : `${project.name} dashboard shown on a laptop screen`
+          }
+          aspect="aspect-[16/10]"
+          bordered={false}
+          priority={priority}
+        />
+      ) : (
+        <ShowcaseVideo
+          src={pick(project.media, 0).src}
+          poster={pick(project.media, 0).poster}
+          alt={pick(project.media, 0).alt}
+          aspect="aspect-[16/10]"
+          bordered={false}
+        />
+      )}
 
       {/* ── HEADLINE ── mixed-weight "Name—description" display line. Owns
           its own bespoke scroll-reveal internally (two-beat word-mask), no
-          Reveal/RevealText wrapper needed here. */}
+          RevealText wrapper needed here. */}
       <ShowcaseHeadline name={project.name} description={headline} caption={project.ndaCaption} />
 
       {/* ── META ROW ── Role / Services / Scope / Timeline, four even columns
           filling the full row width (no inner 6/6 grouping) — each item gets
           an equal share instead of Role/Services and Scope/Timeline competing
           for space within their own half. */}
-      <Reveal>
-        <div className="pt-6">
-          {/* Inset to match the Grid's own margin (px-4 sm:px-5 lg:px-6) rather than
-              full-bleed — same separator pattern as Footer.tsx / the /info page's
-              Experience section. gap-3 (12px) to the meta row content below. */}
-          <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-          <Grid as="dl" className="pt-3 pb-2">
-            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
-              <dt className={textStyles.showcaseMetaLabel}>Role</dt>
-              {/* 1 column wide (col-span-1 of this row's own 4-col grid), 16px
-                  gap (gap-x-4) to the value on its left — same spacer pattern
-                  as the Outcomes row below. */}
-              <div className="grid grid-cols-4 gap-x-4">
-                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.role}</dd>
-                <div aria-hidden="true" className="col-span-1" />
-              </div>
+      <div className="pt-6">
+        {/* Inset to match the Grid's own margin (px-4 sm:px-5 lg:px-6) rather than
+            full-bleed — same separator pattern as Footer.tsx / the /info page's
+            Experience section. gap-3 (12px) to the meta row content below. */}
+        <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
+        <Grid as="dl" className="pt-3 pb-2">
+          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+            <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
+              Role
+            </RevealText>
+            {/* 1 column wide (col-span-1 of this row's own 4-col grid), 16px
+                gap (gap-x-4) to the value on its left — same spacer pattern
+                as the Outcomes row below. RevealText as="dt"/as="dd" — the
+                real dt/dd element is itself the SplitText target, not
+                nested inside a plain wrapper div, so it keeps its role and
+                the dl's term/definition pairing stays intact for
+                screen readers (confirmed via a real ARIA snapshot; see
+                RevealText.tsx's own comment for why a plain-div wrapper
+                broke this the first time). */}
+            <div className="grid grid-cols-4 gap-x-4">
+              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
+                {project.role}
+              </RevealText>
+              <div aria-hidden="true" className="col-span-1" />
             </div>
-            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
-              <dt className={textStyles.showcaseMetaLabel}>Ownership</dt>
-              <div className="grid grid-cols-4 gap-x-4">
-                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.ownership}</dd>
-                <div aria-hidden="true" className="col-span-1" />
-              </div>
+          </div>
+          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+            <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
+              Ownership
+            </RevealText>
+            <div className="grid grid-cols-4 gap-x-4">
+              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
+                {project.ownership}
+              </RevealText>
+              <div aria-hidden="true" className="col-span-1" />
             </div>
-            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
-              <dt className={textStyles.showcaseMetaLabel}>Team</dt>
-              <div className="grid grid-cols-4 gap-x-4">
-                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.team}</dd>
-                <div aria-hidden="true" className="col-span-1" />
-              </div>
+          </div>
+          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+            <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
+              Team
+            </RevealText>
+            <div className="grid grid-cols-4 gap-x-4">
+              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
+                {project.team}
+              </RevealText>
+              <div aria-hidden="true" className="col-span-1" />
             </div>
-            <div className="col-span-4 sm:col-span-4 lg:col-span-3">
-              <dt className={textStyles.showcaseMetaLabel}>Timeline</dt>
-              <div className="grid grid-cols-4 gap-x-4">
-                <dd className={`col-span-3 ${textStyles.showcaseMetaValue}`}>{project.timeline}</dd>
-                <div aria-hidden="true" className="col-span-1" />
-              </div>
+          </div>
+          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+            <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
+              Timeline
+            </RevealText>
+            <div className="grid grid-cols-4 gap-x-4">
+              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
+                {project.timeline}
+              </RevealText>
+              <div aria-hidden="true" className="col-span-1" />
             </div>
-          </Grid>
-        </div>
-      </Reveal>
+          </div>
+        </Grid>
+      </div>
 
       {/* ── MEDIA SINGLE ── directly below the meta row. Opinly and Lexora
           each have their own dedicated full-bleed asset now
@@ -375,8 +394,8 @@ export function ProjectShowcase({
       )}
 
       {/* ── CONTEXT ── labeled ParagraphPair, project.context. Line-mask
-          reveal (RevealText) rather than Reveal's whole-block fade — this is
-          narrative prose, the flagship case for the per-line treatment. */}
+          reveal via RevealText — this is narrative prose, the flagship case
+          for the per-line treatment. */}
       <RevealText>
         <ParagraphPair bodies={[project.context]} label="The Context" />
       </RevealText>
@@ -394,205 +413,196 @@ export function ProjectShowcase({
           container instead of each sitting in its own. Full-bleed items span
           the full row (lg:col-span-12); the paired images keep their
           existing lg:col-span-6 half-width split. */}
-      <Reveal>
-        <Grid className="pt-6 pb-6">
-          {project.slug === "the-dividend-tracker" ? (
-            // The Dividend Tracker-only exception: full row order is
-            // split-width → full-bleed → split-width-with-split-stacked,
-            // instead of the full-bleed → split-width → full-bleed order
-            // every other project uses for MEDIA GROUP A.
-            <>
-              {/* Row 1: split-width. */}
-              <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+      <Grid className="pt-6 pb-6">
+        {project.slug === "the-dividend-tracker" ? (
+          // The Dividend Tracker-only exception: full row order is
+          // split-width → full-bleed → split-width-with-split-stacked,
+          // instead of the full-bleed → split-width → full-bleed order
+          // every other project uses for MEDIA GROUP A.
+          <>
+            {/* Row 1: split-width. */}
+            <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              <ShowcaseImage
+                src={`${base}/showcase-signin.jpg`}
+                alt="The Dividend Tracker sign-in screen reading 'Welcome back! Your dividends are waiting.'"
+                aspect="aspect-[16/19]"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+              />
+            </div>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              <ShowcaseVideo
+                src={`${base}/showcase-onboarding.mp4`}
+                poster={`${base}/showcase-onboarding-poster.jpg`}
+                alt="The Dividend Tracker onboarding screen reading 'Track Your Dividends with Ease'"
+                aspect="aspect-[16/19]"
+              />
+            </div>
+
+            {/* Row 2: full-bleed — moved here from the last-row position
+                every other project uses. */}
+            <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+              <ShowcaseImage
+                src={`${base}/showcase-holdings-detail.jpg`}
+                alt="The Dividend Tracker holdings detail, edit holdings, and retirement value conversion screens"
+                aspect="aspect-[16/9.5]"
+              />
+            </div>
+
+            {/* Row 3 (last row): split-width, right slot split-stacked —
+                moved here from the middle-row position every other project
+                uses. Split-height structure: outer wrapper carries the same
+                aspect-[16/19] as the left slot so both columns end up
+                exactly the same total height, two stacked placeholders
+                inside are unitless flex children (no aspect ratio of their
+                own) that split that fixed height evenly around the Grid's
+                own gap value. */}
+            <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              <ShowcaseVideo
+                src={`${base}/showcase-portfolio.mp4`}
+                poster={`${base}/showcase-portfolio-poster.jpg`}
+                alt="The Dividend Tracker portfolio dashboard on a phone mockup against a building backdrop"
+                aspect="aspect-[16/19]"
+              />
+            </div>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              <div className="flex aspect-[16/19] w-full flex-col gap-3 sm:gap-4">
                 <ShowcaseImage
-                  src={`${base}/showcase-signin.jpg`}
-                  alt="The Dividend Tracker sign-in screen reading 'Welcome back! Your dividends are waiting.'"
-                  aspect="aspect-[16/19]"
+                  src={`${base}/showcase-empty-portfolio.jpg`}
+                  alt="The Dividend Tracker 'Add your first portfolio' empty state"
+                  className="min-h-0 flex-1"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+                <ShowcaseImage
+                  src={`${base}/showcase-portfolio-goals.jpg`}
+                  alt="The Dividend Tracker 'View combined portfolio goals' promo card"
+                  className="min-h-0 flex-1"
                   sizes="(min-width: 1024px) 50vw, 100vw"
                 />
               </div>
-              <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+              {isOpinly ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-secondary-hero.jpg`}
+                  alt="Opinly Content Studio blog content list"
+                  aspect="aspect-[16/9.5]"
+                />
+              ) : project.slug === "lexora" ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-speakup.jpg`}
+                  alt="Lexora Speak Up Program confidentiality policy page"
+                  aspect="aspect-[16/9.5]"
+                />
+              ) : project.slug === "foodops" ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-products.jpg`}
+                  alt="FoodOps Products incoming shipments table"
+                  aspect="aspect-[16/9.5]"
+                />
+              ) : (
+                // Placeholder — real asset pending a future media pass.
+                <div
+                  aria-hidden="true"
+                  className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                />
+              )}
+            </div>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              {isOpinly ? (
                 <ShowcaseVideo
-                  src={`${base}/showcase-onboarding.mp4`}
-                  poster={`${base}/showcase-onboarding-poster.jpg`}
-                  alt="The Dividend Tracker onboarding screen reading 'Track Your Dividends with Ease'"
+                  src={`${base}/showcase-card.mp4`}
+                  poster={`${base}/showcase-card-poster.jpg`}
+                  alt="Opinly product card"
+                  aspect="aspect-[16/19]"
+                  fillHeight
+                />
+              ) : project.slug === "lexora" ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-submit-report.jpg`}
+                  alt="Lexora Submit your report form with a reporting guide sidebar"
+                  aspect="aspect-[16/19]"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+              ) : project.slug === "foodops" ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-prep-product.jpg`}
+                  alt="FoodOps Preparation of new product form"
+                  aspect="aspect-[16/19]"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+              ) : (
+                // Placeholder — real asset pending a future media pass.
+                <div
+                  aria-hidden="true"
+                  className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                />
+              )}
+            </div>
+            <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              {isOpinly ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-table.jpg`}
+                  alt="Opinly content table showing published articles with author, date, and status"
+                  aspect="aspect-[16/19]"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+              ) : project.slug === "lexora" ? (
+                <ShowcaseVideo
+                  src={`${base}/showcase-meet.mp4`}
+                  poster={`${base}/showcase-meet-poster.jpg`}
+                  alt="Lexora video call interface showing participant tiles"
                   aspect="aspect-[16/19]"
                 />
-              </div>
-
-              {/* Row 2: full-bleed — moved here from the last-row position
-                  every other project uses. */}
-              <div className="col-span-4 sm:col-span-8 lg:col-span-12">
-                <RevealWipe>
-                  <ShowcaseImage
-                    src={`${base}/showcase-holdings-detail.jpg`}
-                    alt="The Dividend Tracker holdings detail, edit holdings, and retirement value conversion screens"
-                    aspect="aspect-[16/9.5]"
-                  />
-                </RevealWipe>
-              </div>
-
-              {/* Row 3 (last row): split-width, right slot split-stacked —
-                  moved here from the middle-row position every other project
-                  uses. Split-height structure: outer wrapper carries the same
-                  aspect-[16/19] as the left slot so both columns end up
-                  exactly the same total height, two stacked placeholders
-                  inside are unitless flex children (no aspect ratio of their
-                  own) that split that fixed height evenly around the Grid's
-                  own gap value. */}
-              <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+              ) : project.slug === "foodops" ? (
                 <ShowcaseVideo
-                  src={`${base}/showcase-portfolio.mp4`}
-                  poster={`${base}/showcase-portfolio-poster.jpg`}
-                  alt="The Dividend Tracker portfolio dashboard on a phone mockup against a building backdrop"
+                  src={`${base}/showcase-spreadsheet.mp4`}
+                  poster={`${base}/showcase-spreadsheet-poster.jpg`}
+                  alt="FoodOps Generate sortable spreadsheets form"
                   aspect="aspect-[16/19]"
                 />
-              </div>
-              <div className="col-span-4 sm:col-span-4 lg:col-span-6">
-                <div className="flex aspect-[16/19] w-full flex-col gap-3 sm:gap-4">
-                  <ShowcaseImage
-                    src={`${base}/showcase-empty-portfolio.jpg`}
-                    alt="The Dividend Tracker 'Add your first portfolio' empty state"
-                    className="min-h-0 flex-1"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                  />
-                  <ShowcaseImage
-                    src={`${base}/showcase-portfolio-goals.jpg`}
-                    alt="The Dividend Tracker 'View combined portfolio goals' promo card"
-                    className="min-h-0 flex-1"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="col-span-4 sm:col-span-8 lg:col-span-12">
-                <RevealWipe>
-                  {isOpinly ? (
-                    <ShowcaseImage
-                      src={`${base}/showcase-secondary-hero.jpg`}
-                      alt="Opinly Content Studio blog content list"
-                      aspect="aspect-[16/9.5]"
-                    />
-                  ) : project.slug === "lexora" ? (
-                    <ShowcaseImage
-                      src={`${base}/showcase-speakup.jpg`}
-                      alt="Lexora Speak Up Program confidentiality policy page"
-                      aspect="aspect-[16/9.5]"
-                    />
-                  ) : project.slug === "foodops" ? (
-                    <ShowcaseImage
-                      src={`${base}/showcase-products.jpg`}
-                      alt="FoodOps Products incoming shipments table"
-                      aspect="aspect-[16/9.5]"
-                    />
-                  ) : (
-                    // Placeholder — real asset pending a future media pass.
-                    <div
-                      aria-hidden="true"
-                      className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-                    />
-                  )}
-                </RevealWipe>
-              </div>
+              ) : (
+                // Placeholder — real asset pending a future media pass.
+                <div
+                  aria-hidden="true"
+                  className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                />
+              )}
+            </div>
 
-              <div className="col-span-4 sm:col-span-4 lg:col-span-6">
-                {isOpinly ? (
-                  <ShowcaseVideo
-                    src={`${base}/showcase-card.mp4`}
-                    poster={`${base}/showcase-card-poster.jpg`}
-                    alt="Opinly product card"
-                    aspect="aspect-[16/19]"
-                    fillHeight
-                  />
-                ) : project.slug === "lexora" ? (
-                  <ShowcaseImage
-                    src={`${base}/showcase-submit-report.jpg`}
-                    alt="Lexora Submit your report form with a reporting guide sidebar"
-                    aspect="aspect-[16/19]"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                  />
-                ) : project.slug === "foodops" ? (
-                  <ShowcaseImage
-                    src={`${base}/showcase-prep-product.jpg`}
-                    alt="FoodOps Preparation of new product form"
-                    aspect="aspect-[16/19]"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                  />
-                ) : (
-                  // Placeholder — real asset pending a future media pass.
-                  <div
-                    aria-hidden="true"
-                    className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-                  />
-                )}
-              </div>
-              <div className="col-span-4 sm:col-span-4 lg:col-span-6">
-                {isOpinly ? (
-                  <ShowcaseImage
-                    src={`${base}/showcase-table.jpg`}
-                    alt="Opinly content table showing published articles with author, date, and status"
-                    aspect="aspect-[16/19]"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                  />
-                ) : project.slug === "lexora" ? (
-                  <ShowcaseVideo
-                    src={`${base}/showcase-meet.mp4`}
-                    poster={`${base}/showcase-meet-poster.jpg`}
-                    alt="Lexora video call interface showing participant tiles"
-                    aspect="aspect-[16/19]"
-                  />
-                ) : project.slug === "foodops" ? (
-                  <ShowcaseVideo
-                    src={`${base}/showcase-spreadsheet.mp4`}
-                    poster={`${base}/showcase-spreadsheet-poster.jpg`}
-                    alt="FoodOps Generate sortable spreadsheets form"
-                    aspect="aspect-[16/19]"
-                  />
-                ) : (
-                  // Placeholder — real asset pending a future media pass.
-                  <div
-                    aria-hidden="true"
-                    className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-                  />
-                )}
-              </div>
-
-              <div className="col-span-4 sm:col-span-8 lg:col-span-12">
-                <RevealWipe>
-                  {isOpinly ? (
-                    <ShowcaseImage
-                      src={`${base}/showcase-getting-started.jpg`}
-                      alt="Opinly Getting Started onboarding checklist"
-                      aspect="aspect-[16/9.5]"
-                    />
-                  ) : project.slug === "lexora" ? (
-                    <ShowcaseVideo
-                      src={`${base}/showcase-cs.mp4`}
-                      poster={`${base}/showcase-cs-poster.jpg`}
-                      alt="Lexora Submitted reports case management table"
-                      aspect="aspect-[16/9.5]"
-                    />
-                  ) : project.slug === "foodops" ? (
-                    <ShowcaseImage
-                      src={`${base}/showcase-product-detail.jpg`}
-                      alt="FoodOps product detail page with traceability information"
-                      aspect="aspect-[16/9.5]"
-                    />
-                  ) : (
-                    // Placeholder — real asset pending a future media pass.
-                    <div
-                      aria-hidden="true"
-                      className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-                    />
-                  )}
-                </RevealWipe>
-              </div>
-            </>
-          )}
-        </Grid>
-      </Reveal>
+            <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+              {isOpinly ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-getting-started.jpg`}
+                  alt="Opinly Getting Started onboarding checklist"
+                  aspect="aspect-[16/9.5]"
+                />
+              ) : project.slug === "lexora" ? (
+                <ShowcaseVideo
+                  src={`${base}/showcase-cs.mp4`}
+                  poster={`${base}/showcase-cs-poster.jpg`}
+                  alt="Lexora Submitted reports case management table"
+                  aspect="aspect-[16/9.5]"
+                />
+              ) : project.slug === "foodops" ? (
+                <ShowcaseImage
+                  src={`${base}/showcase-product-detail.jpg`}
+                  alt="FoodOps product detail page with traceability information"
+                  aspect="aspect-[16/9.5]"
+                />
+              ) : (
+                // Placeholder — real asset pending a future media pass.
+                <div
+                  aria-hidden="true"
+                  className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                />
+              )}
+            </div>
+          </>
+        )}
+      </Grid>
 
       {/* ── THE WORK ── merged workIntro/workDetail/workClosing ParagraphPair,
           in that render order. Line-mask reveal (RevealText), same reasoning
@@ -619,223 +629,219 @@ export function ProjectShowcase({
       {/* ── MEDIA GROUP B ── placeholder (full-bleed) → Image pair 1
           (audit/mockup, 2-paired) → placeholder (full-bleed) → closing video
           (full-bleed) — all one shared container. */}
-      <Reveal>
-        <Grid className="pt-6 pb-6">
-          {/* Structural placeholder — not a real asset yet, same convention as
-              the FoodOps slide-video/closing-video placeholders elsewhere in
-              this file. First of two new full-bleed slots bracketing Image
-              pair 1: this one → Image pair 1 → second placeholder → closing
-              video. Removed for FoodOps specifically, per explicit request —
-              its Media Group B starts directly at Image pair 1 instead. */}
-          {isOpinly ? (
-            <div className="col-span-4 sm:col-span-8 lg:col-span-12">
-              <ShowcaseImage
-                src={`${base}/showcase-cms-integration.jpg`}
-                alt="Opinly CMS integration selection screen showing WordPress, Shopify, Wix, Squarespace, Webflow, and Framer options"
-                aspect="aspect-[16/9.5]"
-              />
+      <Grid className="pt-6 pb-6">
+        {/* Structural placeholder — not a real asset yet, same convention as
+            the FoodOps slide-video/closing-video placeholders elsewhere in
+            this file. First of two new full-bleed slots bracketing Image
+            pair 1: this one → Image pair 1 → second placeholder → closing
+            video. Removed for FoodOps specifically, per explicit request —
+            its Media Group B starts directly at Image pair 1 instead. */}
+        {isOpinly ? (
+          <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+            <ShowcaseImage
+              src={`${base}/showcase-cms-integration.jpg`}
+              alt="Opinly CMS integration selection screen showing WordPress, Shopify, Wix, Squarespace, Webflow, and Framer options"
+              aspect="aspect-[16/9.5]"
+            />
+          </div>
+        ) : project.slug === "lexora" ? (
+          <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+            <ShowcaseImage
+              src={`${base}/showcase-case-report.jpg`}
+              alt="Lexora case report detail view showing report CR-01192"
+              aspect="aspect-[16/9.5]"
+            />
+          </div>
+        ) : project.slug === "the-dividend-tracker" ? (
+          <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+            <ShowcaseImage
+              src={`${base}/showcase-watchlist-calendar.jpg`}
+              alt="The Dividend Tracker watchlist, dividend calendar, and dividends payout screens"
+              aspect="aspect-[16/9.5]"
+            />
+          </div>
+        ) : (
+          project.slug !== "foodops" && (
+            <div aria-hidden="true" className="col-span-4 sm:col-span-8 lg:col-span-12">
+              <div className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]" />
             </div>
+          )
+        )}
+
+        <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+          {isOpinly ? (
+            <ShowcaseImage
+              src={`${base}/showcase-audit.jpg`}
+              alt="Opinly site audit modal showing a score of 93 out of 100"
+              aspect="aspect-[16/19]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
           ) : project.slug === "lexora" ? (
-            <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+            // Split-height variant, Lexora-only: the outer wrapper carries
+            // the same aspect-[16/19] as the right slot so both columns end
+            // up exactly the same total height — the two stacked
+            // placeholders inside are unitless flex children (no aspect
+            // ratio of their own) that split that fixed height evenly
+            // around the Grid's own gap value.
+            <div className="flex aspect-[16/19] w-full flex-col gap-3 sm:gap-4">
+              <ShowcaseVideo
+                src={`${base}/showcase-status.mp4`}
+                poster={`${base}/showcase-status-poster.jpg`}
+                alt="Lexora report status list animation"
+                className="min-h-0 flex-1"
+              />
               <ShowcaseImage
-                src={`${base}/showcase-case-report.jpg`}
-                alt="Lexora case report detail view showing report CR-01192"
-                aspect="aspect-[16/9.5]"
+                src={`${base}/showcase-reports-heatmap.jpg`}
+                alt="Lexora total reports heatmap by department"
+                className="min-h-0 flex-1"
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             </div>
           ) : project.slug === "the-dividend-tracker" ? (
-            <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+            <ShowcaseImage
+              src={`${base}/showcase-goals-cashflow.jpg`}
+              alt="The Dividend Tracker dividend calendar, portfolio goals, and cash flow plan screens"
+              aspect="aspect-[16/19]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          ) : project.slug === "foodops" ? (
+            <ShowcaseVideo
+              src={`${base}/showcase-mobile.mp4`}
+              poster={`${base}/showcase-mobile-poster.jpg`}
+              alt="FoodOps mobile scan screen against a commercial kitchen backdrop"
+              aspect="aspect-[16/19]"
+            />
+          ) : (
+            // Placeholder — real asset pending a future media pass.
+            <div
+              aria-hidden="true"
+              className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+            />
+          )}
+        </div>
+        <div className="col-span-4 sm:col-span-4 lg:col-span-6">
+          {isOpinly ? (
+            // Split-height variant, Opinly: same structure as Lexora/The
+            // Dividend Tracker's split-stacked slots — outer wrapper carries
+            // the aspect-[16/19] so this column matches its sibling's total
+            // height, two flex-1 children (no aspect ratio of their own)
+            // split that height evenly around the Grid's own gap value.
+            <div className="flex aspect-[16/19] w-full flex-col gap-3 sm:gap-4">
+              <ShowcaseVideo
+                src={`${base}/showcase-pill.mp4`}
+                poster={`${base}/showcase-pill-poster.jpg`}
+                alt="Opinly product pill animation"
+                className="min-h-0 flex-1"
+              />
               <ShowcaseImage
-                src={`${base}/showcase-watchlist-calendar.jpg`}
-                alt="The Dividend Tracker watchlist, dividend calendar, and dividends payout screens"
-                aspect="aspect-[16/9.5]"
+                src={`${base}/showcase-traffic-chart.jpg`}
+                alt="Opinly organic traffic comparison bar chart against competitors"
+                className="min-h-0 flex-1"
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             </div>
+          ) : project.slug === "lexora" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-speakup-detail.jpg`}
+              alt="Lexora Speak Up Program confidentiality policy page"
+              aspect="aspect-[16/19]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          ) : project.slug === "the-dividend-tracker" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-market-summary.jpg`}
+              alt="The Dividend Tracker AAPL market summary screen"
+              aspect="aspect-[16/19]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          ) : project.slug === "foodops" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-product-details-panel.jpg`}
+              alt="FoodOps product details panel with traceability information"
+              aspect="aspect-[16/19]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
           ) : (
-            project.slug !== "foodops" && (
-              <div aria-hidden="true" className="col-span-4 sm:col-span-8 lg:col-span-12">
-                <div className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]" />
-              </div>
-            )
+            // Placeholder — real asset pending a future media pass.
+            <div
+              aria-hidden="true"
+              className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+            />
           )}
+        </div>
 
-          <div className="col-span-4 sm:col-span-4 lg:col-span-6">
-            {isOpinly ? (
-              <ShowcaseImage
-                src={`${base}/showcase-audit.jpg`}
-                alt="Opinly site audit modal showing a score of 93 out of 100"
-                aspect="aspect-[16/19]"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            ) : project.slug === "lexora" ? (
-              // Split-height variant, Lexora-only: the outer wrapper carries
-              // the same aspect-[16/19] as the right slot so both columns end
-              // up exactly the same total height — the two stacked
-              // placeholders inside are unitless flex children (no aspect
-              // ratio of their own) that split that fixed height evenly
-              // around the Grid's own gap value.
-              <div className="flex aspect-[16/19] w-full flex-col gap-3 sm:gap-4">
-                <ShowcaseVideo
-                  src={`${base}/showcase-status.mp4`}
-                  poster={`${base}/showcase-status-poster.jpg`}
-                  alt="Lexora report status list animation"
-                  className="min-h-0 flex-1"
-                />
-                <ShowcaseImage
-                  src={`${base}/showcase-reports-heatmap.jpg`}
-                  alt="Lexora total reports heatmap by department"
-                  className="min-h-0 flex-1"
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                />
-              </div>
-            ) : project.slug === "the-dividend-tracker" ? (
-              <ShowcaseImage
-                src={`${base}/showcase-goals-cashflow.jpg`}
-                alt="The Dividend Tracker dividend calendar, portfolio goals, and cash flow plan screens"
-                aspect="aspect-[16/19]"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            ) : project.slug === "foodops" ? (
-              <ShowcaseVideo
-                src={`${base}/showcase-mobile.mp4`}
-                poster={`${base}/showcase-mobile-poster.jpg`}
-                alt="FoodOps mobile scan screen against a commercial kitchen backdrop"
-                aspect="aspect-[16/19]"
-              />
-            ) : (
-              // Placeholder — real asset pending a future media pass.
-              <div
-                aria-hidden="true"
-                className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-              />
-            )}
-          </div>
-          <div className="col-span-4 sm:col-span-4 lg:col-span-6">
-            {isOpinly ? (
-              // Split-height variant, Opinly: same structure as Lexora/The
-              // Dividend Tracker's split-stacked slots — outer wrapper carries
-              // the aspect-[16/19] so this column matches its sibling's total
-              // height, two flex-1 children (no aspect ratio of their own)
-              // split that height evenly around the Grid's own gap value.
-              <div className="flex aspect-[16/19] w-full flex-col gap-3 sm:gap-4">
-                <ShowcaseVideo
-                  src={`${base}/showcase-pill.mp4`}
-                  poster={`${base}/showcase-pill-poster.jpg`}
-                  alt="Opinly product pill animation"
-                  className="min-h-0 flex-1"
-                />
-                <ShowcaseImage
-                  src={`${base}/showcase-traffic-chart.jpg`}
-                  alt="Opinly organic traffic comparison bar chart against competitors"
-                  className="min-h-0 flex-1"
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                />
-              </div>
-            ) : project.slug === "lexora" ? (
-              <ShowcaseImage
-                src={`${base}/showcase-speakup-detail.jpg`}
-                alt="Lexora Speak Up Program confidentiality policy page"
-                aspect="aspect-[16/19]"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            ) : project.slug === "the-dividend-tracker" ? (
-              <ShowcaseImage
-                src={`${base}/showcase-market-summary.jpg`}
-                alt="The Dividend Tracker AAPL market summary screen"
-                aspect="aspect-[16/19]"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            ) : project.slug === "foodops" ? (
-              <ShowcaseImage
-                src={`${base}/showcase-product-details-panel.jpg`}
-                alt="FoodOps product details panel with traceability information"
-                aspect="aspect-[16/19]"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            ) : (
-              // Placeholder — real asset pending a future media pass.
-              <div
-                aria-hidden="true"
-                className="aspect-[16/19] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-              />
-            )}
-          </div>
+        {/* Second of the two new placeholder slots — sits between Image
+            pair 1 and the closing video. */}
+        <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+          {isOpinly ? (
+            <ShowcaseVideo
+              src={`${base}/showcase-website-tour.mp4`}
+              poster={`${base}/showcase-website-tour-poster.jpg`}
+              alt="Opinly website tour"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : project.slug === "lexora" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-reports-list.jpg`}
+              alt="Lexora Submitted reports full list view"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : project.slug === "the-dividend-tracker" ? (
+            <ShowcaseVideo
+              src={`${base}/showcase-website-tour.mp4`}
+              poster={`${base}/showcase-website-tour-poster.jpg`}
+              alt="The Dividend Tracker website tour"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : project.slug === "foodops" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-shipping-modal.jpg`}
+              alt="FoodOps Shipping of products modal form"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+            />
+          )}
+        </div>
 
-          {/* Second of the two new placeholder slots — sits between Image
-              pair 1 and the closing video. */}
-          <div className="col-span-4 sm:col-span-8 lg:col-span-12">
-            {isOpinly ? (
-              <ShowcaseVideo
-                src={`${base}/showcase-website-tour.mp4`}
-                poster={`${base}/showcase-website-tour-poster.jpg`}
-                alt="Opinly website tour"
-                aspect="aspect-[16/9.5]"
-              />
-            ) : project.slug === "lexora" ? (
-              <ShowcaseImage
-                src={`${base}/showcase-reports-list.jpg`}
-                alt="Lexora Submitted reports full list view"
-                aspect="aspect-[16/9.5]"
-              />
-            ) : project.slug === "the-dividend-tracker" ? (
-              <ShowcaseVideo
-                src={`${base}/showcase-website-tour.mp4`}
-                poster={`${base}/showcase-website-tour-poster.jpg`}
-                alt="The Dividend Tracker website tour"
-                aspect="aspect-[16/9.5]"
-              />
-            ) : project.slug === "foodops" ? (
-              <ShowcaseImage
-                src={`${base}/showcase-shipping-modal.jpg`}
-                alt="FoodOps Shipping of products modal form"
-                aspect="aspect-[16/9.5]"
-              />
-            ) : (
-              <div
-                aria-hidden="true"
-                className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-              />
-            )}
-          </div>
-
-          <div className="col-span-4 sm:col-span-8 lg:col-span-12">
-            <RevealWipe>
-              {isOpinly ? (
-                <ShowcaseImage
-                  src={`${base}/showcase-idea-ads.jpg`}
-                  alt="Opinly promotional ads reading 'Ditch the $200/month SEO stack. Get it all with Opinly.', 'Why pay $500 for one backlink?', and 'Too busy to optimize your site for Google?'"
-                  aspect="aspect-[16/9.5]"
-                />
-              ) : project.slug === "lexora" ? (
-                <ShowcaseVideo
-                  src={`${base}/showcase-website-tour.mp4`}
-                  poster={`${base}/showcase-website-tour-poster.jpg`}
-                  alt="Lexora website tour"
-                  aspect="aspect-[16/9.5]"
-                />
-              ) : project.slug === "the-dividend-tracker" ? (
-                <ShowcaseImage
-                  src={`${base}/showcase-marketing-cards.jpg`}
-                  alt="The Dividend Tracker promotional cards showing dividend tracking, investing decisions, and future income calculator"
-                  aspect="aspect-[16/9.5]"
-                />
-              ) : project.slug === "foodops" ? (
-                <ShowcaseImage
-                  src={`${base}/showcase-traceability-plan.jpg`}
-                  alt="FoodOps Traceability Plan document view"
-                  aspect="aspect-[16/9.5]"
-                />
-              ) : (
-                // Placeholder — real asset pending a future media pass.
-                <div
-                  aria-hidden="true"
-                  className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-                />
-              )}
-            </RevealWipe>
-          </div>
-        </Grid>
-      </Reveal>
+        <div className="col-span-4 sm:col-span-8 lg:col-span-12">
+          {isOpinly ? (
+            <ShowcaseImage
+              src={`${base}/showcase-idea-ads.jpg`}
+              alt="Opinly promotional ads reading 'Ditch the $200/month SEO stack. Get it all with Opinly.', 'Why pay $500 for one backlink?', and 'Too busy to optimize your site for Google?'"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : project.slug === "lexora" ? (
+            <ShowcaseVideo
+              src={`${base}/showcase-website-tour.mp4`}
+              poster={`${base}/showcase-website-tour-poster.jpg`}
+              alt="Lexora website tour"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : project.slug === "the-dividend-tracker" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-marketing-cards.jpg`}
+              alt="The Dividend Tracker promotional cards showing dividend tracking, investing decisions, and future income calculator"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : project.slug === "foodops" ? (
+            <ShowcaseImage
+              src={`${base}/showcase-traceability-plan.jpg`}
+              alt="FoodOps Traceability Plan document view"
+              aspect="aspect-[16/9.5]"
+            />
+          ) : (
+            // Placeholder — real asset pending a future media pass.
+            <div
+              aria-hidden="true"
+              className="aspect-[16/9.5] w-full bg-neutral-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+            />
+          )}
+        </div>
+      </Grid>
     </div>
   );
 }
