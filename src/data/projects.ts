@@ -137,7 +137,7 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     ownership: "Product, website, and design system",
     team: "1 designer alongside engineers and stakeholders",
-    timeline: "Jul 2023 – Jul 2024, across four phases of product growth",
+    timeline: "1+ years, across four phases of product growth",
     context:
       "Lexora is a secure compliance platform built for organizations managing sensitive internal reports. Reporters submit concerns anonymously across whistleblowing, grievances, conflict of interest, and fraud. Case managers investigate and resolve those reports. Organizations use the platform to demonstrate regulatory compliance with audit-ready documentation.",
     problem:
@@ -190,7 +190,7 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     ownership: "Product, website, and design system",
     team: "1 designer alongside founders and engineers",
-    timeline: "Apr 2025 to Feb 2026",
+    timeline: "9 months",
     context:
       "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
     problem:
@@ -242,7 +242,7 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     ownership: "Product and website",
     team: "1 designer alongside engineers",
-    timeline: "Oct 2024 to Jan 2025",
+    timeline: "2 months",
     context:
       "The Dividend Tracker is a mobile investment app built for dividend investors. It tracks portfolio performance, monitors upcoming dividend payouts, forecasts future income, and helps investors set and track financial goals, all in one place. From someone receiving their first dividend to someone managing a complex multi-portfolio strategy, the app is built to make passive income visible and manageable.",
     problem:

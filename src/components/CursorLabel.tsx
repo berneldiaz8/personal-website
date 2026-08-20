@@ -29,8 +29,10 @@ function getServerSnapshot() {
 /**
  * Cursor-follow label — bare text that trails the mouse while hovering the
  * wrapped content, fading in/out on enter/leave. GSAP quickTo drives the
- * trailing motion (matching the rest of the site's GSAP-only approach — see
- * Reveal.tsx's note on dropping motion/react as a redundant second engine).
+ * trailing motion (matching the rest of the site's GSAP-only approach — this
+ * codebase migrated fully off motion/react, one engine instead of two, since
+ * GSAP was already required for WorkBrowser's pin-based stacking and
+ * SmoothScroll's Lenis sync, which motion/react has no equivalent for).
  * quickTo is GSAP's purpose-built utility for this exact case: repeated
  * rapid tweens (one per mousemove) without stacking/queuing.
  *
@@ -88,15 +90,17 @@ function getServerSnapshot() {
  * 2. mix-blend-mode isolation — `mix-blend-mode: difference` only blends
  * against content painted within the same CSS stacking context. Any ancestor
  * with a non-"none" `transform` (or opacity<1, filter, isolation: isolate,
- * etc.) creates a new one, trapping the blend inside it. WorkTeaser's rows
- * are wrapped in Reveal.tsx, which leaves a GSAP-applied transform on the row
- * even after its scroll-reveal animation finishes — without portal, hovering
- * genuinely empty space within that row (no other painted content in that
- * exact spot, inside the isolated subtree) left the label with nothing local
- * to diff against, so it painted its literal white source color, invisible
- * against the real page's white background. Portaling to document.body moves
- * the label outside that transformed ancestor entirely, so it blends against
- * whatever's actually beneath it in the real page paint.
+ * etc.) creates a new one, trapping the blend inside it. This was originally
+ * root-caused on WorkTeaser's rows, back when they were wrapped in
+ * Reveal.tsx (since removed — its final opacity-only form wouldn't have
+ * triggered this, but an earlier version also animated `y`, which left a
+ * GSAP-applied `transform` on the row even after the scroll-reveal finished):
+ * without portal, hovering genuinely empty space within that row (no other
+ * painted content in that exact spot, inside the isolated subtree) left the
+ * label with nothing local to diff against, so it painted its literal white
+ * source color, invisible against the real page's white background.
+ * Portaling to document.body sidesteps this class of bug entirely regardless
+ * of what (if anything) transforms/isolates a given call site's ancestors.
  *
  * Portaling escapes both the same way GalleryLightbox already does for the
  * first one. In portal mode the label switches from
