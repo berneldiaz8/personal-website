@@ -190,7 +190,7 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     ownership: "Product, website, and design system",
     team: "1 designer alongside founders and engineers",
-    timeline: "9 months",
+    timeline: "7 months",
     context:
       "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
     problem:
