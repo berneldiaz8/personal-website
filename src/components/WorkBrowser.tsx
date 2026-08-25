@@ -128,7 +128,23 @@ export function WorkBrowser() {
             }}
             data-project-accent
             style={accentStyle(project.accent)}
-            className="bg-background pb-[160px]"
+            // `relative` is load-bearing, not decorative: the stacked-cards pin
+            // above sets the *outgoing* row to `position: fixed` (z-index auto).
+            // Per CSS paint order, a positioned element always paints above a
+            // plain `position: static` one regardless of DOM order — so without
+            // this, every later project's row (still static) painted *behind*
+            // any earlier row currently mid-pin, letting the frozen outgoing
+            // card's content bleed through any transparent gap in the incoming
+            // one (most visible in the sparse space around/between the
+            // headline's animated words, worst on mobile where the headline
+            // wraps to many more lines). Making every row `relative` puts them
+            // all in the same "positioned" paint bucket as the pin, where
+            // z-index is equal (auto) and DOM order is the tiebreaker — so a
+            // later project's own opaque `bg-background` now correctly covers
+            // an earlier, still-pinned one. Confirmed via computed-style
+            // inspection: the pinned row measured `position: fixed` while the
+            // next row measured `position: static`, exactly matching this rule.
+            className="relative bg-background pb-[160px]"
           >
             <h3 className="sr-only">{project.name}</h3>
 
