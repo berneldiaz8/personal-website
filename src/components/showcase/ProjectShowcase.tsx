@@ -604,12 +604,17 @@ export function ProjectShowcase({
         )}
       </Grid>
 
-      {/* ── THE WORK ── merged workIntro/workDetail/workClosing ParagraphPair,
-          in that render order. Line-mask reveal (RevealText), same reasoning
-          as Context above. */}
+      {/* ── THE WORK ── merged workIntro/workDetail/(optional workDetail2)/
+          workClosing ParagraphPair, in that render order. Line-mask reveal
+          (RevealText), same reasoning as Context above. */}
       <RevealText>
         <ParagraphPair
-          bodies={[project.workIntro.body, project.workDetail.body, project.workClosing.body]}
+          bodies={[
+            project.workIntro.body,
+            project.workDetail.body,
+            ...(project.workDetail2 ? [project.workDetail2.body] : []),
+            project.workClosing.body,
+          ]}
           label="The Work"
         />
       </RevealText>
