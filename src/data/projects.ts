@@ -1,9 +1,3 @@
-export type Outcome = {
-  stat: string;
-  title: string;
-  description: string;
-};
-
 export type Beat = {
   heading: string;
   body: string;
@@ -35,10 +29,11 @@ export type Project = {
   context: string;
   problem: string;
   outcomeSummary: string;
-  /** "The Work" section's 3 paragraphs, in render order: workIntro, workDetail, workClosing. */
+  /** "The Work" section's paragraphs, in render order: workIntro, workDetail, workDetail2 (optional 4th paragraph), workClosing. */
   workIntro: Beat;
   workDetail: Beat;
-  outcomes: [Outcome, Outcome, Outcome];
+  /** Optional 4th "The Work" paragraph, rendered between workDetail and workClosing when present. */
+  workDetail2?: Beat;
   workClosing: Beat;
   /** Looping muted product-walkthrough clips, converted from the source Figma exports. */
   media: MediaItem[];
@@ -81,41 +76,25 @@ export const projects: Project[] = [
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Food Tech Startup",
     role: "Product Designer",
-    ownership: "Web portal, mobile app, design system, and PRD documentation",
-    team: "1 designer alongside a product manager and stakeholders",
-    timeline: "6 weeks, concept to launch-ready MVP",
+    ownership: "Mobile app, web portal, design system",
+    team: "1 designer, 1 product manager, plus stakeholders",
+    timeline: "6-week MVP",
     context:
-      "FoodOps is a food traceability platform built for restaurants. Under FDA FSMA Rule 204, restaurants must track and document every step of their food supply chain and produce that data to the FDA on request. The people responsible for executing this daily are kitchen staff and restaurant managers, each with completely different needs from the same system.",
+      "FoodOps is a food traceability platform built to help restaurants meet federal food safety requirements. Under FDA FSMA Rule 204, every step of the food supply chain must be logged as a Critical Tracking Event (CTE) by the responsible party. For most restaurants, that means one moment matters most: receiving a shipment, the final link connecting back through the chain. Kitchen staff scan shipments on arrival, appending the receiving data to the record. Restaurant managers step in when the FDA requests information, retrieving the traceability plan the system has ready.",
     problem:
-      "No product existed. Just a brief and a federal regulation that kitchen staff had to execute daily. The people responsible for FDA compliance weren't compliance officers. They were line workers in the middle of a busy shift, with no time to learn a complex system and no tolerance for friction. The design problem wasn't just building something that met the regulation. It was building something that worked for the person least equipped to deal with it.",
+      "No product existed. Just a brief and a federal regulation, dense, technical, written with zero regard for the people who'd have to execute it. Kitchen staff needed a way to record every shipment accurately, in the middle of a busy shift, with no tolerance for anything that slowed them down. Restaurant managers needed to produce a complete, accurate record the moment the FDA came asking, with no system yet built to make that possible. Nobody in a kitchen should have to read a federal regulation to keep their restaurant compliant. That was the real design problem.",
     workDetail: {
       heading: "Regulatory Complexity in the Hands of Kitchen Staff",
-      body: "Every user flow was mapped from scratch, stripping the mobile experience to its core: open app, scan, done. Complex transformation and shipping flows were broken into structured steps with pre-populated fields and copy written for non-technical users. The design system, the full PRD, and a launch-ready MVP shipped within six weeks.",
+      body: "Every flow was mapped from scratch, stripping mobile to its core: open app, scan, done. Transformation and shipping worked the same way, structured steps, pre-populated fields, clear copy, no added weight.",
     },
     workIntro: {
       heading: "Turning Regulatory Requirements Into Simple, Guided Actions",
-      body: "FSMA Rule 204 required restaurants to record Critical Tracking Events across their food supply chain, with regulatory consequences for errors. The people executing these tasks were kitchen staff with low to moderate tech experience, working under time pressure. Complex regulatory data had to stay simple enough for someone scanning a barcode during a busy service.",
+      body: "FSMA Rule 204 required restaurants to record Critical Tracking Events across their food supply chain, with regulatory consequences for errors. Kitchen staff and restaurant managers had low to moderate tech experience, under time pressure, with no patience for friction.",
     },
-    outcomes: [
-      {
-        stat: "6 Weeks",
-        title: "Concept to Launch",
-        description:
-          "Full MVP delivered on time, from concept to launch-ready product within a fixed agile timeline.",
-      },
-      {
-        stat: "Fully Owned",
-        title: "End to End",
-        description:
-          "Portal, mobile app, design system, and PRD delivered by one designer from scratch.",
-      },
-      {
-        stat: "2 Days",
-        title: "Concept to Prototype",
-        description:
-          "Concept to testable prototype in 2 days instead of 1 week through AI-assisted research and rapid prototyping.",
-      },
-    ],
+    workDetail2: {
+      heading: "Catching the Gap Before Engineering",
+      body: "The clearest example of that discipline: a structural gap in the receiving flow would have broken the compliance chain. It went unflagged until I caught it and made the case to get it into the MVP before engineering started. Design system, full PRD, and launch-ready MVP shipped in six weeks.",
+    },
     workClosing: {
       heading: "Simplicity Is the Most Powerful Compliance Tool",
       body: "A kitchen worker needs a clear next step, not a regulation to interpret.",
@@ -135,9 +114,9 @@ export const projects: Project[] = [
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Compliance Startup",
     role: "UI/UX Designer",
-    ownership: "Product, website, and design system",
-    team: "1 designer alongside engineers and stakeholders",
-    timeline: "1+ years, across four phases of product growth",
+    ownership: "Product, website, design system",
+    team: "1 designer, 10+ engineers, plus stakeholder",
+    timeline: "1+ years, four phases of product growth.",
     context:
       "Lexora is a secure compliance platform built for organizations managing sensitive internal reports. Reporters submit concerns anonymously across whistleblowing, grievances, conflict of interest, and fraud. Case managers investigate and resolve those reports. Organizations use the platform to demonstrate regulatory compliance with audit-ready documentation.",
     problem:
@@ -150,26 +129,6 @@ export const projects: Project[] = [
       heading: "Designing a System That Grew Without Breaking",
       body: "Every structural decision the brief left undefined was mine to make before engineering wrote a line of code.",
     },
-    outcomes: [
-      {
-        stat: "1M+",
-        title: "Users",
-        description:
-          "Users reached on a platform grown from a five-person MVP to a full-scale compliance suite.",
-      },
-      {
-        stat: "Zero Doubt",
-        title: "Precision",
-        description:
-          "Compliance officers and whistleblowers completed critical tasks with speed and precision. No confusion. No hesitation. No room for error.",
-      },
-      {
-        stat: "Built to Scale",
-        title: "Design System",
-        description:
-          "Design system built from scratch. Engineers moved faster and shipped with consistency across every phase.",
-      },
-    ],
     workClosing: {
       heading: "Clarity Is the Most Protective Design Decision",
       body: "From there: a role-based permission model defining exactly what assignees, followers, and admins see and can do. A full case lifecycle from submission through three distinct closure types. Three separate interfaces for whistleblowers, company users, and back office administration. A design system built from scratch and maintained solo across four phases of growth.",
@@ -188,8 +147,8 @@ export const projects: Project[] = [
       "Rebuilt an AI-powered competitive intelligence platform from the ground up, overhauling a data-heavy tool that left users without direction into one with clear structure and guided actions.",
     industryTag: "SEO AI Startup",
     role: "UI/UX Designer",
-    ownership: "Product, website, and design system",
-    team: "1 designer alongside founders and engineers",
+    ownership: "Product, website, design system",
+    team: "1 designer, 3 engineers",
     timeline: "7 months",
     context:
       "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
@@ -203,31 +162,12 @@ export const projects: Project[] = [
       heading: "Restructuring Around the User's Next Action",
       body: "The platform handed users dense data with no hierarchy and no stated next step. Core tasks ran 9+ steps deep. Sessions ended before a single action, not because a feature was missing, but because nothing ever said what to do next.",
     },
-    outcomes: [
-      {
-        stat: "9 to 3-4",
-        title: "Steps",
-        description:
-          "Steps to complete a core task. Complexity reduced so users could finally act with confidence.",
-      },
-      {
-        stat: "Zero to One",
-        title: "Design System",
-        description:
-          "First design system built from scratch, unifying the UI and giving engineering faster, cleaner builds.",
-      },
-      {
-        stat: "Full Circle",
-        title: "One Partner",
-        description:
-          "Product, brand, website, and campaigns delivered by one creative partner. Retention, leads, and demo requests grew.",
-      },
-    ],
     workClosing: {
       heading: "Direction Is a Design Decision",
       body: "Hierarchy earned what more features never did.",
     },
-    outcomeSummary: "Placeholder",
+    outcomeSummary:
+      "A product that went from leaving first-time users without direction to actively telling them what's working, what's declining, and what to do next. Two new product areas, Content Studio and platform integrations, shipped within the same consistent foundation. One insight, applied across an entire product.",
     media: videoMedia("opinly", 4, "Opinly"),
     images: imageGallery("opinly", 8, "Opinly"),
     accent: { light: "#c2410c", dark: "#fb923c" },
@@ -240,8 +180,8 @@ export const projects: Project[] = [
       "Overhauled an outdated mobile dividend tracking app end to end, identifying every structural problem before redesigning the entire product.",
     industryTag: "Fintech",
     role: "UI/UX Designer",
-    ownership: "Product and website",
-    team: "1 designer alongside engineers",
+    ownership: "Mobile app, website",
+    team: "1 designer, 1 engineer",
     timeline: "2 months",
     context:
       "The Dividend Tracker is a mobile investment app built for dividend investors. It tracks portfolio performance, monitors upcoming dividend payouts, forecasts future income, and helps investors set and track financial goals, all in one place. From someone receiving their first dividend to someone managing a complex multi-portfolio strategy, the app is built to make passive income visible and manageable.",
@@ -255,26 +195,6 @@ export const projects: Project[] = [
       heading: "Rebuilding Trust Through Clarity and Modern Design",
       body: "The structural problems had one root cause: the product presented everything at once with no system for guiding users through complexity. I redesigned the entire product around one principle: progressive disclosure.",
     },
-    outcomes: [
-      {
-        stat: "50+",
-        title: "Flows Rebuilt",
-        description:
-          "Outdated flows rebuilt into clear, guided experiences that made tracking feel modern and accessible.",
-      },
-      {
-        stat: "Rebuilt",
-        title: "Every Screen",
-        description:
-          "Every screen overhauled. Investors who once avoided the app now return to it with ease and confidence.",
-      },
-      {
-        stat: "Clarity First",
-        title: "Progressive Disclosure",
-        description:
-          "Financial data restructured with progressive disclosure so users felt informed and in control at every step.",
-      },
-    ],
     workClosing: {
       heading: "Good Design Makes Complex Things Feel Simple",
       body: "Empty states, loading states, and error states were designed across every flow so no moment in the product was left unhandled. One principle. Applied across an entire product.",
