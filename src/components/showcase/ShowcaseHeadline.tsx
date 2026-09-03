@@ -138,7 +138,7 @@ export function ShowcaseHeadline({
           },
           scrollTrigger: {
             trigger: root,
-            start: "top 85%",
+            start: "top 90%",
             toggleActions: "play none none none",
           },
         })
@@ -168,13 +168,13 @@ export function ShowcaseHeadline({
             filter: "blur(0px)",
             // Retuned alongside nameWords, same reasoning. Own span
             // (duration + stagger amount) is ~1.07s; combined with
-            // nameWords' ~1.05s span and the "-=0.5" overlap below, the
-            // whole headline now settles at ~1.6s total.
+            // nameWords' ~1.05s span and the "-=0.7" overlap below, the
+            // whole headline now settles at ~1.4s total.
             duration: 0.85,
             stagger: { amount: 0.22, from: "start" },
             ease: REVEAL_EASE,
           },
-          "-=0.5",
+          "-=0.7",
         );
     },
     { scope: containerRef, dependencies: [ready] },

@@ -22,7 +22,7 @@ import { Logo } from "./Logo";
  */
 export function Hero() {
   return (
-    <section className="px-4 pt-10 pb-16 sm:px-5 sm:pb-24 lg:px-6 lg:pb-40">
+    <section className="px-4 pt-10 pb-16 sm:px-5 sm:pb-24 lg:px-6 lg:pb-10">
       <RevealText
         as="h1"
         className="max-w-[923px] text-pretty text-3xl font-extralight leading-[1.2] tracking-[-0.5px] text-muted sm:text-4xl lg:text-[48px]"
@@ -35,6 +35,8 @@ export function Hero() {
         is a UI/UX designer who takes complex products with no design
         foundation and ships them end to end.
       </RevealText>
+
+      <div className="h-[240px]" />
     </section>
   );
 }

@@ -38,7 +38,7 @@ export const textStyles = {
    * Lexora/The Dividend Tracker/FoodOps get their own Opinly-style showcase built out.
    */
   showcaseMetaLabel: "text-sm font-medium text-foreground",
-  showcaseMetaValue: "text-pretty text-sm font-normal text-muted",
+  showcaseMetaValue: "text-pretty text-sm font-normal text-foreground",
   showcaseStat: "text-4xl font-medium tabular-nums tracking-tight text-foreground",
   /** Formerly a `font-mono` (Geist Mono) exception to the single-font-family rule —
    * Geist Mono was removed from the codebase, so this is General Sans like everything

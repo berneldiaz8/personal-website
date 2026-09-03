@@ -76,9 +76,9 @@ export const projects: Project[] = [
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Food Tech Startup",
     role: "Product Designer",
-    ownership: "Web portal, mobile app, design system, and PRD documentation",
-    team: "1 designer alongside a product manager and stakeholders",
-    timeline: "6 weeks, concept to launch-ready MVP",
+    ownership: "Mobile app, web portal, design system",
+    team: "1 designer, 1 product manager, plus stakeholders",
+    timeline: "6-week MVP",
     context:
       "FoodOps is a food traceability platform built to help restaurants meet federal food safety requirements. Under FDA FSMA Rule 204, every step of the food supply chain must be logged as a Critical Tracking Event (CTE) by the responsible party. For most restaurants, that means one moment matters most: receiving a shipment, the final link connecting back through the chain. Kitchen staff scan shipments on arrival, appending the receiving data to the record. Restaurant managers step in when the FDA requests information, retrieving the traceability plan the system has ready.",
     problem:
@@ -114,9 +114,9 @@ export const projects: Project[] = [
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Compliance Startup",
     role: "UI/UX Designer",
-    ownership: "Product, website, and design system",
-    team: "1 designer alongside engineers and stakeholders",
-    timeline: "1+ years, across four phases of product growth",
+    ownership: "Product, website, design system",
+    team: "1 designer, 10+ engineers, plus stakeholder",
+    timeline: "1+ years, four phases of product growth.",
     context:
       "Lexora is a secure compliance platform built for organizations managing sensitive internal reports. Reporters submit concerns anonymously across whistleblowing, grievances, conflict of interest, and fraud. Case managers investigate and resolve those reports. Organizations use the platform to demonstrate regulatory compliance with audit-ready documentation.",
     problem:
@@ -147,8 +147,8 @@ export const projects: Project[] = [
       "Rebuilt an AI-powered competitive intelligence platform from the ground up, overhauling a data-heavy tool that left users without direction into one with clear structure and guided actions.",
     industryTag: "SEO AI Startup",
     role: "UI/UX Designer",
-    ownership: "Product, website, and design system",
-    team: "1 designer alongside founders and engineers",
+    ownership: "Product, website, design system",
+    team: "1 designer, 3 engineers",
     timeline: "7 months",
     context:
       "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
@@ -166,7 +166,8 @@ export const projects: Project[] = [
       heading: "Direction Is a Design Decision",
       body: "Hierarchy earned what more features never did.",
     },
-    outcomeSummary: "Placeholder",
+    outcomeSummary:
+      "A product that went from leaving first-time users without direction to actively telling them what's working, what's declining, and what to do next. Two new product areas, Content Studio and platform integrations, shipped within the same consistent foundation. One insight, applied across an entire product.",
     media: videoMedia("opinly", 4, "Opinly"),
     images: imageGallery("opinly", 8, "Opinly"),
     accent: { light: "#c2410c", dark: "#fb923c" },
@@ -179,8 +180,8 @@ export const projects: Project[] = [
       "Overhauled an outdated mobile dividend tracking app end to end, identifying every structural problem before redesigning the entire product.",
     industryTag: "Fintech",
     role: "UI/UX Designer",
-    ownership: "Product and website",
-    team: "1 designer alongside engineers",
+    ownership: "Mobile app, website",
+    team: "1 designer, 1 engineer",
     timeline: "2 months",
     context:
       "The Dividend Tracker is a mobile investment app built for dividend investors. It tracks portfolio performance, monitors upcoming dividend payouts, forecasts future income, and helps investors set and track financial goals, all in one place. From someone receiving their first dividend to someone managing a complex multi-portfolio strategy, the app is built to make passive income visible and manageable.",

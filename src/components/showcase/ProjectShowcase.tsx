@@ -171,7 +171,7 @@ function ParagraphPair({
             className="col-span-4 hidden sm:col-span-4 sm:block lg:col-span-3 lg:col-start-4"
           />
         )}
-        <div className="col-span-4 flex max-w-[65ch] flex-col gap-4 text-sm leading-relaxed text-muted sm:col-span-4 lg:col-span-3 lg:col-start-7">
+        <div className="col-span-4 flex max-w-[65ch] flex-col gap-4 text-sm leading-relaxed text-foreground sm:col-span-4 lg:col-span-3 lg:col-start-7">
           {bodies.map((body, i) => (
             <p key={i}>{body}</p>
           ))}
@@ -302,7 +302,7 @@ export function ProjectShowcase({
           </div>
           <div className="col-span-4 sm:col-span-4 lg:col-span-3">
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
-              Ownership
+              Scope
             </RevealText>
             <div className="grid grid-cols-4 gap-x-4">
               <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
@@ -397,7 +397,7 @@ export function ProjectShowcase({
           reveal via RevealText — this is narrative prose, the flagship case
           for the per-line treatment. */}
       <RevealText>
-        <ParagraphPair bodies={[project.context]} label="The Context" />
+        <ParagraphPair bodies={[project.context]} label="Context" />
       </RevealText>
 
       {/* ── THE PROBLEM ── labeled ParagraphPair, project.problem. Same
@@ -405,7 +405,7 @@ export function ProjectShowcase({
           replaced the old Overview/stats row so this reads as narrative
           prose instead of a stat block. */}
       <RevealText>
-        <ParagraphPair bodies={[project.problem]} label="The Problem" pt="pt-6" pb="pb-20" />
+        <ParagraphPair bodies={[project.problem]} label="Problem" pt="pt-6" pb="pb-20" />
       </RevealText>
 
       {/* ── MEDIA GROUP A ── secondary hero (full-bleed) → idea-ads/table
@@ -615,19 +615,19 @@ export function ProjectShowcase({
             ...(project.workDetail2 ? [project.workDetail2.body] : []),
             project.workClosing.body,
           ]}
-          label="The Work"
+          label="Approach"
         />
       </RevealText>
 
       {/* ── THE OUTCOME ── labeled ParagraphPair, project.outcomeSummary. Same
-          treatment as The Work above. Lexora-only: pb-20 (80px) instead of
-          the shared default pb-[136px]. */}
+          treatment as The Work above. pb-20 (80px) on every project, not the
+          shared ParagraphPair default of pb-[136px]. */}
       <RevealText>
         <ParagraphPair
           bodies={[project.outcomeSummary]}
-          label="The Outcome"
+          label="Outcome"
           pt="pt-6"
-          pb={project.slug === "lexora" ? "pb-20" : undefined}
+          pb="pb-20"
         />
       </RevealText>
 
