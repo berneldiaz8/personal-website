@@ -279,7 +279,7 @@ export function ProjectShowcase({
             full-bleed — same separator pattern as Footer.tsx / the /info page's
             Experience section. gap-3 (12px) to the meta row content below. */}
         <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-        <Grid as="dl" className="pt-3 pb-2">
+        <Grid as="dl" className="pt-3 pb-[136px]">
           <div className="col-span-4 sm:col-span-4 lg:col-span-3">
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Role
@@ -336,7 +336,15 @@ export function ProjectShowcase({
         </Grid>
       </div>
 
-      {/* ── MEDIA SINGLE ── directly below the meta row. Opinly and Lexora
+      {/* ── CONTEXT ── labeled ParagraphPair, project.context. Line-mask
+          reveal via RevealText — this is narrative prose, the flagship case
+          for the per-line treatment. Sits directly below the meta row, ahead
+          of Media Single, per explicit request. */}
+      <RevealText>
+        <ParagraphPair bodies={project.context} label="Context" pt="pt-6" pb="pb-20" />
+      </RevealText>
+
+      {/* ── MEDIA SINGLE ── directly below Context. Opinly and Lexora
           each have their own dedicated full-bleed asset now
           (showcase-app.mp4 / showcase-wb.mp4). The Dividend Tracker-only
           exception: this slot is split-width (two half columns) here instead
@@ -393,19 +401,26 @@ export function ProjectShowcase({
         </div>
       )}
 
-      {/* ── CONTEXT ── labeled ParagraphPair, project.context. Line-mask
-          reveal via RevealText — this is narrative prose, the flagship case
-          for the per-line treatment. */}
-      <RevealText>
-        <ParagraphPair bodies={[project.context]} label="Context" />
-      </RevealText>
-
       {/* ── THE PROBLEM ── labeled ParagraphPair, project.problem. Same
           treatment as Context above (line-mask reveal via RevealText) —
           replaced the old Overview/stats row so this reads as narrative
-          prose instead of a stat block. */}
+          prose instead of a stat block. Now directly follows Media Single
+          rather than Context (Context moved above, right below the meta
+          row), so it keeps its own default top padding/border rather than
+          the tighter pt-6 that assumed Context was its immediate neighbor. */}
       <RevealText>
-        <ParagraphPair bodies={[project.problem]} label="Problem" pt="pt-6" pb="pb-20" />
+        <ParagraphPair bodies={project.problem} label="Problem" pb="pb-20" />
+      </RevealText>
+
+      {/* ── DISCOVERY ── labeled ParagraphPair, project.discovery. Same
+          treatment as Problem above (line-mask reveal via RevealText). Only
+          FoodOps has real copy so far — every other project still holds a
+          placeholder string in its own `discovery` field in projects.ts,
+          swap those for real copy as each project's Discovery beat gets
+          written. Sits directly below Problem per explicit request (moved
+          here from below Approach). */}
+      <RevealText>
+        <ParagraphPair bodies={project.discovery} label="Discovery" pb="pb-20" />
       </RevealText>
 
       {/* ── MEDIA GROUP A ── secondary hero (full-bleed) → idea-ads/table
@@ -624,7 +639,7 @@ export function ProjectShowcase({
           shared ParagraphPair default of pb-[136px]. */}
       <RevealText>
         <ParagraphPair
-          bodies={[project.outcomeSummary]}
+          bodies={project.outcomeSummary}
           label="Outcome"
           pt="pt-6"
           pb="pb-20"

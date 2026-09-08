@@ -25,7 +25,7 @@ export function Hero() {
     <section className="px-4 pt-10 pb-16 sm:px-5 sm:pb-24 lg:px-6 lg:pb-10">
       <RevealText
         as="h1"
-        className="max-w-[923px] text-pretty text-3xl font-extralight leading-[1.2] tracking-[-0.5px] text-muted sm:text-4xl lg:text-[48px]"
+        className="max-w-[60rem] text-pretty text-3xl font-extralight leading-[1.2] tracking-[-0.5px] text-muted sm:text-4xl lg:text-[48px]"
       >
         <span className="sr-only">berneldiaz</span>
         <Logo
