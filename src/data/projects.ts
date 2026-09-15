@@ -1,8 +1,3 @@
-export type Beat = {
-  heading: string;
-  body: string;
-};
-
 export type MediaItem = {
   src: string;
   poster: string;
@@ -36,12 +31,11 @@ export type Project = {
   discovery: string[];
   /** One or more paragraphs, rendered as separate <p>s (see ParagraphPair). */
   outcomeSummary: string[];
-  /** "The Work" section's paragraphs, in render order: workIntro, workDetail, workDetail2 (optional 4th paragraph), workClosing. */
-  workIntro: Beat;
-  workDetail: Beat;
-  /** Optional 4th "The Work" paragraph, rendered between workDetail and workClosing when present. */
-  workDetail2?: Beat;
-  workClosing: Beat;
+  /** "The Work"/Approach section's paragraphs, rendered verbatim as separate
+   * <p>s (see ParagraphPair), same shape as context/problem/discovery/
+   * outcomeSummary. No fixed beat count or structure — one or more
+   * paragraphs, in whatever order reads best for that project's narrative. */
+  workBody: string[];
   /** Looping muted product-walkthrough clips, converted from the source Figma exports. */
   media: MediaItem[];
   /** Static supporting visuals (mockups, ad creatives, UI detail shots) from the source Figma deck. */
@@ -79,41 +73,32 @@ export const projects: Project[] = [
     number: "01",
     name: "FoodOps",
     tagline:
-      "Translated dense FDA recordkeeping requirements into a food traceability platform restaurant staff could actually use under pressure, delivered from scratch as a launch-ready MVP.",
+      "Translated a federal food safety regulation into a three-screen scan and a request-ready portal, built as an MVP.",
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Food Tech Startup",
     role: "Product Designer",
-    ownership: "Mobile app, web portal, design system",
+    ownership: "Product, design system",
     team: "1 designer, 1 product manager, plus stakeholders",
     timeline: "6-week MVP",
     context: [
-      "Restaurants sit at the end of the food supply chain. Under FSMA Rule 204, they must keep records at every point they receive, transform, or ship covered food, and produce that data within 24 hours of an FDA request.",
-      "I designed both sides of this compliance platform alone: a mobile scanning app for kitchen staff, and a back-office portal for managers, covering three regulatory checkpoints in six weeks.",
+      "Restaurants sit at the end of the food supply chain. Under FSMA Rule 204, they have to keep records at every point they receive, transform, or ship covered food, and produce that data within 24 hours if FDA asks for it.",
+      "I designed both sides of this compliance platform alone: a mobile scanning app for kitchen staff, and a back-office portal for managers, three regulatory checkpoints in six weeks.",
     ],
     problem: [
-      "No system existed for this at the restaurant level. Records lived on paper, in scattered invoices, in whatever format a distributor sent. Pulling that together for an FDA request meant a manual search through files never built to be searched.",
-      "The problem was designing a workflow kitchen staff under time pressure, and a manager juggling constant interruptions, would both use correctly every time.",
+      "Nothing existed for this at the restaurant level. Records lived on paper, in scattered invoices, in whatever format a distributor happened to send. Pulling that together for an FDA request meant digging through files that were never built to be searched.",
+      "The real challenge was getting a kitchen worker under time pressure, and a manager juggling constant interruptions, to both use this correctly every time.",
     ],
     discovery: [
-      "Before I designed a single screen, I read the FSMA Rule 204 text and the PTI implementation guidance directly. That reading surfaced the finding that shaped the whole product: a restaurant's receiving record depends on the distributor's shipping record to be verified as compliant. Two companies, one transaction, matched by lot code.",
-      "That finding pointed to a page most stakeholders didn't want built. Kitchen staff receive and scan; they don't browse a queue, so an Arriving Shipments list looked unnecessary from a pure staff-workflow view. I made the case that the page wasn't for kitchen staff. It was the only point where a supplier's data could enter the system before a truck arrived. Without it, a receiving record had nothing to check itself against. The page stayed in scope.",
+      "Before I touched a screen, I read the FSMA Rule 204 text and the PTI implementation guidance myself. That's what surfaced the finding that shaped the whole product: a restaurant's receiving record depends on the distributor's shipping record to be verified as compliant. Two companies, one transaction, matched by lot code.",
+      "That finding is what justified a page most stakeholders didn't want built. Staff receive and scan, they don't browse a queue, so an Arriving Shipments list looked unnecessary from a pure workflow angle. My case was that the page was never for staff. It was the only point where a supplier's data could get into the system before a truck showed up, and without it, a receiving record had nothing to check itself against. The page stayed in scope.",
     ],
-    workIntro: {
-      heading: "Structured Around the Regulation Itself",
-      body: "The delivered portal followed the regulation's own structure: separate sections for Arriving Shipments, Transformation, Shipping, Spreadsheet, and Traceability Plan. Within six weeks, this let me design and validate consistently across every checkpoint, rather than risk an untested structure across all three at once.",
-    },
-    workDetail: {
-      heading: "Two Form Factors, Not One Responsive Interface",
-      body: "I split the platform across two form factors instead of one responsive interface. Kitchen staff mid-shift and a manager juggling interruptions needed different things entirely, so the mobile app became a near-invisible capture layer, stripped to the scan itself, while the portal held the structural complexity: cross-referencing shipments, generating lot codes, producing exportable records.",
-    },
-    workClosing: {
-      heading: "One System, Two Form Factors, Zero Rebuilt Components",
-      body: "Every screen pulls from one token-based design system I built alongside the product. One system, two form factors, five sections, zero rebuilt components.",
-    },
+    workBody: [
+      "What shipped followed the regulation's own structure: separate sections for Arriving Shipments, Transformation, Shipping, Spreadsheet, Traceability Plan. Six weeks isn't enough time to gamble on an untested structure across all three checkpoints at once, so this is what let me design and validate consistently. I also split the platform into two form factors instead of forcing one responsive interface to do both jobs. A kitchen worker mid-shift and a manager fielding constant interruptions need completely different things, so the mobile app became a near-invisible capture layer, three screens, zero typing, while the portal carried the structural complexity: cross-referencing shipments, generating lot codes, producing exportable records.",
+      "I scoped the import pipeline as required from day one, since without it a clean data feed and a phone call with a scribbled note would look identical to the system. Every screen also runs on one token-based design system I built alongside the product, which is why Transformation and Shipping share the same form structure instead of getting rebuilt separately.",
+    ],
     outcomeSummary: [
-      "I co-authored the technical data specifications with the Product Manager, translating each workflow into a structure developers could build from directly. Stakeholders approved the specification, with positive feedback on the approach.",
-      "This engagement delivered a system a restaurant can rely on when FDA comes asking. Every data relationship had a defined structure: cross-company reconciliation between receiving and shipping records, lot code logic linking transformation events to their source, and a portal validated across every checkpoint. That structure does the platform's actual job: a restaurant produces a compliant record within the 24-hour window FDA Rule 204 requires, instead of a manual search through scattered files.",
-      "My engagement ended at handoff, so I can't speak to what happened after. What I can speak to, in detail, is every decision behind it, and where I'd take it next.",
+      "I co-authored the technical data specifications with the Product Manager, turning each workflow into something developers could build from directly. Stakeholders approved it, with good feedback on the approach. What this engagement delivered was a system a restaurant can rely on when FDA comes asking. Every data relationship had a defined structure: cross-company reconciliation between receiving and shipping records, lot code logic linking transformation events to their source, a portal validated across every checkpoint.",
+      "That structure does the platform's actual job, a restaurant produces a compliant record within the 24-hour window FDA Rule 204 requires, instead of a manual search through scattered files. My engagement ended at handoff, so I can't speak to what happened after. What I can walk through, in full, is every decision behind it, and where I'd take it next.",
     ],
     media: videoMedia("foodops", 3, "FoodOps"),
     images: imageGallery("foodops", 5, "FoodOps"),
@@ -124,7 +109,7 @@ export const projects: Project[] = [
     number: "02",
     name: "Lexora",
     tagline:
-      "Built the design foundation of a governance, risk, and compliance platform from scratch, as the sole designer across four phases of product growth from MVP to enterprise-ready system.",
+      "Built the design foundation for a GRC compliance platform, solo, from MVP to enterprise-ready.",
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Compliance Startup",
     role: "UI/UX Designer",
@@ -132,27 +117,21 @@ export const projects: Project[] = [
     team: "1 designer, 10+ engineers, plus stakeholder",
     timeline: "1+ years, four phases of product growth.",
     context: [
-      "Lexora is a secure compliance platform built for organizations managing sensitive internal reports. Reporters submit concerns anonymously across whistleblowing, grievances, conflict of interest, and fraud. Case managers investigate and resolve those reports. Organizations use the platform to demonstrate regulatory compliance with audit-ready documentation.",
+      "Lexora is a secure compliance platform. Organizations use it to manage and resolve reports across whistleblowing, grievances, conflict of interest, and fraud. Reporters submit anonymously. Case managers investigate without breaking that confidentiality. Organizations produce audit-ready documentation for regulators. I joined a five-person team as the only designer and built the design foundation across four phases of growth.",
     ],
     problem: [
-      "No product. No design. No system. A dense compliance brief and a hard regulatory deadline. The brief defined what the platform needed to do but left every structural decision open. How does an anonymous whistleblower maintain access to their own report without an account? Who sees what inside a sensitive case involving potential retaliation? How does a case move from submission to audit-ready closure without breaking the chain of confidentiality? These weren't edge cases. They were the core of the product.",
+      "No product existed. No design system was in place. We were starting from a blank canvas with nothing but a dense compliance brief and a hard regulatory deadline. Every structural call was still open. Three questions sat at the center of it: How do you give someone recoverable access when you've agreed never to know who they are? How do you protect a report from the people it might be about? How do you build a paper trail that holds up in court without exposing the reporter? That's the core of the product, not an edge case.",
     ],
-    // Placeholder — real Discovery copy pending, matching FoodOps' pattern once written.
-    discovery: ["Placeholder discovery copy — real content pending."],
-    workDetail: {
-      heading: "High Stakes, Zero Margin for Confusion",
-      body: "The hardest problem was identity without an account. An anonymous whistleblower needs to access their own report, receive updates, and communicate with investigators, all without creating a traceable account. I designed a report key system as the identity mechanism, giving reporters persistent access without compromising their anonymity.",
-    },
-    workIntro: {
-      heading: "Designing a System That Grew Without Breaking",
-      body: "Every structural decision the brief left undefined was mine to make before engineering wrote a line of code.",
-    },
-    workClosing: {
-      heading: "Clarity Is the Most Protective Design Decision",
-      body: "From there: a role-based permission model defining exactly what assignees, followers, and admins see and can do. A full case lifecycle from submission through three distinct closure types. Three separate interfaces for whistleblowers, company users, and back office administration. A design system built from scratch and maintained solo across four phases of growth.",
-    },
+    discovery: [
+      "The hardest problem here wasn't a mechanism to design. It was a tension no mechanism could actually resolve. A report key gives full anonymity. Lose it, access is gone for good. A registered account gives recovery. It costs you a personal identifier. No option does both. The real question wasn't which one to offer, it was how to disclose that tradeoff honestly, right at the moment a reporter has to choose.",
+    ],
+    workBody: [
+      "I placed the disclosure guide directly beside the access choice, not tucked into a separate help page, so the tradeoff registers before a reporter commits, not after. Underneath that, a two-layer permission model does the heavier lifting, account-level roles control who manages the company and its settings, case-level roles control who can act on one specific report. It protects a report from the people it might concern, but not from an implicated admin, and I say that limit out loud instead of overselling what the system can do.",
+      "The case lifecycle closes things out with three closure types. Locking freezes the case record, redaction leaves a visible marker instead of quietly deleting data, so the audit-ready claim has a real mechanism behind it, not just a label. The design system scaled right along with all of this, every new domain reused the same components instead of starting from zero, which is what let the product grow from one module to six without a rebuild. One case-management engine carried the whole thing, maintained solo, and in Phase 4 that same architecture extended into a four-tier partner model with no rebuild needed.",
+    ],
     outcomeSummary: [
-      "A compliance system that didn't exist, built from a brief by one designer. Anonymous reporters access their cases without a traceable account. Case managers work within a permission structure that protects confidentiality at every stage. Compliance officers close cases with documentation that holds up to regulatory scrutiny. Four phases of growth, 10+ engineers, one design foundation that held.",
+      "A compliance system got built from a brief, by one designer. Reporters choose between two access methods, each carrying a disclosed tradeoff, not a hidden one. Case managers work inside a permission structure that states its own limits instead of pretending it doesn't have any. Compliance officers close cases with a locked, structured final report built to hold up under regulatory scrutiny.",
+      "Engineering grew past ten people. Design stayed a team of one, and the foundation held, later extending into a four-tier partner architecture without a rebuild. One gap turned up on later review: every anonymity protection in this product shields the reporter from the company, none of them shields the investigator from the reporter. That's the next problem this system needs to solve.",
     ],
     media: videoMedia("lexora", 5, "Lexora"),
     images: imageGallery("lexora", 7, "Lexora"),
@@ -163,34 +142,27 @@ export const projects: Project[] = [
     number: "03",
     name: "Opinly",
     tagline:
-      "Rebuilt an AI-powered competitive intelligence platform from the ground up, overhauling a data-heavy tool that left users without direction into one with clear structure and guided actions.",
+      "Rebuilt a competitive intelligence platform from static reporting to guided action, design system built from zero.",
     industryTag: "SEO AI Startup",
     role: "UI/UX Designer",
     ownership: "Product, website, design system",
     team: "1 designer, 3 engineers",
     timeline: "7 months",
     context: [
-      "Opinly is an AI-powered SEO platform for agencies and founders managing competitive intelligence. Every feature worked. Nothing told users what to do with them. I joined as the sole creative partner to build the order missing from day one.",
+      "Opinly is an AI-powered competitive intelligence and SEO platform. Marketers and founders use it to track competitors, monitor keyword rankings, run site audits, manage backlinks, and generate SEO content. I joined as the sole designer, working directly with the founding team to rebuild the product end to end.",
     ],
     problem: [
-      "Every feature worked. Nothing told users what to do with them. Core tasks ran 9+ steps deep, and sessions ended before a single action was taken, not because a feature was missing, but because nothing on screen ever said what to do next. The design problem wasn't a missing feature. It was a platform full of data and empty of direction.",
+      "There was no handoff when I joined, so I opened the product myself and went through it the way a new user would. Every page followed the same pattern: numbers on screen, nothing telling you what they meant or what to do next. The dashboard was the clearest version of this. Competitor data, rankings, audit scores, all sitting there with nothing connecting them to action.",
     ],
-    // Placeholder — real Discovery copy pending, matching FoodOps' pattern once written.
-    discovery: ["Placeholder discovery copy — real content pending."],
-    workDetail: {
-      heading: "A Platform Full of Data and Empty of Direction",
-      body: "Every screen now answers one question: what does this user need to do next. Tasks dropped to 3-4 steps. 70+ flows redesigned. One design system, built from scratch, carried the same order into the brand, the website, and the campaigns launched around the product.",
-    },
-    workIntro: {
-      heading: "Restructuring Around the User's Next Action",
-      body: "The platform handed users dense data with no hierarchy and no stated next step. Core tasks ran 9+ steps deep. Sessions ended before a single action, not because a feature was missing, but because nothing ever said what to do next.",
-    },
-    workClosing: {
-      heading: "Direction Is a Design Decision",
-      body: "Hierarchy earned what more features never did.",
-    },
+    discovery: [
+      "Going through the product screen by screen made the real problem clear. This wasn't about missing features. Every core function already worked, tracking, auditing, monitoring, all of it. The gap was that none of it told you what to do with what you were looking at.",
+    ],
+    workBody: [
+      "There was no design system either, so that came first, built alongside the redesign so components got tested against real screens right away. With that foundation in place, I started with the dashboard: declining metrics got a prompt with a path to act on, static numbers became trend lines you could read at a glance, empty states started pointing at a real next step instead of sitting blank.",
+      "The founder told me users were stalling at the Content Studio integration step, where they connect their live site. The product already had the answers: I'd designed brand voice controls in settings, a review-and-approve workflow so nothing publishes without sign-off, and content scoring against SEO criteria. But none of that was visible from the integration screen. I built a concerns screen at that step surfacing what the product already handled, so the user could see the answers right when they needed them. That same thinking carried through the rest of the product, including the platform integration layer.",
+    ],
     outcomeSummary: [
-      "A product that went from leaving first-time users without direction to actively telling them what's working, what's declining, and what to do next. Two new product areas, Content Studio and platform integrations, shipped within the same consistent foundation. One insight, applied across an entire product.",
+      "The design system is the thing that lasts. It didn't exist before and now sits behind every screen in the product. On top of it, the product went from displaying information to telling users what to do next, starting with the dashboard and carried through Content Studio and the integration layer.",
     ],
     media: videoMedia("opinly", 4, "Opinly"),
     images: imageGallery("opinly", 8, "Opinly"),
@@ -204,7 +176,7 @@ export const projects: Project[] = [
       "Overhauled an outdated mobile dividend tracking app end to end, identifying every structural problem before redesigning the entire product.",
     industryTag: "Fintech",
     role: "UI/UX Designer",
-    ownership: "Mobile app, website",
+    ownership: "Product, website",
     team: "1 designer, 1 engineer",
     timeline: "2 months",
     context: [
@@ -215,18 +187,11 @@ export const projects: Project[] = [
     ],
     // Placeholder — real Discovery copy pending, matching FoodOps' pattern once written.
     discovery: ["Placeholder discovery copy — real content pending."],
-    workDetail: {
-      heading: "An App Investors Used Because They Had To",
-      body: "Portfolio creation went from a single overloaded screen to a guided experience with four distinct paths. The payout calendar became a layered structure moving from yearly forecast to monthly calendar to individual stock payouts by date. Premium features were shown in context before asking for payment, so free users understood what they were missing before being asked to upgrade. Showing value before asking for payment is progressive disclosure applied to the business model, not just the interface.",
-    },
-    workIntro: {
-      heading: "Rebuilding Trust Through Clarity and Modern Design",
-      body: "The structural problems had one root cause: the product presented everything at once with no system for guiding users through complexity. I redesigned the entire product around one principle: progressive disclosure.",
-    },
-    workClosing: {
-      heading: "Good Design Makes Complex Things Feel Simple",
-      body: "Empty states, loading states, and error states were designed across every flow so no moment in the product was left unhandled. One principle. Applied across an entire product.",
-    },
+    workBody: [
+      "The structural problems had one root cause: the product presented everything at once with no system for guiding users through complexity. I redesigned the entire product around one principle: progressive disclosure.",
+      "Portfolio creation went from a single overloaded screen to a guided experience with four distinct paths. The payout calendar became a layered structure moving from yearly forecast to monthly calendar to individual stock payouts by date. Premium features were shown in context before asking for payment, so free users understood what they were missing before being asked to upgrade. Showing value before asking for payment is progressive disclosure applied to the business model, not just the interface.",
+      "Empty states, loading states, and error states were designed across every flow so no moment in the product was left unhandled. One principle. Applied across an entire product.",
+    ],
     outcomeSummary: [
       "An outdated app with no structural system became a product with a clear principle applied consistently across every surface. A first-time investor adding their first portfolio follows a guided path with a clear starting point. The payout calendar layers annual forecast, monthly calendar, and individual stock payouts in one screen so any level of detail is reachable without switching views. Every empty state, loading state, and error state has a handled response. The structure that was missing now exists.",
     ],

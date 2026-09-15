@@ -33,9 +33,9 @@ Design portfolio site. Goal: showcase project case studies to land work/clients.
   do overflow, and the scrollbar would flicker in/out when navigating between routes.
 - `src/components/` — `Nav`, `Footer`, `Hero`, `WorkTeaser`, `WorkBrowser`, `CaseStudyDetail`,
   `Clock`, `Reveal`
-- `src/data/projects.ts` — typed `Project[]` with all case study copy (context/challenge/approach/
-  outcomes/reflection are still fully populated even though the UI no longer renders them — see
-  `## Work page architecture` before deleting any of these fields); `getProject(slug)` helper
+- `src/data/projects.ts` — typed `Project[]` with all case study copy: `context`/`problem`/
+  `discovery`/`workBody`/`outcomeSummary`, each `string[]` rendered verbatim as separate `<p>`s via
+  `ParagraphPair` (see `## Work page architecture`); `getProject(slug)` helper
 - `public/work/{slug}/N.mp4` + `N-poster.jpg` — looping muted product-walkthrough clips (N = 1 to
   however many that project has: Opinly 4, Lexora 5, The Dividend Tracker 5, FoodOps 3). Converted
   from the real source **video** exports at `Documents/Design Journey/Portfolio assets/V2/{Project}/Video/`
@@ -67,23 +67,32 @@ A deliberate blend of the three references below, applied 2026-07-16:
 - **aaronpoe's colorful warmth** → each project now has its own locked accent color instead of
   one site-wide accent: Opinly stays orange (`#c2410c`/`#fb923c`), Lexora is blue
   (`#1d4ed8`/`#60a5fa`), The Dividend Tracker is emerald (`#047857`/`#34d399`), FoodOps is amber
-  (`#b45309`/`#fbbf24`) — all verified ≥4.5:1 contrast in both themes (see the Python snippet in
-  git history / ask to re-derive if adding a project). Global chrome (Nav, Footer, Hero) keeps
-  the neutral default (Opinly's orange); only the `WorkBrowser` section shifts accent, tied to
-  whichever project is active. This resolves the `Color Consistency Lock` rule per-scope, not
-  page-wide: within the billboard, everything is one consistent color at a time, it just changes
-  deliberately as the selection changes — the rule is about avoiding random inconsistency, not
-  about banning intentional, content-driven color transitions.
+  (`#b45309`/`#fbbf24`) — pairs originally verified ≥4.5:1 contrast in both themes back when the
+  site still had a dark mode (see the Python snippet in git history / ask to re-derive if adding a
+  project), light half is what actually renders today (see below). Global chrome (Nav, Footer,
+  Hero) keeps the neutral default (Opinly's orange); only the `WorkBrowser` section shifts accent,
+  tied to whichever project is active. This resolves the `Color Consistency Lock` rule per-scope,
+  not page-wide: within the billboard, everything is one consistent color at a time, it just
+  changes deliberately as the selection changes — the rule is about avoiding random inconsistency,
+  not about banning intentional, content-driven color transitions.
 
 **How the per-project accent works:** `Project.accent = { light, dark }` in `projects.ts`. Any
 element that should carry a project's color sets `data-project-accent` + inline
 `style={{ '--accent-light': ..., '--accent-dark': ... }}` (see `WorkBrowser.tsx`) — a CSS rule in
-`globals.css` resolves `--accent` from those two vars against the same `prefers-color-scheme`
-switch the global default uses, so every component that already reads `text-accent`/`bg-accent`
-etc. just works without changes.
+`globals.css` resolves `--accent` to that element's `--accent-light` value. `--accent-dark` is
+still set alongside it (and still passed through from `Project.accent.dark`) but is dead going
+into the CSS today — see below.
 
-Base tokens (`--background`/`--foreground`/`--muted`/`--border`) stay monochrome and unchanged.
-Dark mode via `prefers-color-scheme` media query, as before. Still open to further redirection.
+**Site-wide light lock (2026-08-10):** the site no longer follows the visitor's
+`prefers-color-scheme` setting. `:root` and every per-project accent render their **light** values
+only — `--background`/`--foreground`/`--muted`/`--border`/`--accent` are fixed to one light
+palette everywhere (`globals.css`'s `:root` block), with no `@media (prefers-color-scheme: dark)`
+override left anywhere in the stylesheet. `/gallery` is the sole exception, and it isn't
+theme-adaptive either: it forces its own fixed dark palette unconditionally via
+`[data-force-dark]`, regardless of the visitor's system theme, as a deliberate one-off design
+choice rather than a second theme mode. Don't reintroduce system-theme adaptivity (a `dark:`
+variant, a new `prefers-color-scheme` block, restoring `--accent-dark`'s CSS wiring) without an
+explicit re-ask — the removal was intentional, not an oversight.
 
 ## Media pipeline
 Case study visuals are real product-walkthrough video, not screenshots. Source files live outside
@@ -209,13 +218,29 @@ this required.
    project's `h3` name is now `sr-only`, and the case study starts immediately with no visible
    chrome above it. The `divide-y` between projects and each showcase's own internal `border-t`
    were removed too, so projects run together with no divider line at all.
-6. **Current (2026-07-17):** `CaseStudyDetail.tsx` (the original talimi-style narrative — meta row
+6. `CaseStudyDetail.tsx` (the original talimi-style narrative — meta row
    + numbered `00 Context`→`04 Reflection` beats + Outcomes) was retired in favor of a single
    shared `ProjectShowcase.tsx` (`src/components/showcase/`), originally built as
    `OpinlyShowcase.tsx` for Opinly alone and then generalized to all 4 projects per explicit user
    request ("keep it consistent with other projects"). `CaseStudyDetail.tsx` itself is left in the
    tree, unused, rather than deleted — kept around in case it's still wanted as reference/rollback
    until the new layout is confirmed final.
+7. **Current (2026-09-11):** the "Approach" section's data shape was consolidated. It used to be
+   `workIntro`/`workDetail`/`workDetail2?`/`workClosing` — four separate `Beat` fields (each a
+   `{ heading, body }` pair, originally meant to render as its own headed subsection, modeled on
+   Opinly's first hand-written Approach copy: a 3-act intro → detail → closing arc). The `heading`
+   half had gone fully unused for a while — `ProjectShowcase.tsx` only ever read each `.body` and
+   concatenated them into one flowing paragraph block, so every project was carrying dead heading
+   text. Rather than just drop the unused headings, the whole 4-field/3-act shape was replaced with
+   a single `workBody: string[]` — the exact same shape as `context`/`problem`/`discovery`/
+   `outcomeSummary` (one or more paragraphs, rendered verbatim as separate `<p>`s via
+   `ParagraphPair`, no fixed beat count or forced narrative arc). `workBody` already existed as an
+   optional override for projects whose Approach copy didn't fit the 3-act shape (Lexora, then
+   FoodOps); it's now the only shape, required on every project, and Opinly/The Dividend Tracker's
+   old `workIntro`/`workDetail`/`workClosing` paragraphs were folded into `workBody` arrays in the
+   same render order they used to appear in. Don't reintroduce the `Beat`/intro-detail-closing split
+   for new projects — write Approach copy as a plain paragraph array like the other narrative
+   fields.
 
 `WorkBrowser.tsx` (rendered from `src/app/work/page.tsx`) maps every project straight to
 `<ProjectShowcase project={project} />`, no per-project branching. `ProjectShowcase.tsx` is the

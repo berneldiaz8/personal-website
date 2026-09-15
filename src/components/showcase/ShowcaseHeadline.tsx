@@ -1,5 +1,6 @@
 import { textStyles } from "@/lib/typography";
 import { RevealText } from "../RevealText";
+import { Grid } from "./Grid";
 
 /**
  * Mixed-weight display headline: "Name—description", name in Medium weight (black),
@@ -34,14 +35,14 @@ export function ShowcaseHeadline({
 }: {
   name: string;
   description: string;
-  /** Optional NDA disclosure line, rendered 24px below the headline, one line. */
+  /** Optional NDA disclosure line, rendered 8px below the headline, one line. */
   caption?: string;
 }) {
   return (
-    <div className="px-4 pt-6 pb-[136px] sm:px-5 lg:px-6">
+    <Grid className="pt-6 pb-[136px]">
       <RevealText
         as="div"
-        className="max-w-[60rem] text-balance text-4xl font-medium leading-[1.2] tracking-[-0.5px] text-foreground sm:text-5xl"
+        className="col-span-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.5px] text-foreground sm:col-span-8 sm:text-5xl lg:col-span-8"
       >
         <span>{name}</span>
         <span className="font-extralight text-muted">
@@ -50,10 +51,10 @@ export function ShowcaseHeadline({
         </span>
       </RevealText>
       {caption && (
-        <RevealText as="div" className="mt-6 max-w-[60rem]">
-          <p className={textStyles.showcaseCaption}>{caption}</p>
+        <RevealText as="div" className="col-span-4 mt-2 sm:col-span-8 lg:col-span-8">
+          <p className={`${textStyles.showcaseCaption} italic`}>{caption}</p>
         </RevealText>
       )}
-    </div>
+    </Grid>
   );
 }

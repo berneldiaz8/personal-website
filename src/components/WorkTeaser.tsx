@@ -107,7 +107,7 @@ export function WorkTeaser() {
             <div key={project.slug} className="border-t border-border pb-[184px]">
               <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
                 <CursorLabel
-                  label="More"
+                  label="View case study"
                   portal
                   className="relative grid grid-cols-4 gap-y-6 pt-4 sm:grid-cols-8 lg:grid-cols-12 lg:items-stretch lg:gap-x-4"
                 >

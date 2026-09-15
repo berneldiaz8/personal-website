@@ -1,5 +1,6 @@
 import { RevealText } from "./RevealText";
 import { Logo } from "./Logo";
+import { Grid } from "./showcase/Grid";
 
 /**
  * Line-mask entrance via RevealText (see that file) — swapped from a bespoke
@@ -22,19 +23,21 @@ import { Logo } from "./Logo";
  */
 export function Hero() {
   return (
-    <section className="px-4 pt-10 pb-16 sm:px-5 sm:pb-24 lg:px-6 lg:pb-10">
-      <RevealText
-        as="h1"
-        className="max-w-[60rem] text-pretty text-3xl font-extralight leading-[1.2] tracking-[-0.5px] text-muted sm:text-4xl lg:text-[48px]"
-      >
-        <span className="sr-only">berneldiaz</span>
-        <Logo
-          aria-hidden="true"
-          className="mr-3 inline-block h-[0.73em] w-auto translate-y-[calc(0.05em_-_1px)] align-baseline text-foreground"
-        />
-        is a UI/UX designer who takes complex products with no design
-        foundation and ships them end to end.
-      </RevealText>
+    <section className="pt-10 pb-16 sm:pb-24 lg:pb-10">
+      <Grid>
+        <RevealText
+          as="h1"
+          className="col-span-4 text-balance text-3xl font-extralight leading-[1.2] tracking-[-0.5px] text-muted sm:col-span-8 sm:text-4xl lg:col-span-8 lg:text-[48px]"
+        >
+          <span className="sr-only">berneldiaz</span>
+          <Logo
+            aria-hidden="true"
+            className="mr-3 inline-block h-[0.73em] w-auto translate-y-[calc(0.05em_-_1px)] align-baseline text-foreground"
+          />
+          is a UI/UX designer who takes complex products with no design
+          foundation and ships them end to end.
+        </RevealText>
+      </Grid>
 
       <div className="h-[240px]" />
     </section>

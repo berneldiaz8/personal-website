@@ -409,7 +409,7 @@ export function ProjectShowcase({
           row), so it keeps its own default top padding/border rather than
           the tighter pt-6 that assumed Context was its immediate neighbor. */}
       <RevealText>
-        <ParagraphPair bodies={project.problem} label="Problem" pb="pb-20" />
+        <ParagraphPair bodies={project.problem} label="Problem" pb="pb-[136px]" />
       </RevealText>
 
       {/* ── DISCOVERY ── labeled ParagraphPair, project.discovery. Same
@@ -420,7 +420,7 @@ export function ProjectShowcase({
           written. Sits directly below Problem per explicit request (moved
           here from below Approach). */}
       <RevealText>
-        <ParagraphPair bodies={project.discovery} label="Discovery" pb="pb-20" />
+        <ParagraphPair bodies={project.discovery} label="Discovery" pt="pt-6" pb="pb-20" />
       </RevealText>
 
       {/* ── MEDIA GROUP A ── secondary hero (full-bleed) → idea-ads/table
@@ -619,19 +619,12 @@ export function ProjectShowcase({
         )}
       </Grid>
 
-      {/* ── THE WORK ── merged workIntro/workDetail/(optional workDetail2)/
-          workClosing ParagraphPair, in that render order. Line-mask reveal
-          (RevealText), same reasoning as Context above. */}
+      {/* ── THE WORK ── project.workBody, rendered verbatim as one <p> per
+          paragraph, same treatment as Context/Problem/Discovery/Outcome
+          below. Line-mask reveal (RevealText), same reasoning as Context
+          above. */}
       <RevealText>
-        <ParagraphPair
-          bodies={[
-            project.workIntro.body,
-            project.workDetail.body,
-            ...(project.workDetail2 ? [project.workDetail2.body] : []),
-            project.workClosing.body,
-          ]}
-          label="Approach"
-        />
+        <ParagraphPair bodies={project.workBody} label="Approach" />
       </RevealText>
 
       {/* ── THE OUTCOME ── labeled ParagraphPair, project.outcomeSummary. Same
