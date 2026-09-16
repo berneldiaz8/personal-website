@@ -133,9 +133,14 @@ export function RevealText({
           ? Array.from(paragraphs)
           : [root];
 
+        // linesClass names the mask wrapper (SplitText appends "-mask" to it,
+        // giving ".reveal-line-mask") so globals.css can target it — see the
+        // comment there for why it needs deliberate descender/ascender
+        // headroom independent of whatever `leading-*` value a call site uses.
         SplitText.create(splitTargets, {
           type: "lines",
           mask: "lines",
+          linesClass: "reveal-line",
           autoSplit: true,
           onSplit(self) {
             if (hasPlayed.current) {

@@ -18,7 +18,8 @@ export type Project = {
   ndaCaption?: string;
   industryTag: string;
   role: string;
-  ownership: string;
+  /** Rendered under the "Scope" label in ProjectShowcase.tsx's meta row. */
+  scope: string;
   team: string;
   timeline: string;
   /** One or more paragraphs, rendered as separate <p>s (see ParagraphPair). */
@@ -77,7 +78,7 @@ export const projects: Project[] = [
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Food Tech Startup",
     role: "Product Designer",
-    ownership: "Product, design system",
+    scope: "Product, design system",
     team: "1 designer, 1 product manager, plus stakeholders",
     timeline: "6-week MVP",
     context: [
@@ -113,7 +114,7 @@ export const projects: Project[] = [
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Compliance Startup",
     role: "UI/UX Designer",
-    ownership: "Product, website, design system",
+    scope: "Product, website, design system",
     team: "1 designer, 10+ engineers, plus stakeholder",
     timeline: "1+ years, four phases of product growth.",
     context: [
@@ -145,7 +146,7 @@ export const projects: Project[] = [
       "Rebuilt a competitive intelligence platform from static reporting to guided action, design system built from zero.",
     industryTag: "SEO AI Startup",
     role: "UI/UX Designer",
-    ownership: "Product, website, design system",
+    scope: "Product, website, design system",
     team: "1 designer, 3 engineers",
     timeline: "7 months",
     context: [
@@ -176,7 +177,7 @@ export const projects: Project[] = [
       "Overhauled an outdated mobile dividend tracking app end to end, identifying every structural problem before redesigning the entire product.",
     industryTag: "Fintech",
     role: "UI/UX Designer",
-    ownership: "Product, website",
+    scope: "Product, website",
     team: "1 designer, 1 engineer",
     timeline: "2 months",
     context: [

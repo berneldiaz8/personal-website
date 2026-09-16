@@ -2,7 +2,7 @@
 
 :root {
   --background: #fffffc;
-  --foreground: #18181b;
+  --foreground: #000000;
   --muted: #66625c;
   --accent: #c2410c;
   --border: #e5e1d9;
@@ -45,13 +45,36 @@ html {
   --accent: var(--accent-light);
 }
 
+/* RevealText's (src/components/RevealText.tsx) line-mask reveal wraps each
+   split line in a clone with `overflow: clip` and no explicit height, so it
+   inherits its clip box purely from the line's own line-height-driven box —
+   descender ink (g/j/p/q/y) and tall ascenders get cut the instant a call
+   site's `leading-*` runs tight, since ordinary unmasked text is never
+   actually clipped to its line box (only this mask literally does). Confirmed
+   repeatedly on this exact mechanism (see ShowcaseHeadline.tsx's and
+   Hero.tsx's own comments) — bumping `leading-*` higher each time this came
+   up was treating the symptom, not the cause, and caps how tight any
+   headline's line-height can ever be. Fixed at the source instead: give the
+   mask itself a fixed headroom independent of whatever leading value is in
+   use, then cancel the footprint growth with matching negative margin so
+   line spacing/layout is completely unaffected — only the clip *window* gets
+   taller, not the visual gap between lines. 0.12em was chosen as comfortably
+   larger than any plausible sub-pixel rendering/rounding error while staying
+   subtle enough not to noticeably change how far a line appears to "rise"
+   during the reveal. Requires RevealText.tsx's `linesClass: "reveal-line"`
+   config (SplitText appends "-mask" to name the mask element itself). */
+.reveal-line-mask {
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}
+
 /* /gallery stays dark unconditionally, by deliberate design, independent of
    the rest of the site's (fixed light) palette — see src/app/gallery/page.tsx.
    Values are duplicated from the site's former dark palette rather than
    introduced as new tokens. color-scheme is set too so any native
    form/scroll UI within this scope also renders dark. */
 [data-force-dark] {
-  --background: #0c0c0d;
+  --background: #000000;
   --foreground: #f4f4f5;
   --muted: #a1a1aa;
   --accent: #fb923c;

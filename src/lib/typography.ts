@@ -13,7 +13,7 @@ export const textStyles = {
   /** Same as eyebrow, tinted with the active project's accent color instead of muted. */
   eyebrowAccent: "text-xs font-medium uppercase tracking-wide text-accent",
   /** Same as eyebrow, in the primary (foreground) color instead of muted. Nav links. */
-  eyebrowPrimary: "text-xs font-medium uppercase tracking-wide text-foreground",
+  eyebrowPrimary: "text-sm font-medium uppercase tracking-wide text-foreground",
   /** Slightly larger uppercase tracked label. Hero's "Bernel Diaz" line, section h2s ("Selected Work"). */
   eyebrowLg: "text-sm font-medium uppercase tracking-wide text-muted",
   /** Tabular numerals (still tabular-nums for consistent digit width, just no longer
@@ -37,8 +37,13 @@ export const textStyles = {
    * Larger "showcase" scale introduced for OpinlyShowcase.tsx — will get reused as
    * Lexora/The Dividend Tracker/FoodOps get their own Opinly-style showcase built out.
    */
-  showcaseMetaLabel: "text-sm font-medium text-foreground",
-  showcaseMetaValue: "text-pretty text-sm font-normal text-foreground",
+  /** Matched to the /info page's "Experience" section label (`eyebrowLg`) —
+   * uppercase, tracking-wide, muted instead of foreground (2026-09-16,
+   * explicit request). */
+  showcaseMetaLabel: "text-sm font-medium uppercase tracking-wide text-muted",
+  /** text-base (regular size step) instead of text-sm, font-medium instead
+   * of font-normal (2026-09-16, explicit request). */
+  showcaseMetaValue: "text-pretty text-base font-medium text-foreground",
   showcaseStat: "text-4xl font-medium tabular-nums tracking-tight text-foreground",
   /** Formerly a `font-mono` (Geist Mono) exception to the single-font-family rule —
    * Geist Mono was removed from the codebase, so this is General Sans like everything
@@ -56,16 +61,47 @@ export const textStyles = {
    * variable is bound anywhere in that node).
    */
   heading2xl: "text-2xl font-medium leading-[29px] tracking-[-0.2px] text-foreground",
+  /** Figma's "Heading/xl Medium" style (20px/25px, -0.1px tracking, 500 weight)
+   * — distinct from `heading2xl` above (24px/29px, -0.2px). Used for the
+   * `/work` case-study section labels (Context/Problem/Discovery/Approach/
+   * Outcome) in `ProjectShowcase.tsx`'s `ParagraphPair` (2026-09-16, explicit
+   * request, replacing an earlier mistaken use of `heading2xl` there). */
+  headingXl: "text-xl font-medium leading-[25px] tracking-[-0.1px] text-foreground",
   /** Same metrics as `heading2xl`, font-light instead of font-medium, text-muted
    * instead of text-foreground — the experience entries' role/title line sits
    * directly under the company name in this weight/color. Needed adding General
    * Sans Light/300 to the site's font files (previously only 200/400/500 were
    * loaded) since this is the first call site for it. */
   heading2xlLight: "text-2xl font-light leading-[29px] tracking-[-0.2px] text-muted",
+  /** Same metrics as `heading2xlLight`, font-normal instead of font-light —
+   * the /info page's experience entries' role/title line, bumped up to
+   * Regular/400 (already loaded, no new font file needed). */
+  heading2xlRegular: "text-2xl font-normal leading-[29px] tracking-[-0.2px] text-muted",
   /** Figma's "Label/xs Regular" style (12px/15px, 0.4px tracking) — distinct from
    * `eyebrow` above: font-normal not font-medium. Used for the /info page's
    * EXPERIENCE section label, text-muted like every other supporting-text
    * element in that section (company/role stay foreground/muted respectively;
    * everything smaller and label-like reads as muted). */
   labelXs: "text-xs font-normal uppercase tracking-[0.4px] text-muted",
+  /** Same as `labelXs`, at text-sm instead of text-xs — the /info page's
+   * experience entries' location/years line, bumped up from labelXs to read
+   * consistently with the section's other text after the Experience label
+   * itself moved to eyebrowLg. */
+  labelSm: "text-sm font-normal uppercase tracking-[0.4px] text-muted",
+  /** Hero's h1 ("berneldiaz is a UI/UX designer who..."). Responsive display
+   * headline: text-3xl -> sm:text-4xl -> lg:text-[48px]. leading-[1] is a
+   * deliberate content choice, not clipping-constrained — see Hero.tsx's own
+   * comment on why (RevealText's mask carries its own descender/ascender
+   * headroom now, independent of whatever leading a call site picks). Grid
+   * col-span classes stay at the call site, same as every other token here
+   * that pairs with layout classes it doesn't own. */
+  hero: "text-balance text-3xl font-normal leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
+  /** ShowcaseHeadline's project-name run ("Name—description" on each `/work`
+   * case study). Same size/leading/tracking/color steps as `hero` above
+   * (matched 2026-09-16, explicit request), font-semibold instead of
+   * font-normal — the em-dash + description half stays font-normal via its
+   * own span at the call site, not part of this token. Grid col-span classes
+   * stay at the call site too, same as `hero`. */
+  showcaseHeadline:
+    "text-balance text-3xl font-semibold leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
 } as const;

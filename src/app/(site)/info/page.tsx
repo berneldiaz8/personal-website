@@ -19,10 +19,10 @@ const paragraphs = [
 
 export default function InfoPage() {
   return (
-    <section className="pt-10">
+    <section className="pt-16">
       <h1 className="sr-only">About</h1>
 
-      <Grid className="items-start pb-6">
+      <Grid className="items-start pb-[52px]">
         <RevealText className="col-span-4 flex flex-col gap-6 sm:col-span-8 lg:col-span-4 lg:col-start-7">
           {paragraphs.map((paragraph) => (
             <p key={paragraph} className={textStyles.heading2xl}>
@@ -44,8 +44,8 @@ export default function InfoPage() {
               Context"/"The Problem"/"The Work"/"The Outcome" on /work),
               per explicit user request to keep this label's grid slot
               consistent with that pattern. */}
-          <RevealText as="div" className="col-span-4 sm:col-span-4 lg:col-span-3 lg:col-start-4">
-            <p className={textStyles.labelXs}>Experience</p>
+          <RevealText as="div" className="col-span-4 sm:col-span-4 lg:col-span-3">
+            <p className={textStyles.eyebrowLg}>EXPERIENCE</p>
           </RevealText>
 
           <div className="col-span-4 flex flex-col sm:col-span-8 lg:col-span-6 lg:col-start-7">
@@ -56,7 +56,7 @@ export default function InfoPage() {
                   i === 0 ? "" : "mt-10 border-t border-border pt-3"
                 }`}
               >
-                <div className="flex flex-col lg:flex-1">
+                <div className="flex flex-col gap-1 lg:flex-1">
                   {/* as="a" — the anchor itself is the SplitText target
                       here (not nested inside a `<p>` this component
                       splits), so it keeps its own role and gets the
@@ -73,7 +73,7 @@ export default function InfoPage() {
                     {entry.company}
                   </RevealText>
                   <RevealText as="div">
-                    <p className={textStyles.heading2xlLight}>{entry.role}</p>
+                    <p className={textStyles.heading2xlRegular}>{entry.role}</p>
                   </RevealText>
                 </div>
                 {/* lg:contents stays on this plain wrapper, not on the
@@ -91,12 +91,12 @@ export default function InfoPage() {
                     in. */}
                 <div className="mt-2 flex items-center justify-between lg:mt-0 lg:contents">
                   <RevealText as="div" className="lg:flex-1">
-                    <p className="text-xs font-normal uppercase tracking-[0.4px] text-muted">
+                    <p className={textStyles.labelSm}>
                       {entry.location}
                     </p>
                   </RevealText>
                   <RevealText as="div" className="lg:flex-1 lg:text-right">
-                    <p className="text-xs font-normal uppercase tracking-[0.4px] text-muted">
+                    <p className={textStyles.labelSm}>
                       {entry.years}
                     </p>
                   </RevealText>

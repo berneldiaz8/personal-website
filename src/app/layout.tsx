@@ -11,21 +11,21 @@ import "./globals.css";
 // General Sans (fontshare.com/fonts/general-sans), self-hosted via next/font/local
 // rather than Fontshare's CDN <link>, so it gets the same build-time optimization/
 // zero-CLS treatment Geist had. Only the weights actually used in the codebase are
-// included (200/300/400/500 — see `grep -rohE "font-(thin|extralight|light|...)"`),
-// not the full 6-weight family Fontshare offers. Semibold/600 was dropped 2026-07-19
-// once every `font-semibold` call site was switched to `font-medium`, leaving it
-// unused — re-add the file (from `src/app/fonts/`'s original download, or re-fetch
-// from Fontshare's API) if a heavier weight is needed again later. Light/300 was
+// included — see `grep -rohE "font-(thin|extralight|light|...)"`. Light/300 was
 // added 2026-07-21 for the Figma-sourced /info page redesign (job title/role text,
 // `textStyles.heading2xlLight`) — fetched via Fontshare's own CSS API
 // (`api.fontshare.com/v2/css?f[]=general-sans@300`), same source as every other
-// weight here, just not through the fontshare.com/fonts UI.
+// weight here, just not through the fontshare.com/fonts UI. Semibold/600 was
+// dropped 2026-07-19 once every `font-semibold` call site was switched to
+// `font-medium`, then re-added 2026-09-16 for `ShowcaseHeadline.tsx`'s project-name
+// span (the already-downloaded file was still sitting unused in `src/app/fonts/`).
 const generalSans = localFont({
   src: [
     { path: "./fonts/GeneralSans-Extralight.woff2", weight: "200", style: "normal" },
     { path: "./fonts/GeneralSans-Light.woff2", weight: "300", style: "normal" },
     { path: "./fonts/GeneralSans-Regular.woff2", weight: "400", style: "normal" },
     { path: "./fonts/GeneralSans-Medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/GeneralSans-Semibold.woff2", weight: "600", style: "normal" },
   ],
   variable: "--font-general-sans",
   display: "swap",

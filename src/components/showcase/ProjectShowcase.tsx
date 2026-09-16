@@ -159,19 +159,35 @@ function ParagraphPair({
           12px gap (gap-3 on this wrapper) to the label/paragraph row below. */}
       {showBorder && <div className="border-t border-border" />}
       <Grid margin={false}>
+        {/* Label (Context/Problem/Discovery/Approach/Outcome) dropped its
+            `lg:col-start-4` offset to sit flush left at lg:col-start-1
+            (2026-09-16, explicit request). Font size bumped from
+            `headingXl` (20px) to `heading2xl` (24px, 2026-09-16, explicit
+            request) — Figma's Heading/2xl Medium, already used for the
+            /info page's Experience label/company names. Paragraph body
+            keeps its own lg:col-start-7 position, so the gap between label
+            and body widened. */}
         {label ? (
-          <p
-            className={`col-span-4 sm:col-span-4 lg:col-span-3 lg:col-start-4 ${textStyles.labelXs}`}
-          >
+          <p className={`col-span-4 sm:col-span-4 lg:col-span-3 ${textStyles.heading2xl}`}>
             {label}
           </p>
         ) : (
           <div
             aria-hidden="true"
-            className="col-span-4 hidden sm:col-span-4 sm:block lg:col-span-3 lg:col-start-4"
+            className="col-span-4 hidden sm:col-span-4 sm:block lg:col-span-3"
           />
         )}
-        <div className="col-span-4 flex max-w-[65ch] flex-col gap-4 text-sm leading-relaxed text-foreground sm:col-span-4 lg:col-span-3 lg:col-start-7">
+        {/* text-base/font-medium instead of text-sm/font-normal (2026-09-16,
+            explicit request) — applies to every section's body copy
+            (Context/Problem/Discovery/Approach/Outcome) since they all
+            share this one ParagraphPair. Width changed from lg:col-span-3
+            lg:col-start-7 to lg:col-span-6 lg:col-start-4 (2026-09-16,
+            explicit request) — fills grid columns 4-9, sitting flush
+            against the 3-col label (col 1-3). Dropped `max-w-[65ch]` in the
+            same pass — it was capping the actual rendered line length short
+            of the col-span track, so a width change wasn't visible on
+            screen without also removing it. */}
+        <div className="col-span-4 flex flex-col gap-4 text-pretty text-base font-medium leading-snug text-foreground sm:col-span-4 lg:col-span-6 lg:col-start-4">
           {bodies.map((body, i) => (
             <p key={i}>{body}</p>
           ))}
@@ -284,16 +300,17 @@ export function ProjectShowcase({
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Role
             </RevealText>
-            {/* 1 column wide (col-span-1 of this row's own 4-col grid), 16px
-                gap (gap-x-4) to the value on its left — same spacer pattern
-                as the Outcomes row below. RevealText as="dt"/as="dd" — the
-                real dt/dd element is itself the SplitText target, not
-                nested inside a plain wrapper div, so it keeps its role and
-                the dl's term/definition pairing stays intact for
-                screen readers (confirmed via a real ARIA snapshot; see
-                RevealText.tsx's own comment for why a plain-div wrapper
-                broke this the first time). */}
-            <div className="grid grid-cols-4 gap-x-4">
+            {/* mt-1 (4px, 2026-09-16 explicit request) between the dt label
+                above and this value row. 1 column wide (col-span-1 of this
+                row's own 4-col grid), 16px gap (gap-x-4) to the value on its
+                left — same spacer pattern as the Outcomes row below.
+                RevealText as="dt"/as="dd" — the real dt/dd element is itself
+                the SplitText target, not nested inside a plain wrapper div,
+                so it keeps its role and the dl's term/definition pairing
+                stays intact for screen readers (confirmed via a real ARIA
+                snapshot; see RevealText.tsx's own comment for why a
+                plain-div wrapper broke this the first time). */}
+            <div className="mt-1 grid grid-cols-4 gap-x-4">
               <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
                 {project.role}
               </RevealText>
@@ -304,9 +321,9 @@ export function ProjectShowcase({
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Scope
             </RevealText>
-            <div className="grid grid-cols-4 gap-x-4">
+            <div className="mt-1 grid grid-cols-4 gap-x-4">
               <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
-                {project.ownership}
+                {project.scope}
               </RevealText>
               <div aria-hidden="true" className="col-span-1" />
             </div>
@@ -315,7 +332,7 @@ export function ProjectShowcase({
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Team
             </RevealText>
-            <div className="grid grid-cols-4 gap-x-4">
+            <div className="mt-1 grid grid-cols-4 gap-x-4">
               <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
                 {project.team}
               </RevealText>
@@ -326,7 +343,7 @@ export function ProjectShowcase({
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Timeline
             </RevealText>
-            <div className="grid grid-cols-4 gap-x-4">
+            <div className="mt-1 grid grid-cols-4 gap-x-4">
               <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
                 {project.timeline}
               </RevealText>

@@ -3,28 +3,32 @@ import { RevealText } from "../RevealText";
 import { Grid } from "./Grid";
 
 /**
- * Mixed-weight display headline: "Name—description", name in Medium weight (black),
- * description in ExtraLight (muted), both in the site's font-sans family. Figma:
- * Display/5xl Medium + Display/5xl ExtraLight (paired styles — a single Figma text
- * style can't express two weights in one run). The em-dash is an explicit, scoped
- * exception to the site's em-dash ban — see CLAUDE.md and .claude/rules/skills-used.md
- * before touching it.
+ * Display headline: "Name—description", both in the site's font-sans family,
+ * both full foreground color now. Originally a mixed-weight/mixed-color
+ * treatment (name in Medium/black, description in ExtraLight/muted) matching
+ * Figma's paired Display/5xl Medium + Display/5xl ExtraLight styles — the
+ * description span was moved to font-normal/text-foreground (2026-09-16,
+ * explicit request) to read closer to Hero's single-weight, single-color
+ * headline, and the name's weight was then bumped from Medium to Semibold
+ * (2026-09-16, explicit request; Semibold/600 re-added to `layout.tsx`'s
+ * `localFont` load list for this) as the one remaining weight step. The
+ * em-dash is an explicit, scoped exception to the site's em-dash ban — see
+ * CLAUDE.md and .claude/rules/skills-used.md before touching it.
+ *
+ * Size/leading/tracking/color for the name run now live in
+ * `textStyles.showcaseHeadline` (`src/lib/typography.ts`) rather than being
+ * hand-typed here — matched to `textStyles.hero`'s steps exactly (2026-09-16,
+ * explicit request) rather than Figma's flat 5xl/1.1, weight aside. The mask
+ * clipping descender ink at tight leading that motivated the old leading-1.2
+ * value has since been fixed at the source (`.reveal-line-mask` in
+ * globals.css carries its own headroom), so leading-[1] is safe here the
+ * same way it already is on Hero.tsx's h1. Grid col-span classes stay at
+ * the call site, same convention as `hero`'s own call site in Hero.tsx.
  *
  * Reveal routes through the shared RevealText component (line-mask stagger,
  * same as Hero.tsx's h1) rather than its own bespoke word-mask timeline —
  * the previous two-beat name/description word stagger was removed per
  * explicit request to keep this consistent with Hero's reveal instead.
- *
- * `leading-[1.2]`, not the Figma-matched 1.1 this originally shipped with —
- * RevealText's `mask: "lines"` wrapper is an empty clone of each line with
- * only `overflow: clip` set; it has no explicit height, so it inherits its
- * box height purely from `line-height`, with no allowance for descender ink
- * the way normal (unmasked) text silently gets. At 1.1 this clipped the
- * bottom of every descender (g/j/p/q/y) in the description text — invisible
- * under `prefers-reduced-motion` (SplitText never runs there) but present
- * for everyone else. 1.2 was the smallest bump that fully cleared it,
- * confirmed by screenshotting "recordkeeping"/"traceability"/"pressure" at
- * 1.1/1.2/1.25/1.3.
  *
  * Shared by every project's ProjectShowcase (originally introduced for Opinly).
  */
@@ -42,17 +46,17 @@ export function ShowcaseHeadline({
     <Grid className="pt-6 pb-[136px]">
       <RevealText
         as="div"
-        className="col-span-4 text-balance text-4xl font-medium leading-[1.2] tracking-[-0.5px] text-foreground sm:col-span-8 sm:text-5xl lg:col-span-8"
+        className={`col-span-4 ${textStyles.showcaseHeadline} sm:col-span-8 lg:col-span-8`}
       >
         <span>{name}</span>
-        <span className="font-extralight text-muted">
+        <span className="font-normal text-foreground">
           {"—"}
           {description}
         </span>
       </RevealText>
       {caption && (
-        <RevealText as="div" className="col-span-4 mt-2 sm:col-span-8 lg:col-span-8">
-          <p className={`${textStyles.showcaseCaption} italic`}>{caption}</p>
+        <RevealText as="div" className="col-span-4 mt-4 sm:col-span-8 lg:col-span-8">
+          <p className="text-sm font-normal uppercase leading-[18px] text-muted">{caption}</p>
         </RevealText>
       )}
     </Grid>

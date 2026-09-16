@@ -1,6 +1,5 @@
-import Link from "next/link";
-import { Logo } from "./Logo";
 import { NavLink } from "./NavLink";
+import { WordmarkLink } from "./WordmarkLink";
 import { Grid } from "./showcase/Grid";
 import { textStyles } from "@/lib/typography";
 
@@ -8,13 +7,7 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 bg-background">
       <Grid className="items-center py-5">
-        <Link
-          href="/"
-          aria-label="berneldiaz, home"
-          className="col-span-2 w-fit sm:col-span-2 lg:col-span-3"
-        >
-          <Logo className="h-[14px] w-auto text-foreground" aria-hidden="true" />
-        </Link>
+        <WordmarkLink />
 
         {/* Aligned to the same column body copy starts at (see ParagraphPair's
             lg:col-start-7 in ProjectShowcase.tsx). Gallery moves out of this
