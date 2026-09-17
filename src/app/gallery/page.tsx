@@ -4,10 +4,16 @@ import { GalleryInfoRow } from "@/components/GalleryInfoRow";
 import { GalleryCarousel } from "@/components/GalleryCarousel";
 import { galleryCarouselItems } from "@/data/galleryCarousel";
 
+const title = "Bernel Diaz — Gallery";
+const description =
+  "A closer look at real product screens from Bernel Diaz's case studies: Lexora, FoodOps, The Dividend Tracker, and Opinly.";
+
 export const metadata: Metadata = {
-  title: "Bernel Diaz — Gallery",
-  description:
-    "A closer look at real product screens from Bernel Diaz's case studies: Lexora, FoodOps, The Dividend Tracker, and Opinly.",
+  title,
+  description,
+  alternates: { canonical: "/gallery" },
+  openGraph: { title, description, url: "/gallery" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 /**

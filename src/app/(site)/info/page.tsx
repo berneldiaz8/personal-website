@@ -4,10 +4,16 @@ import { Grid } from "@/components/showcase/Grid";
 import { experience } from "@/data/experience";
 import { textStyles } from "@/lib/typography";
 
+const title = "Bernel Diaz — Info";
+const description =
+  "Bernel Diaz is a designer who brings structure and clarity to complex products, from early-stage startups to platforms serving over a million people.";
+
 export const metadata: Metadata = {
-  title: "Bernel Diaz — Info",
-  description:
-    "Bernel Diaz is a designer who brings structure and clarity to complex products, from early-stage startups to platforms serving over a million people.",
+  title,
+  description,
+  alternates: { canonical: "/info" },
+  openGraph: { title, description, url: "/info" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 const paragraphs = [

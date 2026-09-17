@@ -42,6 +42,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Bernel Diaz — Designer",
   description,
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Bernel Diaz — Designer",
     description,
