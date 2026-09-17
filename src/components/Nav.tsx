@@ -17,12 +17,16 @@ export function Nav() {
         <nav
           className={`col-span-2 col-start-3 flex flex-wrap items-center gap-x-2 gap-y-0.5 sm:col-span-2 sm:col-start-5 lg:col-span-3 lg:col-start-7 ${textStyles.eyebrowPrimary}`}
         >
-          <NavLink href="/work">Work,</NavLink>
-          <NavLink href="/info">Info</NavLink>
+          <NavLink href="/work" size="md">
+            Work,
+          </NavLink>
+          <NavLink href="/info" size="md">
+            Info
+          </NavLink>
           <span className="-ml-2 sm:hidden" aria-hidden="true">
             ,
           </span>
-          <NavLink href="/gallery" className="sm:hidden">
+          <NavLink href="/gallery" size="md" className="sm:hidden">
             Gallery
           </NavLink>
         </nav>
@@ -34,7 +38,9 @@ export function Nav() {
         <div
           className={`hidden sm:col-span-2 sm:col-start-7 sm:flex sm:justify-end lg:col-span-3 lg:col-start-10 ${textStyles.eyebrowPrimary}`}
         >
-          <NavLink href="/gallery">Gallery</NavLink>
+          <NavLink href="/gallery" size="md">
+            Gallery
+          </NavLink>
         </div>
       </Grid>
     </header>

@@ -5,15 +5,21 @@ import { Grid } from "./showcase/Grid";
 export function Footer() {
   return (
     <footer className="sticky top-0 flex h-[100dvh] flex-col justify-between bg-background text-muted">
-      {/* mt-[56px] clears Nav's own rendered height (56px — re-measured
-          empirically rather than assumed; an arbitrary value since 56px falls
+      {/* mt-[60px] clears Nav's own rendered height (60px — re-measured
+          empirically rather than assumed; an arbitrary value since it falls
           between Tailwind's default spacing steps) — both this row and the
           nav are `sticky top-0`, so once the footer is fully stuck the nav
-          (z-50) sits directly on top of it. Was previously mt-[54px], 2px
-          short of Nav's actual height, which hid the separator border below
-          entirely underneath Nav's opaque background — confirmed by
-          measuring both rects at max scroll (Nav bottom: 56px, border: 54-55px). */}
-      <div className="mt-[56px]">
+          (z-50) sits directly on top of it. Was previously mt-[56px], which
+          matched Nav's height at the time but went stale when Nav.tsx's
+          NavLink instances picked up `size="md"` (14px -> 20px hover-swap
+          box) in a later pass, growing Nav's real height from 56px to 60px
+          and hiding the separator border below entirely underneath Nav's
+          opaque background again — confirmed by measuring both rects at max
+          scroll (Nav bottom: 60px, border: 56-57px). This value is coupled
+          to Nav.tsx's actual rendered height, not a fixed constant — re-check
+          it (`document.querySelector('header').getBoundingClientRect().height`
+          at max scroll) any time Nav.tsx's own vertical sizing changes. */}
+      <div className="mt-[60px]">
         {/* Separator is inset to match the Grid's own margin (px-4 sm:px-5
             lg:px-6) rather than full-bleed — a plain sibling div, not a
             border-t on the Grid itself, since a border on the Grid would sit

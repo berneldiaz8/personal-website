@@ -68,11 +68,12 @@ export default function InfoPage() {
                     href={entry.companyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    delay={i * 0.06}
                     className={`w-fit ${textStyles.heading2xl}`}
                   >
                     {entry.company}
                   </RevealText>
-                  <RevealText as="div">
+                  <RevealText as="div" delay={i * 0.06}>
                     <p className={textStyles.heading2xlRegular}>{entry.role}</p>
                   </RevealText>
                 </div>
@@ -90,12 +91,12 @@ export default function InfoPage() {
                     flex items of the grandparent once lg:contents kicks
                     in. */}
                 <div className="mt-2 flex items-center justify-between lg:mt-0 lg:contents">
-                  <RevealText as="div" className="lg:flex-1">
+                  <RevealText as="div" delay={i * 0.06} className="lg:flex-1">
                     <p className={textStyles.labelSm}>
                       {entry.location}
                     </p>
                   </RevealText>
-                  <RevealText as="div" className="lg:flex-1 lg:text-right">
+                  <RevealText as="div" delay={i * 0.06} className="lg:flex-1 lg:text-right">
                     <p className={textStyles.labelSm}>
                       {entry.years}
                     </p>

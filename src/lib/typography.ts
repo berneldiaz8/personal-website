@@ -62,10 +62,13 @@ export const textStyles = {
    */
   heading2xl: "text-2xl font-medium leading-[29px] tracking-[-0.2px] text-foreground",
   /** Figma's "Heading/xl Medium" style (20px/25px, -0.1px tracking, 500 weight)
-   * — distinct from `heading2xl` above (24px/29px, -0.2px). Used for the
-   * `/work` case-study section labels (Context/Problem/Discovery/Approach/
-   * Outcome) in `ProjectShowcase.tsx`'s `ParagraphPair` (2026-09-16, explicit
-   * request, replacing an earlier mistaken use of `heading2xl` there). */
+   * — distinct from `heading2xl` above (24px/29px, -0.2px). Originally used for
+   * the `/work` case-study section labels (Context/Problem/Discovery/Approach/
+   * Outcome) in `ProjectShowcase.tsx`'s `ParagraphPair`, but superseded there
+   * (2026-09-16, explicit request) by a bump *to* `heading2xl` — see that
+   * file's own comment on the label, which now uses `heading2xl` and is the
+   * source of truth. Currently unused; kept in case a future call site wants
+   * this exact size step back. */
   headingXl: "text-xl font-medium leading-[25px] tracking-[-0.1px] text-foreground",
   /** Same metrics as `heading2xl`, font-light instead of font-medium, text-muted
    * instead of text-foreground — the experience entries' role/title line sits
@@ -98,10 +101,11 @@ export const textStyles = {
   hero: "text-balance text-3xl font-normal leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
   /** ShowcaseHeadline's project-name run ("Name—description" on each `/work`
    * case study). Same size/leading/tracking/color steps as `hero` above
-   * (matched 2026-09-16, explicit request), font-semibold instead of
-   * font-normal — the em-dash + description half stays font-normal via its
-   * own span at the call site, not part of this token. Grid col-span classes
-   * stay at the call site too, same as `hero`. */
+   * (matched 2026-09-16, explicit request). font-medium (reverted from a
+   * brief font-semibold stint, 2026-09-17, explicit request) — the em-dash +
+   * description half stays font-normal via its own span at the call site,
+   * not part of this token. Grid col-span classes stay at the call site too,
+   * same as `hero`. */
   showcaseHeadline:
-    "text-balance text-3xl font-semibold leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
+    "text-balance text-3xl font-medium leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
 } as const;

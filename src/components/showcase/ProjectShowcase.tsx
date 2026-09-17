@@ -187,7 +187,9 @@ function ParagraphPair({
             same pass — it was capping the actual rendered line length short
             of the col-span track, so a width change wasn't visible on
             screen without also removing it. */}
-        <div className="col-span-4 flex flex-col gap-4 text-pretty text-base font-medium leading-snug text-foreground sm:col-span-4 lg:col-span-6 lg:col-start-4">
+        <div
+          className={`col-span-4 flex flex-col gap-4 leading-snug sm:col-span-4 lg:col-span-6 lg:col-start-4 ${textStyles.showcaseMetaValue}`}
+        >
           {bodies.map((body, i) => (
             <p key={i}>{body}</p>
           ))}
@@ -286,69 +288,64 @@ export function ProjectShowcase({
           RevealText wrapper needed here. */}
       <ShowcaseHeadline name={project.name} description={headline} caption={project.ndaCaption} />
 
-      {/* ── META ROW ── Role / Services / Scope / Timeline, four even columns
+      {/* ── META ROW ── Role / Scope / Team / Timeline, four even columns
           filling the full row width (no inner 6/6 grouping) — each item gets
-          an equal share instead of Role/Services and Scope/Timeline competing
+          an equal share instead of Role/Scope and Team/Timeline competing
           for space within their own half. */}
       <div className="pt-6">
         {/* Inset to match the Grid's own margin (px-4 sm:px-5 lg:px-6) rather than
             full-bleed — same separator pattern as Footer.tsx / the /info page's
             Experience section. gap-3 (12px) to the meta row content below. */}
         <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-        <Grid as="dl" className="pt-3 pb-[136px]">
-          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+        <Grid as="dl" className="pt-3 pb-[176px]">
+          {/* dt/dd are direct siblings inside the same div, not dd nested one
+              level deeper inside its own wrapper — they must be direct
+              children of a div that's itself a direct child of the dl for
+              the term/definition pairing to stay intact for screen readers
+              (confirmed via a real ARIA snapshot: an extra wrapper div
+              around just the dd dropped it from the dl's content model
+              entirely, even though the dt stayed fine — see RevealText.tsx's
+              own comment for the general version of this pitfall).
+              dd now spans the field's full width (2026-09-17, explicit
+              request) rather than 3-of-4 sub-columns with a spacer eating
+              the last quarter — that spacer was inherited from the Outcomes
+              row's own stat+caption layout below, but here it just narrowed
+              the value's available width for no visual reason, forcing
+              multi-word values (e.g. Team's "1 designer, 1 product manager,
+              plus stakeholders") to wrap a word earlier than they need to.
+              gap-1 (4px) reproduces the previous gap-y-1 spacing between the
+              label and the value. */}
+          <div className="col-span-4 flex flex-col gap-1 sm:col-span-4 lg:col-span-3">
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Role
             </RevealText>
-            {/* mt-1 (4px, 2026-09-16 explicit request) between the dt label
-                above and this value row. 1 column wide (col-span-1 of this
-                row's own 4-col grid), 16px gap (gap-x-4) to the value on its
-                left — same spacer pattern as the Outcomes row below.
-                RevealText as="dt"/as="dd" — the real dt/dd element is itself
-                the SplitText target, not nested inside a plain wrapper div,
-                so it keeps its role and the dl's term/definition pairing
-                stays intact for screen readers (confirmed via a real ARIA
-                snapshot; see RevealText.tsx's own comment for why a
-                plain-div wrapper broke this the first time). */}
-            <div className="mt-1 grid grid-cols-4 gap-x-4">
-              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
-                {project.role}
-              </RevealText>
-              <div aria-hidden="true" className="col-span-1" />
-            </div>
+            <RevealText as="dd" className={textStyles.showcaseMetaValue}>
+              {project.role}
+            </RevealText>
           </div>
-          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+          <div className="col-span-4 flex flex-col gap-1 sm:col-span-4 lg:col-span-3">
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Scope
             </RevealText>
-            <div className="mt-1 grid grid-cols-4 gap-x-4">
-              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
-                {project.scope}
-              </RevealText>
-              <div aria-hidden="true" className="col-span-1" />
-            </div>
+            <RevealText as="dd" className={`xl:whitespace-nowrap ${textStyles.showcaseMetaValue}`}>
+              {project.scope}
+            </RevealText>
           </div>
-          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+          <div className="col-span-4 flex flex-col gap-1 sm:col-span-4 lg:col-span-3">
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Team
             </RevealText>
-            <div className="mt-1 grid grid-cols-4 gap-x-4">
-              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
-                {project.team}
-              </RevealText>
-              <div aria-hidden="true" className="col-span-1" />
-            </div>
+            <RevealText as="dd" className={textStyles.showcaseMetaValue}>
+              {project.team}
+            </RevealText>
           </div>
-          <div className="col-span-4 sm:col-span-4 lg:col-span-3">
+          <div className="col-span-4 flex flex-col gap-1 sm:col-span-4 lg:col-span-3">
             <RevealText as="dt" className={textStyles.showcaseMetaLabel}>
               Timeline
             </RevealText>
-            <div className="mt-1 grid grid-cols-4 gap-x-4">
-              <RevealText as="dd" className={`col-span-3 ${textStyles.showcaseMetaValue}`}>
-                {project.timeline}
-              </RevealText>
-              <div aria-hidden="true" className="col-span-1" />
-            </div>
+            <RevealText as="dd" className={textStyles.showcaseMetaValue}>
+              {project.timeline}
+            </RevealText>
           </div>
         </Grid>
       </div>
@@ -358,7 +355,7 @@ export function ProjectShowcase({
           for the per-line treatment. Sits directly below the meta row, ahead
           of Media Single, per explicit request. */}
       <RevealText>
-        <ParagraphPair bodies={project.context} label="Context" pt="pt-6" pb="pb-20" />
+        <ParagraphPair bodies={project.context} label="Context" pt="pt-6" pb="pb-24" />
       </RevealText>
 
       {/* ── MEDIA SINGLE ── directly below Context. Opinly and Lexora
@@ -426,7 +423,12 @@ export function ProjectShowcase({
           row), so it keeps its own default top padding/border rather than
           the tighter pt-6 that assumed Context was its immediate neighbor. */}
       <RevealText>
-        <ParagraphPair bodies={project.problem} label="Problem" pb="pb-[136px]" />
+        <ParagraphPair
+          bodies={project.problem}
+          label="Problem"
+          pt="pt-24"
+          pb="pb-[176px]"
+        />
       </RevealText>
 
       {/* ── DISCOVERY ── labeled ParagraphPair, project.discovery. Same
@@ -437,7 +439,7 @@ export function ProjectShowcase({
           written. Sits directly below Problem per explicit request (moved
           here from below Approach). */}
       <RevealText>
-        <ParagraphPair bodies={project.discovery} label="Discovery" pt="pt-6" pb="pb-20" />
+        <ParagraphPair bodies={project.discovery} label="Discovery" pt="pt-6" pb="pb-24" />
       </RevealText>
 
       {/* ── MEDIA GROUP A ── secondary hero (full-bleed) → idea-ads/table
@@ -641,18 +643,23 @@ export function ProjectShowcase({
           below. Line-mask reveal (RevealText), same reasoning as Context
           above. */}
       <RevealText>
-        <ParagraphPair bodies={project.workBody} label="Approach" />
+        <ParagraphPair
+          bodies={project.workBody}
+          label="Approach"
+          pt="pt-24"
+          pb="pb-[176px]"
+        />
       </RevealText>
 
       {/* ── THE OUTCOME ── labeled ParagraphPair, project.outcomeSummary. Same
-          treatment as The Work above. pb-20 (80px) on every project, not the
+          treatment as The Work above. pb-24 (96px) on every project, not the
           shared ParagraphPair default of pb-[136px]. */}
       <RevealText>
         <ParagraphPair
           bodies={project.outcomeSummary}
           label="Outcome"
           pt="pt-6"
-          pb="pb-20"
+          pb="pb-24"
         />
       </RevealText>
 

@@ -361,7 +361,7 @@ export function CursorLabel({
       aria-hidden="true"
       className={`pointer-events-none select-none ${
         portal ? "fixed z-[60]" : "absolute z-10"
-      } left-0 top-0 scale-90 overflow-hidden whitespace-nowrap text-sm font-medium uppercase leading-4 tracking-wide text-white opacity-0 [mix-blend-mode:difference]`}
+      } left-0 top-0 scale-90 overflow-hidden whitespace-nowrap text-sm font-medium uppercase leading-5 tracking-wide text-white opacity-0 [mix-blend-mode:difference]`}
     >
       <span ref={textRef} className="block">
         {displayedLabel}

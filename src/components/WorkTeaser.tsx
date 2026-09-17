@@ -116,11 +116,17 @@ export function WorkTeaser() {
       </RevealText>
 
       <div className="flex flex-col">
-        {projects.map((project) => {
+        {projects.map((project, i) => {
           const preview = previewFor(project);
+          // Per-row cascade (2026-09-16 and earlier) — each row's reveal
+          // starts slightly after the previous one's, instead of every row
+          // animating on the same timing basis. Restored after the
+          // Reveal->RevealText migration dropped it (RevealText's `delay`
+          // prop, added in this same diff for GalleryLightbox, covers it).
+          const delay = i * 0.08;
 
           return (
-            // border-t + the 184px gap to the next row live on this plain
+            // border-t + the 200px gap to the next row live on this plain
             // wrapper, not the Link itself — a Link's hover/click box
             // covers its own padding too, so putting that spacing directly
             // on the Link made hovering the empty space below each row
@@ -137,7 +143,7 @@ export function WorkTeaser() {
             <div
               key={project.slug}
               id={project.slug}
-              className="scroll-mt-28 border-t border-border pb-[184px]"
+              className="scroll-mt-28 border-t border-border pb-[200px]"
             >
               <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
                 <CursorLabel
@@ -148,6 +154,7 @@ export function WorkTeaser() {
                   <div className="col-span-4 flex flex-col gap-4 sm:col-span-8 lg:col-span-3 lg:justify-between">
                     <RevealText
                       as="h3"
+                      delay={delay}
                       // leading-[1], matching Hero.tsx's h1 (2026-09-16, explicit
                       // request) — the old leading-[1.2] existed to dodge
                       // RevealText's SplitText mask clipping descender ink at
@@ -156,7 +163,7 @@ export function WorkTeaser() {
                       // (`.reveal-line-mask` in globals.css carries its own
                       // headroom now), so leading-[1] is safe here the same way
                       // it already is on Hero.tsx/ShowcaseHeadline.tsx.
-                      className="text-balance text-3xl font-semibold leading-[1] tracking-[-0.4px] sm:text-4xl"
+                      className="text-balance text-3xl font-medium leading-[1] tracking-[-0.4px] sm:text-4xl"
                     >
                       {project.slug === "the-dividend-tracker" ? (
                         <>
@@ -168,8 +175,13 @@ export function WorkTeaser() {
                         project.name
                       )}
                     </RevealText>
-                    <RevealText as="div" className="flex flex-col gap-5">
-                      <p className={`w-full text-pretty ${textStyles.heading2xl}`}>
+                    <RevealText as="div" delay={delay} className="flex flex-col gap-5">
+                      {/* font-normal instead of `heading2xl`'s own font-medium
+                          (explicit request) — written out explicitly rather
+                          than overriding the token, since it's shared with
+                          the /info page and ProjectShowcase.tsx's section
+                          labels, which stay font-medium. */}
+                      <p className="w-full text-pretty text-2xl font-normal leading-[29px] tracking-[-0.2px] text-foreground">
                         {project.tagline}
                       </p>
                     </RevealText>

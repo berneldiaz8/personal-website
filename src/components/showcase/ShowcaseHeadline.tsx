@@ -43,7 +43,7 @@ export function ShowcaseHeadline({
   caption?: string;
 }) {
   return (
-    <Grid className="pt-6 pb-[136px]">
+    <Grid className="pt-6 pb-[176px]">
       <RevealText
         as="div"
         className={`col-span-4 ${textStyles.showcaseHeadline} sm:col-span-8 lg:col-span-8`}

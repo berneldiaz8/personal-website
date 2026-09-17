@@ -34,6 +34,14 @@ import { REVEAL_EASE } from "@/lib/gsapEase";
  * source-level reasoning). `window.scrollTo(0, 0)` fallback when Lenis
  * isn't mounted (`prefers-reduced-motion`) stays instant — no animation to
  * gate there either way.
+ *
+ * `lenisInstance.resize()` right before `scrollTo()`, same as
+ * SeeWorkButton.tsx and for the same reason (that file's own comment has the
+ * full explanation): `scrollTo()` clamps its target against Lenis's cached
+ * `limit`, which can still be stale/small right after mount. The target here
+ * is always `0`, so a stale limit clamping "down toward 0" can't actually be
+ * observed today — but calling `resize()` first costs nothing and avoids the
+ * same landmine resurfacing if this ever scrolls to a non-zero target.
  */
 export function WordmarkLink() {
   const pathname = usePathname();
@@ -47,6 +55,7 @@ export function WordmarkLink() {
         if (pathname !== "/") return;
         e.preventDefault();
         if (lenisInstance) {
+          lenisInstance.resize();
           lenisInstance.scrollTo(0, {
             duration: 1.6,
             easing: gsap.parseEase(REVEAL_EASE),
