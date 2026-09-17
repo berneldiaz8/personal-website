@@ -31,7 +31,7 @@ export function Hero() {
           <span className="sr-only">berneldiaz</span>
           <Logo
             aria-hidden="true"
-            className="mr-3.5 inline-block h-[0.73em] w-auto translate-y-[calc(0.05em_-_1px)] align-baseline text-foreground"
+            className="mr-3 inline-block h-[0.73em] w-auto translate-y-[calc(0.05em_-_1px)] align-baseline text-foreground"
           />
           is a UI/UX designer who takes complex products with no design
           foundation and ships them end to end.

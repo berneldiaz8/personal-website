@@ -176,12 +176,7 @@ export function WorkTeaser() {
                       )}
                     </RevealText>
                     <RevealText as="div" delay={delay} className="flex flex-col gap-5">
-                      {/* font-normal instead of `heading2xl`'s own font-medium
-                          (explicit request) — written out explicitly rather
-                          than overriding the token, since it's shared with
-                          the /info page and ProjectShowcase.tsx's section
-                          labels, which stay font-medium. */}
-                      <p className="w-full text-pretty text-2xl font-normal leading-[29px] tracking-[-0.2px] text-foreground">
+                      <p className={`w-full text-pretty ${textStyles.heading2xl}`}>
                         {project.tagline}
                       </p>
                     </RevealText>
