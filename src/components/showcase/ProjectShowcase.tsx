@@ -153,9 +153,12 @@ function ParagraphPair({
   showBorder?: boolean;
 }) {
   return (
-    <div className={`flex flex-col gap-3 px-6 ${pt} ${pb}`}>
-      {/* Border spans full-bleed within this section's own inset (px-6 on the
-          outer wrapper), not scoped to just the paragraph's own column — a
+    <div className={`flex flex-col gap-3 px-4 sm:px-5 lg:px-6 ${pt} ${pb}`}>
+      {/* Border spans full-bleed within this section's own inset
+          (px-4/sm:px-5/lg:px-6 on the outer wrapper, matching Grid.tsx's own
+          side-margin steps — responsive as of 2026-09-21, explicit request,
+          was a flat px-6 before), not scoped to just the paragraph's own
+          column — a
           12px gap (gap-3 on this wrapper) to the label/paragraph row below. */}
       {showBorder && <div className="border-t border-border" />}
       <Grid margin={false}>
@@ -258,7 +261,15 @@ export function ProjectShowcase({
       {/* ── HERO ── opening full-bleed image/video, the page's LCP candidate.
           Renders statically, no fade-on-scroll — the scroll-reveal fade
           (Reveal.tsx) was removed site-wide per explicit user request,
-          alongside RevealWipe.tsx before it. */}
+          alongside RevealWipe.tsx before it.
+          aspect-[1/1] on mobile, stepping up to 16/10 at sm+ (2026-09-21,
+          explicit request — asked for as "4/4", written as the equivalent
+          1/1 since that's the same ratio in its normal form; tried 4/3,
+          5/3, 3/4, and 3/5 first). This wrapper's object-center (not
+          object-top) crops evenly from both edges rather than always from
+          the bottom, so re-check each project's cover once uploaded — a
+          square crop is a meaningfully tighter crop than 16:10 and likely
+          to cut into UI content. */}
       {hasHeroImage ? (
         <ShowcaseImage
           src={`${base}/showcase-hero.jpg`}
@@ -269,7 +280,7 @@ export function ProjectShowcase({
                 ? `${project.name} products dashboard shown on a tablet`
                 : `${project.name} dashboard shown on a laptop screen`
           }
-          aspect="aspect-[16/10]"
+          aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
           priority={priority}
         />
@@ -278,7 +289,7 @@ export function ProjectShowcase({
           src={pick(project.media, 0).src}
           poster={pick(project.media, 0).poster}
           alt={pick(project.media, 0).alt}
-          aspect="aspect-[16/10]"
+          aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
         />
       )}
@@ -292,12 +303,15 @@ export function ProjectShowcase({
           filling the full row width (no inner 6/6 grouping) — each item gets
           an equal share instead of Role/Scope and Team/Timeline competing
           for space within their own half. */}
-      <div className="pt-6">
+      <div className="pt-4 sm:pt-6">
         {/* Inset to match the Grid's own margin (px-4 sm:px-5 lg:px-6) rather than
             full-bleed — same separator pattern as Footer.tsx / the /info page's
             Experience section. gap-3 (12px) to the meta row content below. */}
         <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-        <Grid as="dl" className="pt-3 pb-[176px]">
+        {/* pb-[112px] on mobile, stepping up to the original 176px at sm+
+            (2026-09-21, explicit request) — same mobile-responsive vertical
+            rhythm pass applied to every pt/pb in this file below. */}
+        <Grid as="dl" className="pt-3 pb-[112px] sm:pb-[176px]">
           {/* dt/dd are direct siblings inside the same div, not dd nested one
               level deeper inside its own wrapper — they must be direct
               children of a div that's itself a direct child of the dl for
@@ -355,7 +369,12 @@ export function ProjectShowcase({
           for the per-line treatment. Sits directly below the meta row, ahead
           of Media Single, per explicit request. */}
       <RevealText>
-        <ParagraphPair bodies={project.context} label="Context" pt="pt-6" pb="pb-24" />
+        <ParagraphPair
+          bodies={project.context}
+          label="Context"
+          pt="pt-4 sm:pt-6"
+          pb="pb-16 sm:pb-24"
+        />
       </RevealText>
 
       {/* ── MEDIA SINGLE ── directly below Context. Opinly and Lexora
@@ -365,7 +384,7 @@ export function ProjectShowcase({
           of the single full-bleed block every other project uses. Every
           other project still placeholders pending a future media pass. */}
       {project.slug === "the-dividend-tracker" ? (
-        <Grid className="pt-4 pb-6">
+        <Grid className="pt-3 pb-4 sm:pt-4 sm:pb-6">
           <div className="col-span-4 sm:col-span-4 lg:col-span-6">
             <ShowcaseVideo
               src={`${base}/showcase-holdings.mp4`}
@@ -384,27 +403,39 @@ export function ProjectShowcase({
           </div>
         </Grid>
       ) : (
-        <div className="px-4 pt-4 pb-6 sm:px-5 lg:px-6">
+        <div className="px-4 pt-3 pb-4 sm:px-5 sm:pt-4 sm:pb-6 lg:px-6">
           {isOpinly ? (
             <ShowcaseVideo
               src={`${base}/showcase-app.mp4`}
               poster={`${base}/showcase-app-poster.jpg`}
               alt="Opinly product walkthrough"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Lexora's Media
+              // Single/Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "lexora" ? (
             <ShowcaseVideo
               src={`${base}/showcase-wb.mp4`}
               poster={`${base}/showcase-wb-poster.jpg`}
               alt="Lexora product walkthrough"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to WorkTeaser's
+              // product video and the /work hero cover.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "foodops" ? (
             <ShowcaseVideo
               src={`${base}/showcase-app.mp4`}
               poster={`${base}/showcase-app-poster.jpg`}
               alt="FoodOps product walkthrough"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Opinly/Lexora's
+              // own Media Single video.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : (
             <div
@@ -426,8 +457,8 @@ export function ProjectShowcase({
         <ParagraphPair
           bodies={project.problem}
           label="Problem"
-          pt="pt-24"
-          pb="pb-[176px]"
+          pt="pt-16 sm:pt-24"
+          pb="pb-[112px] sm:pb-[176px]"
         />
       </RevealText>
 
@@ -439,7 +470,12 @@ export function ProjectShowcase({
           written. Sits directly below Problem per explicit request (moved
           here from below Approach). */}
       <RevealText>
-        <ParagraphPair bodies={project.discovery} label="Discovery" pt="pt-6" pb="pb-24" />
+        <ParagraphPair
+          bodies={project.discovery}
+          label="Discovery"
+          pt="pt-4 sm:pt-6"
+          pb="pb-16 sm:pb-24"
+        />
       </RevealText>
 
       {/* ── MEDIA GROUP A ── secondary hero (full-bleed) → idea-ads/table
@@ -447,7 +483,7 @@ export function ProjectShowcase({
           container instead of each sitting in its own. Full-bleed items span
           the full row (lg:col-span-12); the paired images keep their
           existing lg:col-span-6 half-width split. */}
-      <Grid className="pt-6 pb-6">
+      <Grid className="pt-4 pb-4 sm:pt-6 sm:pb-6">
         {project.slug === "the-dividend-tracker" ? (
           // The Dividend Tracker-only exception: full row order is
           // split-width → full-bleed → split-width-with-split-stacked,
@@ -478,7 +514,11 @@ export function ProjectShowcase({
               <ShowcaseImage
                 src={`${base}/showcase-holdings-detail.jpg`}
                 alt="The Dividend Tracker holdings detail, edit holdings, and retirement value conversion screens"
-                aspect="aspect-[16/9.5]"
+                // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+                // at sm+ (2026-09-21, explicit request) — same taller,
+                // mobile-native treatment already applied to Opinly and
+                // Lexora's own Media Group A/B slots.
+                aspect="aspect-[4/3] sm:aspect-[16/9.5]"
               />
             </div>
 
@@ -522,19 +562,31 @@ export function ProjectShowcase({
                 <ShowcaseImage
                   src={`${base}/showcase-secondary-hero.jpg`}
                   alt="Opinly Content Studio blog content list"
-                  aspect="aspect-[16/9.5]"
+                  // aspect-[4/3] on mobile, stepping up to the original
+                  // 16/9.5 at sm+ (2026-09-21, explicit request) — same
+                  // taller, mobile-native treatment already applied to
+                  // Opinly's Media Single video and Lexora's own slots.
+                  aspect="aspect-[4/3] sm:aspect-[16/9.5]"
                 />
               ) : project.slug === "lexora" ? (
                 <ShowcaseImage
                   src={`${base}/showcase-speakup.jpg`}
                   alt="Lexora Speak Up Program confidentiality policy page"
-                  aspect="aspect-[16/9.5]"
+                  // aspect-[4/3] on mobile, stepping up to the original
+                  // 16/9.5 at sm+ (2026-09-21, explicit request) — same
+                  // taller, mobile-native treatment already applied to
+                  // Lexora's Media Single video after Context.
+                  aspect="aspect-[4/3] sm:aspect-[16/9.5]"
                 />
               ) : project.slug === "foodops" ? (
                 <ShowcaseImage
                   src={`${base}/showcase-products.jpg`}
                   alt="FoodOps Products incoming shipments table"
-                  aspect="aspect-[16/9.5]"
+                  // aspect-[4/3] on mobile, stepping up to the original
+                  // 16/9.5 at sm+ (2026-09-21, explicit request) — same
+                  // taller, mobile-native treatment already applied to
+                  // Opinly/Lexora's own Media Group A slots.
+                  aspect="aspect-[4/3] sm:aspect-[16/9.5]"
                 />
               ) : (
                 // Placeholder — real asset pending a future media pass.
@@ -611,20 +663,32 @@ export function ProjectShowcase({
                 <ShowcaseImage
                   src={`${base}/showcase-getting-started.jpg`}
                   alt="Opinly Getting Started onboarding checklist"
-                  aspect="aspect-[16/9.5]"
+                  // aspect-[4/3] on mobile, stepping up to the original
+                  // 16/9.5 at sm+ (2026-09-21, explicit request) — same
+                  // taller, mobile-native treatment already applied to
+                  // Opinly's other Media Single/Group A slots.
+                  aspect="aspect-[4/3] sm:aspect-[16/9.5]"
                 />
               ) : project.slug === "lexora" ? (
                 <ShowcaseVideo
                   src={`${base}/showcase-cs.mp4`}
                   poster={`${base}/showcase-cs-poster.jpg`}
                   alt="Lexora Submitted reports case management table"
-                  aspect="aspect-[16/9.5]"
+                  // aspect-[4/3] on mobile, stepping up to the original
+                  // 16/9.5 at sm+ (2026-09-21, explicit request) — same
+                  // taller, mobile-native treatment already applied to
+                  // Lexora's other Media Single/Group A slots.
+                  aspect="aspect-[4/3] sm:aspect-[16/9.5]"
                 />
               ) : project.slug === "foodops" ? (
                 <ShowcaseImage
                   src={`${base}/showcase-product-detail.jpg`}
                   alt="FoodOps product detail page with traceability information"
-                  aspect="aspect-[16/9.5]"
+                  // aspect-[4/3] on mobile, stepping up to the original
+                  // 16/9.5 at sm+ (2026-09-21, explicit request) — same
+                  // taller, mobile-native treatment already applied to
+                  // FoodOps' other Media Group A slots.
+                  aspect="aspect-[4/3] sm:aspect-[16/9.5]"
                 />
               ) : (
                 // Placeholder — real asset pending a future media pass.
@@ -646,8 +710,8 @@ export function ProjectShowcase({
         <ParagraphPair
           bodies={project.workBody}
           label="Approach"
-          pt="pt-24"
-          pb="pb-[176px]"
+          pt="pt-16 sm:pt-24"
+          pb="pb-[112px] sm:pb-[176px]"
         />
       </RevealText>
 
@@ -658,15 +722,15 @@ export function ProjectShowcase({
         <ParagraphPair
           bodies={project.outcomeSummary}
           label="Outcomes"
-          pt="pt-6"
-          pb="pb-24"
+          pt="pt-4 sm:pt-6"
+          pb="pb-16 sm:pb-24"
         />
       </RevealText>
 
       {/* ── MEDIA GROUP B ── placeholder (full-bleed) → Image pair 1
           (audit/mockup, 2-paired) → placeholder (full-bleed) → closing video
           (full-bleed) — all one shared container. */}
-      <Grid className="pt-6 pb-6">
+      <Grid className="pt-4 pb-4 sm:pt-6 sm:pb-6">
         {/* Structural placeholder — not a real asset yet, same convention as
             the FoodOps slide-video/closing-video placeholders elsewhere in
             this file. First of two new full-bleed slots bracketing Image
@@ -678,7 +742,11 @@ export function ProjectShowcase({
             <ShowcaseImage
               src={`${base}/showcase-cms-integration.jpg`}
               alt="Opinly CMS integration selection screen showing WordPress, Shopify, Wix, Squarespace, Webflow, and Framer options"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Opinly's other
+              // Media Single/Group A slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           </div>
         ) : project.slug === "lexora" ? (
@@ -686,7 +754,11 @@ export function ProjectShowcase({
             <ShowcaseImage
               src={`${base}/showcase-case-report.jpg`}
               alt="Lexora case report detail view showing report CR-01192"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Lexora's other
+              // Media Single/Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           </div>
         ) : project.slug === "the-dividend-tracker" ? (
@@ -694,7 +766,11 @@ export function ProjectShowcase({
             <ShowcaseImage
               src={`${base}/showcase-watchlist-calendar.jpg`}
               alt="The Dividend Tracker watchlist, dividend calendar, and dividends payout screens"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to The Dividend
+              // Tracker's own Media Group A slot.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           </div>
         ) : (
@@ -815,20 +891,32 @@ export function ProjectShowcase({
               src={`${base}/showcase-website-tour.mp4`}
               poster={`${base}/showcase-website-tour-poster.jpg`}
               alt="Opinly website tour"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Opinly's other
+              // Media Single/Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "lexora" ? (
             <ShowcaseImage
               src={`${base}/showcase-reports-list.jpg`}
               alt="Lexora Submitted reports full list view"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Lexora's other
+              // Media Single/Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "the-dividend-tracker" ? (
             <ShowcaseVideo
               src={`${base}/showcase-website-tour.mp4`}
               poster={`${base}/showcase-website-tour-poster.jpg`}
               alt="The Dividend Tracker website tour"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to The Dividend
+              // Tracker's other Media Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "foodops" ? (
             <ShowcaseImage
@@ -849,26 +937,42 @@ export function ProjectShowcase({
             <ShowcaseImage
               src={`${base}/showcase-idea-ads.jpg`}
               alt="Opinly promotional ads reading 'Ditch the $200/month SEO stack. Get it all with Opinly.', 'Why pay $500 for one backlink?', and 'Too busy to optimize your site for Google?'"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Opinly's other
+              // Media Single/Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "lexora" ? (
             <ShowcaseVideo
               src={`${base}/showcase-website-tour.mp4`}
               poster={`${base}/showcase-website-tour-poster.jpg`}
               alt="Lexora website tour"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to Lexora's other
+              // Media Single/Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "the-dividend-tracker" ? (
             <ShowcaseImage
               src={`${base}/showcase-marketing-cards.jpg`}
               alt="The Dividend Tracker promotional cards showing dividend tracking, investing decisions, and future income calculator"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to The Dividend
+              // Tracker's other Media Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : project.slug === "foodops" ? (
             <ShowcaseImage
               src={`${base}/showcase-traceability-plan.jpg`}
               alt="FoodOps Traceability Plan document view"
-              aspect="aspect-[16/9.5]"
+              // aspect-[4/3] on mobile, stepping up to the original 16/9.5
+              // at sm+ (2026-09-21, explicit request) — same taller,
+              // mobile-native treatment already applied to FoodOps' other
+              // Media Group A/B slots.
+              aspect="aspect-[4/3] sm:aspect-[16/9.5]"
             />
           ) : (
             // Placeholder — real asset pending a future media pass.

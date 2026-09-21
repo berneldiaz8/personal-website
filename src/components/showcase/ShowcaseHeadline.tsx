@@ -43,7 +43,14 @@ export function ShowcaseHeadline({
   caption?: string;
 }) {
   return (
-    <Grid className="pt-6 pb-[176px]">
+    // pt-4/pb-[112px] on mobile, stepping up to the original pt-6/176px at
+    // sm+ (2026-09-21, explicit request) — same mobile-responsive vertical
+    // rhythm pass applied throughout ProjectShowcase.tsx. This pb was missed
+    // in that pass since it lives in this separate file, which produced a
+    // visibly inconsistent gap: this headline's own 176px bottom padding was
+    // stacking on top of the meta row's own top padding, making the gap
+    // above the meta row noticeably bigger than the gap below it.
+    <Grid className="pt-4 pb-[112px] sm:pt-6 sm:pb-[176px]">
       <RevealText
         as="div"
         className={`col-span-4 ${textStyles.showcaseHeadline} sm:col-span-8 lg:col-span-9`}

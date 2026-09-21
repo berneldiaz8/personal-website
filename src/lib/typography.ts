@@ -67,8 +67,9 @@ export const textStyles = {
    * Outcome) in `ProjectShowcase.tsx`'s `ParagraphPair`, but superseded there
    * (2026-09-16, explicit request) by a bump *to* `heading2xl` — see that
    * file's own comment on the label, which now uses `heading2xl` and is the
-   * source of truth. Currently unused; kept in case a future call site wants
-   * this exact size step back. */
+   * source of truth. Reused (2026-09-21, explicit request) for WorkTeaser's
+   * project tagline, stepped down from heading2xl to create more size
+   * distinction against the row's h3 project name. */
   headingXl: "text-xl font-medium leading-[25px] tracking-[-0.1px] text-foreground",
   /** Same metrics as `heading2xl`, font-light instead of font-medium, text-muted
    * instead of text-foreground — the experience entries' role/title line sits
@@ -92,20 +93,35 @@ export const textStyles = {
    * itself moved to eyebrowLg. */
   labelSm: "text-sm font-normal uppercase tracking-[0.4px] text-muted",
   /** Hero's h1 ("berneldiaz is a UI/UX designer who..."). Responsive display
-   * headline: text-3xl -> sm:text-4xl -> lg:text-[48px]. leading-[1] is a
-   * deliberate content choice, not clipping-constrained — see Hero.tsx's own
-   * comment on why (RevealText's mask carries its own descender/ascender
+   * headline: text-4xl -> sm:text-5xl -> lg:text-[48px]. Bumped up from
+   * text-3xl/sm:text-4xl (2026-09-21, explicit request) to restore a clear
+   * size hierarchy against WorkTeaser's project-title h3, which sits at the
+   * same text-3xl/sm:text-4xl steps — with both at identical sizes on mobile
+   * and sm, the two had no visual distinction at those breakpoints (lg was
+   * already fine, since the teaser title caps at sm:text-4xl with no lg step
+   * of its own). text-5xl resolves to the same 48px as the existing
+   * lg:text-[48px] step, so the size plateaus from sm upward rather than
+   * jumping past it. `showcaseHeadline` below briefly diverged from this at
+   * mobile/sm as a result, then was re-matched to it the same day (explicit
+   * request) — the two are identical at every step again. leading-[1]
+   * is a deliberate content choice, not clipping-constrained — see Hero.tsx's
+   * own comment on why (RevealText's mask carries its own descender/ascender
    * headroom now, independent of whatever leading a call site picks). Grid
    * col-span classes stay at the call site, same as every other token here
    * that pairs with layout classes it doesn't own. */
-  hero: "text-balance text-3xl font-normal leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
+  hero: "text-balance text-4xl font-normal leading-[1] tracking-[-0.5px] text-foreground sm:text-5xl lg:text-[48px]",
   /** ShowcaseHeadline's project-name run ("Name—description" on each `/work`
-   * case study). Same size/leading/tracking/color steps as `hero` above
-   * (matched 2026-09-16, explicit request). font-medium (reverted from a
-   * brief font-semibold stint, 2026-09-17, explicit request) — the em-dash +
-   * description half stays font-normal via its own span at the call site,
-   * not part of this token. Grid col-span classes stay at the call site too,
-   * same as `hero`. */
+   * case study). Originally matched `hero`'s size/leading/tracking/color
+   * steps exactly (2026-09-16, explicit request); `hero` was later bumped at
+   * mobile/sm (2026-09-21) to disambiguate it from WorkTeaser's title, which
+   * temporarily left this token behind at the old text-3xl/sm:text-4xl
+   * steps. Re-matched to `hero` again same day (explicit request, "emulate
+   * the hero headline's mobile responsive size") — text-4xl -> sm:text-5xl
+   * -> lg:text-[48px], identical to `hero` at every step once more.
+   * font-medium (reverted from a brief font-semibold stint, 2026-09-17,
+   * explicit request) — the em-dash + description half stays font-normal via
+   * its own span at the call site, not part of this token. Grid col-span
+   * classes stay at the call site too, same as `hero`. */
   showcaseHeadline:
-    "text-balance text-3xl font-medium leading-[1] tracking-[-0.5px] text-foreground sm:text-4xl lg:text-[48px]",
+    "text-balance text-4xl font-medium leading-[1] tracking-[-0.5px] text-foreground sm:text-5xl lg:text-[48px]",
 } as const;
