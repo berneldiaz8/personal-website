@@ -22,19 +22,19 @@ import { projects } from "@/data/projects";
  */
 export function Hero() {
   return (
-    <section className="pt-6 pb-16">
+    <section className="pt-8 pb-16">
       <Grid>
         <RevealText
           as="h1"
-          className={`col-span-4 ${textStyles.hero} sm:col-span-8 lg:col-span-10`}
+          className={`col-span-4 ${textStyles.hero} sm:col-span-8 lg:col-span-9`}
         >
           <span className="sr-only">berneldiaz</span>
           <Logo
             aria-hidden="true"
             className="mr-3 inline-block h-[0.73em] w-auto translate-y-[calc(0.05em_-_1px)] align-baseline text-foreground"
           />
-          is a UI/UX designer who takes complex products with no design
-          foundation and ships them end to end.
+          is a designer who figures out how products work, then designs the
+          structure teams build from.
         </RevealText>
       </Grid>
 

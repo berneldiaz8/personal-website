@@ -17,15 +17,13 @@ export const metadata: Metadata = {
 };
 
 const paragraphs = [
-  "UI/UX Designer based in the Philippines.",
-  "On most of my projects, I've been the only designer on the team.",
-  "Most of my work has started before the structure was settled. I'm drawn to products at that stage, where someone has to decide how the thing actually works, not just how it looks.",
-  "I find what's broken, define the structure, and ship it end to end. Across B2B SaaS, startups, and enterprise software.",
+  "A designer of digital products, based in the Philippines. I read a product before I touch it. Most of my work starts before the structure is settled, when someone has to decide how the thing works and not only how it looks. I define that structure and design what a team builds from, across B2B SaaS, startups, enterprise software, and consumer apps.",
+  "On the work shown here, I was the only designer, alongside engineers and founders. On other teams, I worked with a head of design and other designers. Today, I use AI-assisted development to turn my designs into working prototypes, so I test ideas in code and engineers start from something closer to the real product. I built this site the same way.",
 ];
 
 export default function InfoPage() {
   return (
-    <section className="pt-16">
+    <section className="pt-8">
       <h1 className="sr-only">About</h1>
 
       <Grid className="items-start pb-[52px]">

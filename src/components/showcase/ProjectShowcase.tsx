@@ -657,7 +657,7 @@ export function ProjectShowcase({
       <RevealText>
         <ParagraphPair
           bodies={project.outcomeSummary}
-          label="Outcome"
+          label="Outcomes"
           pt="pt-6"
           pb="pb-24"
         />

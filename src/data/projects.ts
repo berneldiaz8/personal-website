@@ -70,44 +70,8 @@ function imageGallery(slug: string, count: number, name: string): ImageItem[] {
 
 export const projects: Project[] = [
   {
-    slug: "foodops",
-    number: "01",
-    name: "FoodOps",
-    tagline:
-      "Translated a federal food safety regulation into a three-screen scan and a request-ready portal, built as an MVP.",
-    ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
-    industryTag: "Food Tech Startup",
-    role: "Product Designer",
-    scope: "Product, design system",
-    team: "1 designer, 1 product manager, plus stakeholders",
-    timeline: "6-week MVP",
-    context: [
-      "Restaurants sit at the end of the food supply chain. Under FSMA Rule 204, they have to keep records at every point they receive, transform, or ship covered food, and produce that data within 24 hours if FDA asks for it.",
-      "I designed both sides of this compliance platform alone: a mobile scanning app for kitchen staff, and a back-office portal for managers, three regulatory checkpoints in six weeks.",
-    ],
-    problem: [
-      "Nothing existed for this at the restaurant level. Records lived on paper, in scattered invoices, in whatever format a distributor happened to send. Pulling that together for an FDA request meant digging through files that were never built to be searched.",
-      "The real challenge was getting a kitchen worker under time pressure, and a manager juggling constant interruptions, to both use this correctly every time.",
-    ],
-    discovery: [
-      "Before I touched a screen, I read the FSMA Rule 204 text and the PTI implementation guidance myself. That's what surfaced the finding that shaped the whole product: a restaurant's receiving record depends on the distributor's shipping record to be verified as compliant. Two companies, one transaction, matched by lot code.",
-      "That finding is what justified a page most stakeholders didn't want built. Staff receive and scan, they don't browse a queue, so an Arriving Shipments list looked unnecessary from a pure workflow angle. My case was that the page was never for staff. It was the only point where a supplier's data could get into the system before a truck showed up, and without it, a receiving record had nothing to check itself against. The page stayed in scope.",
-    ],
-    workBody: [
-      "What shipped followed the regulation's own structure: separate sections for Arriving Shipments, Transformation, Shipping, Spreadsheet, Traceability Plan. Six weeks isn't enough time to gamble on an untested structure across all three checkpoints at once, so this is what let me design and validate consistently. I also split the platform into two form factors instead of forcing one responsive interface to do both jobs. A kitchen worker mid-shift and a manager fielding constant interruptions need completely different things, so the mobile app became a near-invisible capture layer, three screens, zero typing, while the portal carried the structural complexity: cross-referencing shipments, generating lot codes, producing exportable records.",
-      "I scoped the import pipeline as required from day one, since without it a clean data feed and a phone call with a scribbled note would look identical to the system. Every screen also runs on one token-based design system I built alongside the product, which is why Transformation and Shipping share the same form structure instead of getting rebuilt separately.",
-    ],
-    outcomeSummary: [
-      "I co-authored the technical data specifications with the Product Manager, turning each workflow into something developers could build from directly. Stakeholders approved it, with good feedback on the approach. What this engagement delivered was a system a restaurant can rely on when FDA comes asking. Every data relationship had a defined structure: cross-company reconciliation between receiving and shipping records, lot code logic linking transformation events to their source, a portal validated across every checkpoint.",
-      "That structure does the platform's actual job, a restaurant produces a compliant record within the 24-hour window FDA Rule 204 requires, instead of a manual search through scattered files. My engagement ended at handoff, so I can't speak to what happened after. What I can walk through, in full, is every decision behind it, and where I'd take it next.",
-    ],
-    media: videoMedia("foodops", 3, "FoodOps"),
-    images: imageGallery("foodops", 5, "FoodOps"),
-    accent: { light: "#b45309", dark: "#fbbf24" },
-  },
-  {
     slug: "lexora",
-    number: "02",
+    number: "01",
     name: "Lexora",
     tagline:
       "Built the design foundation for a GRC compliance platform, solo, from MVP to enterprise-ready.",
@@ -140,7 +104,7 @@ export const projects: Project[] = [
   },
   {
     slug: "opinly",
-    number: "03",
+    number: "02",
     name: "Opinly",
     tagline:
       "Rebuilt a competitive intelligence platform from static reporting to guided action, design system built from zero.",
@@ -171,34 +135,70 @@ export const projects: Project[] = [
   },
   {
     slug: "the-dividend-tracker",
-    number: "04",
+    number: "03",
     name: "The Dividend Tracker",
     tagline:
-      "Overhauled an outdated mobile dividend tracking app end to end, identifying every structural problem before redesigning the entire product.",
+      "Overhauled a mobile dividend tracker from feature-complete but dated and unusable to structured and premium.",
     industryTag: "Fintech",
     role: "UI/UX Designer",
     scope: "Product, website",
-    team: "1 designer, 1 engineer",
+    team: "1 designer, 2 engineers",
     timeline: "2 months",
     context: [
-      "The Dividend Tracker is a mobile investment app built for dividend investors. It tracks portfolio performance, monitors upcoming dividend payouts, forecasts future income, and helps investors set and track financial goals, all in one place. From someone receiving their first dividend to someone managing a complex multi-portfolio strategy, the app is built to make passive income visible and manageable.",
+      "The Dividend Tracker is a mobile app for dividend investors, tracking what they own, what it pays, and when. It has to work for someone tracking their first stock and someone running four portfolios across different tax accounts, in the same interface. I was the only designer, working directly with the engineers, with no formal brief, just one goal: make the app feel clean, modern, intuitive, and premium.",
     ],
     problem: [
-      "I audited the app first. Structural problems ran across every surface from onboarding to the most complex features in the product. A first-time investor trying to add their first portfolio hit a screen with no guidance and no clear starting point. The payout calendar showed dividend data without telling them what to do with it. Edge cases were missing throughout, so empty states, loading screens, and errors left users stranded at critical moments. The product had the features. The structure to use them didn't exist.",
+      "I audited the app screen by screen before designing anything. The visual design was dated, and the structure was worse: no onboarding, portfolio creation crammed onto one screen, a payout calendar that showed data without meaning, a paywall that asked before it explained, and no empty, error, or loading states anywhere. The product had the features. The structure to use them didn't exist.",
     ],
-    // Placeholder — real Discovery copy pending, matching FoodOps' pattern once written.
-    discovery: ["Placeholder discovery copy — real content pending."],
+    discovery: [
+      "With no brief to work from, the audit became the first deliverable. I went through the app and its web platform the way a first-time investor would, screen by screen, marking every point where I had to guess what to do next. The same pattern showed up everywhere: the feature existed, the path to it didn't.",
+    ],
     workBody: [
-      "The structural problems had one root cause: the product presented everything at once with no system for guiding users through complexity. I redesigned the entire product around one principle: progressive disclosure.",
-      "Portfolio creation went from a single overloaded screen to a guided experience with four distinct paths. The payout calendar became a layered structure moving from yearly forecast to monthly calendar to individual stock payouts by date. Premium features were shown in context before asking for payment, so free users understood what they were missing before being asked to upgrade. Showing value before asking for payment is progressive disclosure applied to the business model, not just the interface.",
-      "Empty states, loading states, and error states were designed across every flow so no moment in the product was left unhandled. One principle. Applied across an entire product.",
+      "Two decisions ran through the redesign, and neither worked alone. \"Clean, modern, premium\" is a visual claim. \"Intuitive\" is a structural one. Structurally, the fix was progressive disclosure: show what a user needs now, hold back the rest until they're ready, or paying. Portfolio creation became four distinct paths instead of one crowded screen. The payout calendar layered into yearly, monthly, and per-stock views. Premium features now explain their value before asking for payment. Hierarchy decisions shaped what gets attention first, a user's own portfolio ranks above general news, a headline number ranks above the detail beneath it.",
+      "Visually, there's no formal design system, just the same choices made by hand across all 31 flows, one accent color, one card pattern, one illustration style for empty states, instead of every screen solving its own problem alone. Every empty, error, and loading state got built from scratch, and the marketing site got rebuilt too, from a page that explained nothing to one built around a clear value and a real path to sign up or download. No user research or usage data backed any of this. Every call came from audit and judgment.",
     ],
     outcomeSummary: [
-      "An outdated app with no structural system became a product with a clear principle applied consistently across every surface. A first-time investor adding their first portfolio follows a guided path with a clear starting point. The payout calendar layers annual forecast, monthly calendar, and individual stock payouts in one screen so any level of detail is reachable without switching views. Every empty state, loading state, and error state has a handled response. The structure that was missing now exists.",
+      "Portfolio creation is four clear paths instead of one crowded screen. The payout calendar reads at whatever depth an investor wants. Premium features make their case before asking for payment. Every failure state tells the user what happened instead of leaving them stuck. The app went from dated and inconsistent to one accent color, one card pattern, and one visual language across the product and the website. There's no usage number behind this, only the before-and-after documented in the screens themselves, and the one thing I'd change is validating it against real user data instead of my own inspection alone. The structure that was missing now exists.",
     ],
     media: videoMedia("the-dividend-tracker", 5, "The Dividend Tracker"),
     images: imageGallery("the-dividend-tracker", 7, "The Dividend Tracker"),
     accent: { light: "#047857", dark: "#34d399" },
+  },
+  {
+    slug: "foodops",
+    number: "04",
+    name: "FoodOps",
+    tagline:
+      "Translated a federal food safety regulation into a three-screen scan and a request-ready portal, built as an MVP.",
+    ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
+    industryTag: "Food Tech Startup",
+    role: "Product Designer",
+    scope: "Product, design system",
+    team: "1 designer, 1 product manager, plus stakeholders",
+    timeline: "6-week MVP",
+    context: [
+      "Restaurants sit at the end of the food supply chain. Under FSMA Rule 204, they have to keep records at every point they receive, transform, or ship covered food, and produce that data within 24 hours if FDA asks for it.",
+      "I designed both sides of this compliance platform alone: a mobile scanning app for kitchen staff, and a back-office portal for managers, three regulatory checkpoints in six weeks.",
+    ],
+    problem: [
+      "Nothing existed for this at the restaurant level. Records lived on paper, in scattered invoices, in whatever format a distributor happened to send. Pulling that together for an FDA request meant digging through files that were never built to be searched.",
+      "The real challenge was getting a kitchen worker under time pressure, and a manager juggling constant interruptions, to both use this correctly every time.",
+    ],
+    discovery: [
+      "Before I touched a screen, I read the FSMA Rule 204 text and the PTI implementation guidance myself. That's what surfaced the finding that shaped the whole product: a restaurant's receiving record depends on the distributor's shipping record to be verified as compliant. Two companies, one transaction, matched by lot code.",
+      "That finding is what justified a page most stakeholders didn't want built. Staff receive and scan, they don't browse a queue, so an Arriving Shipments list looked unnecessary from a pure workflow angle. My case was that the page was never for staff. It was the only point where a supplier's data could get into the system before a truck showed up, and without it, a receiving record had nothing to check itself against. The page stayed in scope.",
+    ],
+    workBody: [
+      "What I delivered followed the regulation's own structure: separate sections for Arriving Shipments, Transformation, Shipping, Spreadsheet, Traceability Plan. Six weeks isn't enough time to gamble on an untested structure across all three checkpoints at once, so this is what let me design consistently across every checkpoint. I also split the platform into two form factors instead of forcing one responsive interface to do both jobs. A kitchen worker mid-shift and a manager fielding constant interruptions need completely different things, so the mobile app became a near-invisible capture layer, three screens, zero typing, while the portal carried the structural complexity: cross-referencing shipments, generating lot codes, producing exportable records.",
+      "I scoped the import pipeline as required from day one, since without it a clean data feed and a phone call with a scribbled note would look identical to the system. Every screen also runs on one token-based design system I built alongside the product, which is why Transformation and Shipping share the same form structure instead of getting rebuilt separately.",
+    ],
+    outcomeSummary: [
+      "I co-authored the technical data specifications with the Product Manager, turning each workflow into something developers could build from directly. Stakeholders approved it, with good feedback on the approach. What this engagement delivered was a system a restaurant can rely on when FDA comes asking. Every data relationship had a defined structure: cross-company reconciliation between receiving and shipping records, lot code logic linking transformation events to their source, a portal structured the same way across every checkpoint.",
+      "That structure does the platform's actual job, a restaurant produces a compliant record within the 24-hour window FDA Rule 204 requires, instead of a manual search through scattered files. My engagement ended at handoff, so I can't speak to what happened after. What I can walk through, in full, is every decision behind it, and where I'd take it next.",
+    ],
+    media: videoMedia("foodops", 3, "FoodOps"),
+    images: imageGallery("foodops", 5, "FoodOps"),
+    accent: { light: "#b45309", dark: "#fbbf24" },
   },
 ];
 
