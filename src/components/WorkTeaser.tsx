@@ -78,7 +78,14 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
       // very top, ignoring the padding entirely) — margin-top does, since
       // margin shifts the box itself in normal flow before the video's
       // inset:0 is even resolved against it.
-      className="relative col-span-4 mt-2 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
+      //
+      // aspect-[4/3] on mobile, stepping up to 16/9 at sm+ (2026-09-21,
+      // explicit request) — a taller, more mobile-native tile than 16:9 gave
+      // at that width, without going tall enough (4:5, 1:1) to risk cropping
+      // into UI content below the fold, since the video itself is
+      // object-cover object-top and a taller box only ever crops from the
+      // bottom.
+      className="relative col-span-4 mt-2 aspect-[4/3] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 sm:aspect-[16/9] lg:col-span-8"
     >
       <video
         ref={ensureVideoMuted}
@@ -176,7 +183,12 @@ export function WorkTeaser() {
                       )}
                     </RevealText>
                     <RevealText as="div" delay={delay} className="flex flex-col gap-5">
-                      <p className={`w-full text-pretty ${textStyles.heading2xl}`}>
+                      {/* headingXl (20px), down from heading2xl (24px,
+                          2026-09-21, explicit request) — scoped to this call
+                          site only, not a change to the shared heading2xl
+                          token, since /info and ProjectShowcase.tsx both
+                          still use heading2xl and weren't asked to shrink. */}
+                      <p className={`w-full text-pretty ${textStyles.headingXl}`}>
                         {project.tagline}
                       </p>
                     </RevealText>
