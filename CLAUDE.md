@@ -7,7 +7,7 @@ Design portfolio site. Goal: showcase project case studies to land work/clients.
 - Tailwind CSS v4
 - ESLint (flat config)
 - `motion` (import from `motion/react`) for scroll reveals, `@phosphor-icons/react` for icons (`/dist/ssr` entry point in Server Components, no `/dist/ssr` needed once a component is already `'use client'`)
-- Single font family: General Sans (`font-sans`, default) truly everywhere now, including narrative prose, numerals, and captions — [Fontshare](https://www.fontshare.com/fonts/general-sans), self-hosted via `next/font/local` (`src/app/layout.tsx`, files in `src/app/fonts/`), swapped in 2026-07-19 replacing the original Geist Sans. Only the weights actually used in the codebase are loaded (Extralight/200, Regular/400, Medium/500) — check `grep -rohE "font-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)" src` before assuming a new weight is available; adding one means pulling another file from Fontshare's API (or, for Semibold/600, re-adding the already-downloaded file already sitting in `src/app/fonts/`), not just adding a Tailwind class. A Newsreader serif/sans pairing was tried (2026-07-16) and explicitly reverted at the user's request — don't reintroduce a serif without being asked again. **Geist Mono removed entirely (2026-07-19):** it used to power the Clock, project numbers ("01"), case-study beat numbers, and — as an explicit, scoped exception to the single-family rule — the outcome-stat caption text in `ProjectShowcase.tsx`. All of that now renders in General Sans; `--font-mono` was dropped from `globals.css`'s `@theme inline` block entirely (not repointed at General Sans, since a `font-mono` utility class that isn't monospace would be a misleading name) and every call site (`src/lib/typography.ts`'s `mono` token, renamed to `numeral` since it's no longer mono; `showcaseCaption`) had its `font-mono` class stripped directly. `tabular-nums` was kept wherever it existed — that's a digit-width feature independent of font family, not part of the mono exception. **`font-semibold` → `font-medium` site-wide (2026-07-19):** every heading/stat/meta-value that used to be Semibold/600 (Hero's H1, the contact page H1, `typography.ts`'s `h3`/`stat`/`showcaseMetaValue`/`showcaseStat` tokens) now uses Medium/500 instead — this dropped Semibold/600 usage to zero, so the font file itself was removed from `layout.tsx`'s `localFont` load list too (still present on disk in `src/app/fonts/` if it's needed again, just not loaded).
+- Single font family: General Sans (`font-sans`, default) truly everywhere now, including narrative prose, numerals, and captions — [Fontshare](https://www.fontshare.com/fonts/general-sans), self-hosted via `next/font/local` (`src/app/layout.tsx`, files in `src/app/fonts/`), swapped in 2026-07-19 replacing the original Geist Sans. Only the weights actually used in the codebase are loaded (Extralight/200, Light/300, Regular/400, Medium/500, Semibold/600) — check `grep -rohE "font-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)" src` before assuming a new weight is available; adding one means pulling another file from Fontshare's API, not just adding a Tailwind class. A Newsreader serif/sans pairing was tried (2026-07-16) and explicitly reverted at the user's request — don't reintroduce a serif without being asked again. **Geist Mono removed entirely (2026-07-19):** it used to power the Clock, project numbers ("01"), case-study beat numbers, and — as an explicit, scoped exception to the single-family rule — the outcome-stat caption text in `ProjectShowcase.tsx`. All of that now renders in General Sans; `--font-mono` was dropped from `globals.css`'s `@theme inline` block entirely (not repointed at General Sans, since a `font-mono` utility class that isn't monospace would be a misleading name) and every call site (`src/lib/typography.ts`'s `mono` token, renamed to `numeral` since it's no longer mono; `showcaseCaption`) had its `font-mono` class stripped directly. `tabular-nums` was kept wherever it existed — that's a digit-width feature independent of font family, not part of the mono exception. **`font-semibold` → `font-medium` site-wide (2026-07-19), partially reversed (2026-09-16):** every heading/stat/meta-value that used to be Semibold/600 (Hero's H1, the contact page H1, `typography.ts`'s `h3`/`stat`/`showcaseMetaValue`/`showcaseStat` tokens) was switched to Medium/500 instead, which dropped Semibold/600 usage to zero and got the font file removed from `layout.tsx`'s `localFont` load list. Semibold/600 was later re-added — both the load-list entry and one call site — for `ShowcaseHeadline.tsx`'s project-name span specifically (explicit request, 2026-09-16); every other former Semibold site named above is still Medium/500, this wasn't a full reversal.
 
 @AGENTS.md
 
@@ -31,11 +31,10 @@ Design portfolio site. Goal: showcase project case studies to land work/clients.
   scrollbar gutter/track renders identically on every route, including `/gallery` which has no
   overflow of its own — without this, `/gallery` would render measurably narrower than pages that
   do overflow, and the scrollbar would flicker in/out when navigating between routes.
-- `src/components/` — `Nav`, `Footer`, `Hero`, `WorkTeaser`, `WorkBrowser`, `CaseStudyDetail`,
-  `Clock`, `Reveal`
-- `src/data/projects.ts` — typed `Project[]` with all case study copy (context/challenge/approach/
-  outcomes/reflection are still fully populated even though the UI no longer renders them — see
-  `## Work page architecture` before deleting any of these fields); `getProject(slug)` helper
+- `src/components/` — `Nav`, `Footer`, `Hero`, `WorkTeaser`, `WorkBrowser`, `Clock`, `RevealText`
+- `src/data/projects.ts` — typed `Project[]` with all case study copy: `context`/`problem`/
+  `discovery`/`workBody`/`outcomeSummary`, each `string[]` rendered verbatim as separate `<p>`s via
+  `ParagraphPair` (see `## Work page architecture`); `getProject(slug)` helper
 - `public/work/{slug}/N.mp4` + `N-poster.jpg` — looping muted product-walkthrough clips (N = 1 to
   however many that project has: Opinly 4, Lexora 5, The Dividend Tracker 5, FoodOps 3). Converted
   from the real source **video** exports at `Documents/Design Journey/Portfolio assets/V2/{Project}/Video/`
@@ -59,31 +58,41 @@ A deliberate blend of the three references below, applied 2026-07-16:
   `aria-live` — it's ambient, not a status update screen readers should hear every second),
   `Work, Contact` small-caps links right. (The mixed serif/sans pairing this reference also
   suggested was tried and reverted — see `## Stack`, single Geist Sans family now.)
-- **talimi's essay-like storytelling** → numbered case-study sections (`00 Context`, `01
-  Challenge`...) are alive and well, just relocated: they used to live on full-page `/work/[slug]`
-  routes, now they render **inline and always-expanded** on `/work` (see
-  `## Work page architecture`) via `CaseStudyDetail.tsx`. The numbering/labeling system itself
-  didn't change, only where it's mounted.
+- **talimi's essay-like storytelling** → labeled case-study sections (Context/Problem/Discovery/
+  Approach/Outcome) are alive and well, just relocated and restructured: they used to live on
+  full-page `/work/[slug]` routes with numbered prefixes (`00 Context`, `01 Challenge`...) via
+  `CaseStudyDetail.tsx`, now they render **inline and always-expanded** on `/work` via
+  `ProjectShowcase.tsx`'s `ParagraphPair` (see `## Work page architecture`) — plain labels, no
+  numbering prefix in the current rendering.
 - **aaronpoe's colorful warmth** → each project now has its own locked accent color instead of
   one site-wide accent: Opinly stays orange (`#c2410c`/`#fb923c`), Lexora is blue
   (`#1d4ed8`/`#60a5fa`), The Dividend Tracker is emerald (`#047857`/`#34d399`), FoodOps is amber
-  (`#b45309`/`#fbbf24`) — all verified ≥4.5:1 contrast in both themes (see the Python snippet in
-  git history / ask to re-derive if adding a project). Global chrome (Nav, Footer, Hero) keeps
-  the neutral default (Opinly's orange); only the `WorkBrowser` section shifts accent, tied to
-  whichever project is active. This resolves the `Color Consistency Lock` rule per-scope, not
-  page-wide: within the billboard, everything is one consistent color at a time, it just changes
-  deliberately as the selection changes — the rule is about avoiding random inconsistency, not
-  about banning intentional, content-driven color transitions.
+  (`#b45309`/`#fbbf24`) — pairs originally verified ≥4.5:1 contrast in both themes back when the
+  site still had a dark mode (see the Python snippet in git history / ask to re-derive if adding a
+  project), light half is what actually renders today (see below). Global chrome (Nav, Footer,
+  Hero) keeps the neutral default (Opinly's orange); only the `WorkBrowser` section shifts accent,
+  tied to whichever project is active. This resolves the `Color Consistency Lock` rule per-scope,
+  not page-wide: within the billboard, everything is one consistent color at a time, it just
+  changes deliberately as the selection changes — the rule is about avoiding random inconsistency,
+  not about banning intentional, content-driven color transitions.
 
 **How the per-project accent works:** `Project.accent = { light, dark }` in `projects.ts`. Any
 element that should carry a project's color sets `data-project-accent` + inline
 `style={{ '--accent-light': ..., '--accent-dark': ... }}` (see `WorkBrowser.tsx`) — a CSS rule in
-`globals.css` resolves `--accent` from those two vars against the same `prefers-color-scheme`
-switch the global default uses, so every component that already reads `text-accent`/`bg-accent`
-etc. just works without changes.
+`globals.css` resolves `--accent` to that element's `--accent-light` value. `--accent-dark` is
+still set alongside it (and still passed through from `Project.accent.dark`) but is dead going
+into the CSS today — see below.
 
-Base tokens (`--background`/`--foreground`/`--muted`/`--border`) stay monochrome and unchanged.
-Dark mode via `prefers-color-scheme` media query, as before. Still open to further redirection.
+**Site-wide light lock (2026-08-10):** the site no longer follows the visitor's
+`prefers-color-scheme` setting. `:root` and every per-project accent render their **light** values
+only — `--background`/`--foreground`/`--muted`/`--border`/`--accent` are fixed to one light
+palette everywhere (`globals.css`'s `:root` block), with no `@media (prefers-color-scheme: dark)`
+override left anywhere in the stylesheet. `/gallery` is the sole exception, and it isn't
+theme-adaptive either: it forces its own fixed dark palette unconditionally via
+`[data-force-dark]`, regardless of the visitor's system theme, as a deliberate one-off design
+choice rather than a second theme mode. Don't reintroduce system-theme adaptivity (a `dark:`
+variant, a new `prefers-color-scheme` block, restoring `--accent-dark`'s CSS wiring) without an
+explicit re-ask — the removal was intentional, not an oversight.
 
 ## Media pipeline
 Case study visuals are real product-walkthrough video, not screenshots. Source files live outside
@@ -107,10 +116,19 @@ through GIF's palette and gets noticeably cleaner gradients/detail at a similar 
 Data model: `Project.media: MediaItem[]` (`{ src, poster, alt }`) replaces the old flat
 `images: string[]`. `videoMedia(slug, count, name)` in `projects.ts` generates the array from the
 `N.mp4`/`N-poster.jpg` naming convention — don't hand-write media entries, add/remove clips by
-changing the `count` argument and re-running the conversion for that slug. Every clip is used now:
-`media[0]` is the collapsed-row thumbnail *and* the case study's Context-adjacent clip, `media[1]`
-sits after Challenge, and everything from `media[2]` onward renders as additional inline clips
-after Approach (see `CaseStudyDetail.tsx`).
+changing the `count` argument and re-running the conversion for that slug.
+
+**STALE, needs a real reconciliation pass (flagged 2026-09-17, not fixed here):** the two
+paragraphs this replaced described how `media[0]`/`media[1]`/`media[2]+` and `Project.images`
+render across `CaseStudyDetail.tsx`'s old numbered `00 Context`→`04 Reflection` beat structure plus
+a separate Outcomes section (see `## Work page architecture` step 6), and `ImageGrid.tsx` — both
+files are now deleted. In the current `ProjectShowcase.tsx`, `project.media`
+is read from exactly one call site (`pick(project.media, 0)`, the non-Opinly placeholder hero
+video), and `project.images` isn't read anywhere at all — meaning the real, converted image assets
+this section describes generating are currently unused dead data, not rendered on `/work` in any
+form. Don't trust the old per-slot mapping claims below this point for either array; if you're
+adding media for a new project, trace `ProjectShowcase.tsx`'s own placeholder-cycling logic
+directly rather than this doc.
 
 **Static images (2026-07-16):** `Project.images: ImageItem[]` (`{ src, alt }`), generated by
 `imageGallery(slug, count, name)` from `~/Documents/Design Journey/Portfolio assets/V2/Images/`
@@ -120,8 +138,7 @@ opening each one and reading the on-screen branding (Opinly=8, Lexora=7, Dividen
 FoodOps=5, in that source order). If more get added to that folder later, they'll need the same
 manual visual sort — don't assume filename order maps to project boundaries. Converted from PNG
 (some raw files were 4-6.5MB) to JPEG (`ffmpeg -vf "scale='min(1600,iw)':-2" -q:v 4`), landing at
-56-292KB each. Rendered by `ImageGrid.tsx` in a `grid-cols-2 sm:grid-cols-3` layout, inserted in
-`CaseStudyDetail.tsx` after the Approach beat's clips, before Outcomes.
+56-292KB each.
 
 The `<video autoPlay loop muted playsInline preload="metadata">` pattern has two call sites today:
 `ShowcaseVideo` (`src/components/showcase/ProjectShowcase.tsx`, used on `/work`) and `TeaserVideo`
@@ -137,7 +154,7 @@ browser counts it as painted.
 **Reduced motion and video (2026-07-31):** video no longer has a `motion-reduce:hidden`/
 static-image swap — it plays for every visitor regardless of `prefers-reduced-motion`. This is a
 deliberate, explicit exception to this codebase's otherwise universal "full bypass under reduced
-motion" rule (see `Reveal.tsx`/`RevealWipe.tsx`/`CursorLabel.tsx`/`FooterWordmark.tsx`, all of
+motion" rule (see `RevealText.tsx`/`CursorLabel.tsx`/`FooterWordmark.tsx`, all of
 which still fully respect it) — video is presenting actual portfolio content, not a decorative
 motion effect, so it's treated like a static image would be (no reduced-motion opt-out needed)
 rather than like UI chrome. Root-caused via a real user report: Analytics showed a large share of
@@ -209,13 +226,29 @@ this required.
    project's `h3` name is now `sr-only`, and the case study starts immediately with no visible
    chrome above it. The `divide-y` between projects and each showcase's own internal `border-t`
    were removed too, so projects run together with no divider line at all.
-6. **Current (2026-07-17):** `CaseStudyDetail.tsx` (the original talimi-style narrative — meta row
+6. `CaseStudyDetail.tsx` (the original talimi-style narrative — meta row
    + numbered `00 Context`→`04 Reflection` beats + Outcomes) was retired in favor of a single
    shared `ProjectShowcase.tsx` (`src/components/showcase/`), originally built as
    `OpinlyShowcase.tsx` for Opinly alone and then generalized to all 4 projects per explicit user
-   request ("keep it consistent with other projects"). `CaseStudyDetail.tsx` itself is left in the
-   tree, unused, rather than deleted — kept around in case it's still wanted as reference/rollback
-   until the new layout is confirmed final.
+   request ("keep it consistent with other projects"). `CaseStudyDetail.tsx` itself was initially
+   left in the tree, unused, as a reference/rollback option — it has since been deleted outright
+   (the new `ProjectShowcase.tsx` layout is confirmed final), so it no longer exists in this repo.
+7. **Current (2026-09-11):** the "Approach" section's data shape was consolidated. It used to be
+   `workIntro`/`workDetail`/`workDetail2?`/`workClosing` — four separate `Beat` fields (each a
+   `{ heading, body }` pair, originally meant to render as its own headed subsection, modeled on
+   Opinly's first hand-written Approach copy: a 3-act intro → detail → closing arc). The `heading`
+   half had gone fully unused for a while — `ProjectShowcase.tsx` only ever read each `.body` and
+   concatenated them into one flowing paragraph block, so every project was carrying dead heading
+   text. Rather than just drop the unused headings, the whole 4-field/3-act shape was replaced with
+   a single `workBody: string[]` — the exact same shape as `context`/`problem`/`discovery`/
+   `outcomeSummary` (one or more paragraphs, rendered verbatim as separate `<p>`s via
+   `ParagraphPair`, no fixed beat count or forced narrative arc). `workBody` already existed as an
+   optional override for projects whose Approach copy didn't fit the 3-act shape (Lexora, then
+   FoodOps); it's now the only shape, required on every project, and Opinly/The Dividend Tracker's
+   old `workIntro`/`workDetail`/`workClosing` paragraphs were folded into `workBody` arrays in the
+   same render order they used to appear in. Don't reintroduce the `Beat`/intro-detail-closing split
+   for new projects — write Approach copy as a plain paragraph array like the other narrative
+   fields.
 
 `WorkBrowser.tsx` (rendered from `src/app/work/page.tsx`) maps every project straight to
 `<ProjectShowcase project={project} />`, no per-project branching. `ProjectShowcase.tsx` is the
@@ -279,6 +312,6 @@ See `.claude/rules/skills-used.md` for the full list of design/a11y skills run a
 ## Working with me
 - Case study content changes should go through `src/data/projects.ts`, not be hardcoded in page components.
 - When pulling new images from Figma, prefer the flattened `export` render for pure-visual gallery slides, and `rawImages` (not the composite) for slides that mix narrative text with mockups — the composite bakes caption text into the image.
-- New scroll-triggered content should use the `Reveal` component (`src/components/Reveal.tsx`), not ad hoc `whileInView` calls — it already handles `prefers-reduced-motion`.
+- New scroll-triggered content should use the `RevealText` component (`src/components/RevealText.tsx`), not ad hoc `whileInView`/GSAP calls — it already handles `prefers-reduced-motion`. (`Reveal.tsx`, this rule's original target, was removed site-wide and replaced by `RevealText.tsx`'s line-mask reveal.)
 - Image containers use an inset `box-shadow` outline (`rgba(0,0,0,0.1)` light / `rgba(255,255,255,0.1)` dark), not a `border-border` class — tinted borders read as dirt on image edges.
 - Decorative icons need `aria-hidden="true"`. Hover-only visual affordances need a `group-focus-visible:` equivalent. Don't skip heading levels.

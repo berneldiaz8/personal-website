@@ -4,25 +4,29 @@ import { Grid } from "@/components/showcase/Grid";
 import { experience } from "@/data/experience";
 import { textStyles } from "@/lib/typography";
 
+const title = "Bernel Diaz — Info";
+const description =
+  "Bernel Diaz is a designer who brings structure and clarity to complex products, from early-stage startups to platforms serving over a million people.";
+
 export const metadata: Metadata = {
-  title: "Bernel Diaz — Info",
-  description:
-    "Bernel Diaz is a designer who brings structure and clarity to complex products, from early-stage startups to platforms serving over a million people.",
+  title,
+  description,
+  alternates: { canonical: "/info" },
+  openGraph: { title, description, url: "/info" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 const paragraphs = [
-  "UI/UX Designer based in the Philippines.",
-  "On most of my projects, I've been the only designer on the team.",
-  "Most of my work has started before the structure was settled. I'm drawn to products at that stage, where someone has to decide how the thing actually works, not just how it looks.",
-  "I find what's broken, define the structure, and ship it end to end. Across B2B SaaS, startups, and enterprise software.",
+  "A designer of digital products, based in the Philippines. I read a product before I touch it. Most of my work starts before the structure is settled, when someone has to decide how the thing works and not only how it looks. I define that structure and design what a team builds from, across B2B SaaS, startups, enterprise software, and consumer apps.",
+  "On the work shown here, I was the only designer, alongside engineers and founders. On other teams, I worked with a head of design and other designers. Today, I use AI-assisted development to turn my designs into working prototypes, so I test ideas in code and engineers start from something closer to the real product. I built this site the same way.",
 ];
 
 export default function InfoPage() {
   return (
-    <section className="pt-10">
+    <section className="pt-8">
       <h1 className="sr-only">About</h1>
 
-      <Grid className="items-start pb-6">
+      <Grid className="items-start pb-[52px]">
         <RevealText className="col-span-4 flex flex-col gap-6 sm:col-span-8 lg:col-span-4 lg:col-start-7">
           {paragraphs.map((paragraph) => (
             <p key={paragraph} className={textStyles.heading2xl}>
@@ -44,8 +48,8 @@ export default function InfoPage() {
               Context"/"The Problem"/"The Work"/"The Outcome" on /work),
               per explicit user request to keep this label's grid slot
               consistent with that pattern. */}
-          <RevealText as="div" className="col-span-4 sm:col-span-4 lg:col-span-3 lg:col-start-4">
-            <p className={textStyles.labelXs}>Experience</p>
+          <RevealText as="div" className="col-span-4 sm:col-span-4 lg:col-span-3">
+            <p className={textStyles.eyebrowLg}>EXPERIENCE</p>
           </RevealText>
 
           <div className="col-span-4 flex flex-col sm:col-span-8 lg:col-span-6 lg:col-start-7">
@@ -56,7 +60,7 @@ export default function InfoPage() {
                   i === 0 ? "" : "mt-10 border-t border-border pt-3"
                 }`}
               >
-                <div className="flex flex-col lg:flex-1">
+                <div className="flex flex-col gap-1 lg:flex-1">
                   {/* as="a" — the anchor itself is the SplitText target
                       here (not nested inside a `<p>` this component
                       splits), so it keeps its own role and gets the
@@ -68,12 +72,13 @@ export default function InfoPage() {
                     href={entry.companyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    delay={i * 0.06}
                     className={`w-fit ${textStyles.heading2xl}`}
                   >
                     {entry.company}
                   </RevealText>
-                  <RevealText as="div">
-                    <p className={textStyles.heading2xlLight}>{entry.role}</p>
+                  <RevealText as="div" delay={i * 0.06}>
+                    <p className={textStyles.heading2xlRegular}>{entry.role}</p>
                   </RevealText>
                 </div>
                 {/* lg:contents stays on this plain wrapper, not on the
@@ -90,13 +95,13 @@ export default function InfoPage() {
                     flex items of the grandparent once lg:contents kicks
                     in. */}
                 <div className="mt-2 flex items-center justify-between lg:mt-0 lg:contents">
-                  <RevealText as="div" className="lg:flex-1">
-                    <p className="text-xs font-normal uppercase tracking-[0.4px] text-muted">
+                  <RevealText as="div" delay={i * 0.06} className="lg:flex-1">
+                    <p className={textStyles.labelSm}>
                       {entry.location}
                     </p>
                   </RevealText>
-                  <RevealText as="div" className="lg:flex-1 lg:text-right">
-                    <p className="text-xs font-normal uppercase tracking-[0.4px] text-muted">
+                  <RevealText as="div" delay={i * 0.06} className="lg:flex-1 lg:text-right">
+                    <p className={textStyles.labelSm}>
                       {entry.years}
                     </p>
                   </RevealText>

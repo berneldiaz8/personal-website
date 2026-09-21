@@ -15,8 +15,9 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
  * masks/translates into view with a stagger, instead of the whole block
  * fading in as one unit (that whole-block fade, Reveal.tsx, was removed
  * site-wide per explicit user request — this is now the only scroll-reveal
- * primitive left on the site, alongside ShowcaseHeadline's own bespoke
- * word-mask reveal). matchMedia full reduced-motion bypass
+ * primitive left on the site; ShowcaseHeadline routes through this
+ * component too rather than keeping its own bespoke reveal). matchMedia
+ * full reduced-motion bypass
  * (SplitText.create is never even called under reduced motion), ScrollTrigger
  * at "top 85%", one-shot toggleActions, REVEAL_EASE. Duration/stagger scale
  * with line count rather than being fixed — see the "play once ready"
@@ -115,9 +116,66 @@ export function RevealText({
   const pendingLinesRef = useRef<Element[] | null>(null);
   const [ready, setReady] = useState(false);
 
+  // Mirrors `ready` for code that can't wait for a dependency-array re-run
+  // (see onSplit below) — the write happens in an effect, not during render
+  // (mutating a ref during render trips this codebase's own
+  // react-hooks/refs lint rule, same reasoning as PageTransition.tsx's
+  // module-flag comment), read only from effects/callbacks.
+  const readyRef = useRef(false);
+  useEffect(() => {
+    readyRef.current = ready;
+  }, [ready]);
+
   useEffect(() => {
     pageReady.then(() => setReady(true));
   }, []);
+
+  // Builds the actual reveal tween for a given set of split lines. Pulled
+  // out so both the mount-time split effect (onSplit, for a resplit that
+  // lands after `ready` is already true) and the "play once ready" effect
+  // below (for the common first-time case) can create it the same way.
+  function createRevealTween(lines: Element[]) {
+    const root = ref.current;
+    if (!root) return undefined;
+
+    // Both duration and stagger spread scale with how many lines actually
+    // got split, instead of every instance on the site — a single-word
+    // label ("Role") and an 8-line merged narrative block ("The Work") —
+    // using the same fixed number regardless of content. Went through two
+    // rounds of retuning: the original fixed 0.9s/0.5s (~1.4s total
+    // regardless of content) read as sluggish; cutting it to match a
+    // reference recording's raw speed (0.4-0.5s/0-0.35s) then read as an
+    // abrupt snap — REVEAL_EASE's long decelerate tail needs real runway
+    // to be perceptible, and 0.4-0.5s didn't leave enough of it even after
+    // one lengthening pass (0.6-0.75s) still wasn't enough per explicit
+    // user feedback. Lengthened further here. `lineCount - 1` (not
+    // `lineCount`) so a single line adds zero stagger — nothing to
+    // cascade against — and gets only its own base duration.
+    const lineCount = lines.length;
+    const duration = gsap.utils.clamp(0.85, 1.05, 0.85 + (lineCount - 1) * 0.03);
+    const staggerAmount = gsap.utils.clamp(0, 0.55, (lineCount - 1) * 0.08);
+
+    return gsap.to(lines, {
+      yPercent: 0,
+      opacity: 1,
+      duration,
+      delay,
+      // `amount`, not `each` — still bounds the total stagger spread
+      // regardless of line count (staggerAmount's own clamp above already
+      // caps it), it's just no longer one fixed number for every
+      // instance on the site.
+      stagger: { amount: staggerAmount, from: "start" },
+      ease: REVEAL_EASE,
+      onComplete: () => {
+        hasPlayed.current = true;
+      },
+      scrollTrigger: {
+        trigger: root,
+        start: "top 85%",
+        toggleActions: "play none none none",
+      },
+    });
+  }
 
   // Split + hide immediately on mount — never gated on ready (see comment
   // above).
@@ -133,9 +191,14 @@ export function RevealText({
           ? Array.from(paragraphs)
           : [root];
 
+        // linesClass names the mask wrapper (SplitText appends "-mask" to it,
+        // giving ".reveal-line-mask") so globals.css can target it — see the
+        // comment there for why it needs deliberate descender/ascender
+        // headroom independent of whatever `leading-*` value a call site uses.
         SplitText.create(splitTargets, {
           type: "lines",
           mask: "lines",
+          linesClass: "reveal-line",
           autoSplit: true,
           onSplit(self) {
             if (hasPlayed.current) {
@@ -144,6 +207,20 @@ export function RevealText({
             }
 
             gsap.set(self.lines, { yPercent: 110, opacity: 0 });
+
+            // If `ready` already flipped true by the time this (re)split
+            // happens — a resize/orientation-change/webfont-load landing
+            // after the "play once ready" effect below already ran once —
+            // that effect won't fire again (its dependency array is
+            // [ready, delay], both already stable). Build the tween for
+            // these lines right here instead, and return it so SplitText
+            // tracks it the same way GSAP's autoSplit expects: the next
+            // resplit's own revert() calls .kill() on whatever this
+            // returned, exactly like the very first split's tween.
+            if (readyRef.current) {
+              return createRevealTween(self.lines);
+            }
+
             pendingLinesRef.current = self.lines;
           },
         });
@@ -157,51 +234,16 @@ export function RevealText({
   // ScrollTrigger) is only created once the loading screen is actually
   // gone, without delaying the split+hide step above. pendingLinesRef stays
   // null under reduced motion (the matchMedia guard above skips the split
-  // entirely), so this stays a no-op there too.
+  // entirely), so this stays a no-op there too. Only handles the *first*
+  // time `ready` flips true after mount — a later resplit is handled
+  // directly inside onSplit above instead, since this effect won't re-run
+  // for it.
   useGSAP(
     () => {
-      const root = ref.current;
-      if (!ready || !pendingLinesRef.current || !root) return;
+      if (!ready || !pendingLinesRef.current) return;
       const lines = pendingLinesRef.current;
       pendingLinesRef.current = null;
-
-      // Both duration and stagger spread scale with how many lines actually
-      // got split, instead of every instance on the site — a single-word
-      // label ("Role") and an 8-line merged narrative block ("The Work") —
-      // using the same fixed number regardless of content. Went through two
-      // rounds of retuning: the original fixed 0.9s/0.5s (~1.4s total
-      // regardless of content) read as sluggish; cutting it to match a
-      // reference recording's raw speed (0.4-0.5s/0-0.35s) then read as an
-      // abrupt snap — REVEAL_EASE's long decelerate tail needs real runway
-      // to be perceptible, and 0.4-0.5s didn't leave enough of it even after
-      // one lengthening pass (0.6-0.75s) still wasn't enough per explicit
-      // user feedback. Lengthened further here. `lineCount - 1` (not
-      // `lineCount`) so a single line adds zero stagger — nothing to
-      // cascade against — and gets only its own base duration.
-      const lineCount = lines.length;
-      const duration = gsap.utils.clamp(0.85, 1.05, 0.85 + (lineCount - 1) * 0.03);
-      const staggerAmount = gsap.utils.clamp(0, 0.55, (lineCount - 1) * 0.08);
-
-      gsap.to(lines, {
-        yPercent: 0,
-        opacity: 1,
-        duration,
-        delay,
-        // `amount`, not `each` — still bounds the total stagger spread
-        // regardless of line count (staggerAmount's own clamp above already
-        // caps it), it's just no longer one fixed number for every
-        // instance on the site.
-        stagger: { amount: staggerAmount, from: "start" },
-        ease: REVEAL_EASE,
-        onComplete: () => {
-          hasPlayed.current = true;
-        },
-        scrollTrigger: {
-          trigger: root,
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      createRevealTween(lines);
     },
     { scope: ref, dependencies: [ready, delay] },
   );

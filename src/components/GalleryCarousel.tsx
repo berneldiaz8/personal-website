@@ -9,7 +9,6 @@ import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
 import type { CarouselItem } from "@/data/galleryCarousel";
 import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
-import { textStyles } from "@/lib/typography";
 import { CursorLabel } from "./CursorLabel";
 import { RevealText } from "./RevealText";
 import { Grid } from "./showcase/Grid";
@@ -406,6 +405,13 @@ function CarouselTile({
  * "Close" label doesn't hit this problem: its color is a static `text-white`
  * plus `mix-blend-mode: difference`, not a `--foreground` token, so there's
  * no custom-property cascade to break through the portal boundary.
+ *
+ * Font size/weight bumped from text-xs/(default weight) to text-sm/
+ * font-normal (2026-09-16, explicit request) to match "Drag to explore"'s
+ * font style (GalleryCarousel's own top-level comment). Color deliberately
+ * left as the hardcoded hex above rather than switched to `text-muted` (what
+ * "Drag to explore" uses) — swapping to that class here would reintroduce
+ * the exact portal/custom-property bug this comment documents.
  */
 function GalleryLightbox({
   item,
@@ -466,7 +472,7 @@ function GalleryLightbox({
       >
         <p
           aria-hidden="true"
-          className="text-left text-xs uppercase tracking-wide text-[#f4f4f5]"
+          className="text-left text-sm font-normal uppercase tracking-wide text-[#f4f4f5]"
         >
           {item.project} — {item.label}
         </p>
@@ -772,20 +778,26 @@ export function GalleryCarousel({ items }: { items: CarouselItem[] }) {
           1-column span) plus `whitespace-nowrap` matter here specifically —
           without them this short caption wrapped onto two lines, since a
           single grid column is narrower than "Drag to explore" needs.
-          textStyles.showcaseCaption (src/lib/typography.ts) is this design
-          system's actual caption token — text-xs font-normal uppercase
-          leading-[18px] text-muted — rather than a hand-rolled className;
-          text-muted resolves to #a1a1aa under this page's forced-dark theme
-          (see globals.css's [data-force-dark] block), matching the exact
-          color originally asked for via the token instead of a hardcoded
-          hex. Not aria-hidden: this is genuinely informative (the drag
-          affordance isn't otherwise announced anywhere), not decorative. */}
+          Switched from `textStyles.showcaseCaption` to matching the /info
+          page's "Experience" label's font style (2026-09-16, explicit
+          request) — text-sm uppercase tracking-wide instead of the smaller
+          caption scale, but font-normal rather than `eyebrowLg`'s own
+          font-medium (explicit follow-up request), so written out
+          explicitly rather than using that token directly (it's shared with
+          the Experience label and other call sites, which stay font-medium).
+          Color is unchanged either way: text-muted resolves to #a1a1aa
+          under this page's forced-dark theme (see globals.css's
+          [data-force-dark] block). Not aria-hidden: this is genuinely
+          informative (the drag affordance isn't otherwise announced
+          anywhere), not decorative. */}
       <Grid className="pointer-events-none absolute inset-x-0 bottom-full mb-4">
         <RevealText
           as="div"
           className="col-span-2 col-start-3 whitespace-nowrap sm:col-span-2 sm:col-start-5 lg:col-span-3 lg:col-start-7"
         >
-          <p className={textStyles.showcaseCaption}>Drag to explore</p>
+          <p className="text-sm font-normal uppercase tracking-wide text-muted">
+            Drag to explore
+          </p>
         </RevealText>
       </Grid>
       {/* pl-* only, deliberately not pr-* — matches Grid.tsx's own left

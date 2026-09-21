@@ -2,10 +2,16 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { WorkBrowser } from "@/components/WorkBrowser";
 
+const title = "Bernel Diaz — Work";
+const description =
+  "In-depth product design case studies by Bernel Diaz covering Lexora, FoodOps, The Dividend Tracker, and Opinly, from early challenges to measurable outcomes.";
+
 export const metadata: Metadata = {
-  title: "Bernel Diaz — Work",
-  description:
-    "In-depth product design case studies by Bernel Diaz covering Lexora, FoodOps, The Dividend Tracker, and Opinly, from early challenges to measurable outcomes.",
+  title,
+  description,
+  alternates: { canonical: "/work" },
+  openGraph: { title, description, url: "/work" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 export default function WorkPage() {

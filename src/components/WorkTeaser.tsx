@@ -9,6 +9,7 @@ import { RevealText } from "./RevealText";
 import { VideoLoadingSpinner } from "./VideoLoadingSpinner";
 import { useVideoReady } from "@/lib/useVideoReady";
 import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
+import { textStyles } from "@/lib/typography";
 
 function accentStyle(accent: { light: string; dark: string }): CSSProperties {
   return {
@@ -68,7 +69,16 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
       // from aspect-ratio). Opting this item out of stretch removes the
       // ambiguity outright instead of depending on both engines agreeing on
       // resolution order.
-      className="relative col-span-4 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
+      //
+      // mt-2 (8px, 2026-09-16 explicit request), not pt-2 — the <video>
+      // inside is `absolute inset-0`, and an absolutely positioned child's
+      // containing block is its ancestor's *padding* box, which already
+      // includes the padding area. Padding-top on this div wouldn't move
+      // that boundary at all (the video would still render flush to the
+      // very top, ignoring the padding entirely) — margin-top does, since
+      // margin shifts the box itself in normal flow before the video's
+      // inset:0 is even resolved against it.
+      className="relative col-span-4 mt-2 aspect-[16/9] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 lg:col-span-8"
     >
       <video
         ref={ensureVideoMuted}
@@ -93,34 +103,67 @@ export function WorkTeaser() {
     <section className="px-4 sm:px-5 lg:px-6">
       <h2 className="sr-only">Selected Work</h2>
 
+      {/* Visible section label above the first row (2026-09-16, explicit
+          request) — same font style as the /info page's "Experience"
+          section label (`textStyles.eyebrowLg`). text-muted again (reverted
+          from a brief text-foreground stint), which is exactly what
+          `eyebrowLg` already provides, so back to using that token directly.
+          Separate from the sr-only h2 above, which keeps the heading
+          hierarchy intact; this is purely a visual label, not a second
+          heading. */}
+      <RevealText as="div" className="mb-3">
+        <p className={textStyles.eyebrowLg}>(SELECTED WORKS)</p>
+      </RevealText>
+
       <div className="flex flex-col">
-        {projects.map((project) => {
+        {projects.map((project, i) => {
           const preview = previewFor(project);
+          // Per-row cascade (2026-09-16 and earlier) — each row's reveal
+          // starts slightly after the previous one's, instead of every row
+          // animating on the same timing basis. Restored after the
+          // Reveal->RevealText migration dropped it (RevealText's `delay`
+          // prop, added in this same diff for GalleryLightbox, covers it).
+          const delay = i * 0.08;
 
           return (
-            // border-t + the 184px gap to the next row live on this plain
+            // border-t + the 200px gap to the next row live on this plain
             // wrapper, not the Link itself — a Link's hover/click box
             // covers its own padding too, so putting that spacing directly
             // on the Link made hovering the empty space below each row
             // trigger the cursor-follow label. This keeps the Link's box
             // tight to its actual visible content (text + video).
-            <div key={project.slug} className="border-t border-border pb-[184px]">
+            //
+            // id + scroll-mt-28 (2026-09-16, explicit request) — anchor
+            // target for Hero.tsx's "SEE SELECTED WORK" button (`/#${slug}`
+            // of the first project in `projects`). scroll-mt-28 (112px)
+            // offsets the jump so this row's top clears Nav.tsx's `sticky
+            // top-0` header instead of landing underneath it. SeeWorkButton.tsx
+            // reads this same value automatically via Lenis's own
+            // scroll-margin-top support — no separate offset to keep in sync.
+            <div
+              key={project.slug}
+              id={project.slug}
+              className="scroll-mt-28 border-t border-border pb-[200px]"
+            >
               <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
                 <CursorLabel
-                  label="More"
+                  label="View case study"
                   portal
-                  className="relative grid grid-cols-4 gap-y-6 pt-4 sm:grid-cols-8 lg:grid-cols-12 lg:items-stretch lg:gap-x-4"
+                  className="relative grid grid-cols-4 gap-y-6 pt-2 sm:grid-cols-8 lg:grid-cols-12 lg:items-stretch lg:gap-x-4"
                 >
                   <div className="col-span-4 flex flex-col gap-4 sm:col-span-8 lg:col-span-3 lg:justify-between">
                     <RevealText
                       as="h3"
-                      // leading-[1.2], not 1.1 — same descender-clipping fix as
-                      // ShowcaseHeadline.tsx/Hero.tsx (see ShowcaseHeadline's own
-                      // comment for the mechanism): SplitText's mask wrapper has
-                      // no explicit height, so it inherits its box purely from
-                      // line-height, with none of the overflow allowance normal
-                      // unmasked text gets for descenders (e.g. Opinly's "p"/"y").
-                      className="text-balance text-3xl font-medium leading-[1.2] tracking-[-0.4px] sm:text-4xl"
+                      delay={delay}
+                      // leading-[1], matching Hero.tsx's h1 (2026-09-16, explicit
+                      // request) — the old leading-[1.2] existed to dodge
+                      // RevealText's SplitText mask clipping descender ink at
+                      // tight leading (see ShowcaseHeadline.tsx's own comment for
+                      // the mechanism), but that's since been fixed at the source
+                      // (`.reveal-line-mask` in globals.css carries its own
+                      // headroom now), so leading-[1] is safe here the same way
+                      // it already is on Hero.tsx/ShowcaseHeadline.tsx.
+                      className="text-balance text-3xl font-medium leading-[1] tracking-[-0.4px] sm:text-4xl"
                     >
                       {project.slug === "the-dividend-tracker" ? (
                         <>
@@ -132,11 +175,8 @@ export function WorkTeaser() {
                         project.name
                       )}
                     </RevealText>
-                    <RevealText as="div" className="flex flex-col gap-5">
-                      <p className="w-full text-pretty text-xs font-medium uppercase leading-[18px] text-foreground">
-                        {project.ownership}
-                      </p>
-                      <p className="w-full text-pretty text-xs font-normal uppercase leading-[18px] text-foreground">
+                    <RevealText as="div" delay={delay} className="flex flex-col gap-5">
+                      <p className={`w-full text-pretty ${textStyles.heading2xl}`}>
                         {project.tagline}
                       </p>
                     </RevealText>

@@ -14,25 +14,38 @@ import type { ReactNode } from "react";
  * entirely rather than shortening it, matching every other animation in this
  * codebase.
  */
+// Fixed box the hover-swap track clips to. "sm" (14px) matches the text-xs
+// (12px) links this component was originally built for — 14px of line box
+// comfortably clears a 12px font's descenders. "md" (20px) is for text-sm
+// (14px) links: at that font size a 14px box clips descenders (the "g" in
+// an email address, the "y" in "Gallery") since font-size and line-height
+// are then equal with no room left over.
+const boxSize = {
+  sm: "h-[14px] leading-[14px]",
+  md: "h-[20px] leading-[20px]",
+};
+
 export function NavLink({
   href,
   children,
   target,
   rel,
   className = "",
+  size = "sm",
 }: {
   href: string;
   children: ReactNode;
   target?: string;
   rel?: string;
   className?: string;
+  size?: "sm" | "md";
 }) {
   return (
     <Link
       href={href}
       target={target}
       rel={rel}
-      className={`group relative inline-block h-[14px] overflow-hidden leading-[14px] ${className}`}
+      className={`group relative inline-block overflow-hidden ${boxSize[size]} ${className}`}
     >
       <span className="block transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-full group-focus-visible:-translate-y-full motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-focus-visible:translate-y-0">
         {children}
