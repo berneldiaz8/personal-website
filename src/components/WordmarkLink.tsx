@@ -42,6 +42,14 @@ import { REVEAL_EASE } from "@/lib/gsapEase";
  * is always `0`, so a stale limit clamping "down toward 0" can't actually be
  * observed today — but calling `resize()` first costs nothing and avoids the
  * same landmine resurfacing if this ever scrolls to a non-zero target.
+ *
+ * `h-[16px] overflow-hidden` on the Link matches the Logo's own height
+ * exactly, so it doubles as a mask box — the *stationary* window
+ * NavEntrance.tsx slides the Logo itself (`data-nav-mount`) up out of/into on
+ * mount, same trick NavLink's `boxSize` wrappers use for their hover swap.
+ * The transform has to live on the Logo, not this Link — the Link is what
+ * carries `overflow-hidden`, so animating it directly would move the clip
+ * boundary along with the content instead of revealing anything through it.
  */
 export function WordmarkLink() {
   const pathname = usePathname();
@@ -50,7 +58,7 @@ export function WordmarkLink() {
     <Link
       href="/"
       aria-label="berneldiaz, home"
-      className="col-span-2 w-fit sm:col-span-2 lg:col-span-3"
+      className="col-span-2 block h-[16px] w-fit overflow-hidden sm:col-span-2 lg:col-span-3"
       onClick={(e) => {
         if (pathname !== "/") return;
         e.preventDefault();
@@ -65,7 +73,7 @@ export function WordmarkLink() {
         }
       }}
     >
-      <Logo className="h-[16px] w-auto text-foreground" aria-hidden="true" />
+      <Logo data-nav-mount className="h-[16px] w-auto text-foreground" aria-hidden="true" />
     </Link>
   );
 }

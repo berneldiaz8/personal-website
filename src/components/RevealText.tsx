@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { REVEAL_EASE } from "@/lib/gsapEase";
 import { pageReady } from "@/lib/pageReady";
+import { navReady } from "@/lib/navReady";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -126,8 +127,15 @@ export function RevealText({
     readyRef.current = ready;
   }, [ready]);
 
+  // navReady always resolves after pageReady by construction (NavEntrance's
+  // own reveal tween only starts once pageReady fires), so awaiting it here
+  // guarantees any above-the-fold instance (Hero's h1, already past
+  // ScrollTrigger's "top 85%" the moment it's created) starts only once the
+  // nav row has visibly finished — see navReady.ts's own comment for why.
+  // Below-the-fold instances aren't delayed in practice: their ScrollTrigger
+  // already waits on the user scrolling there, long after nav is done.
   useEffect(() => {
-    pageReady.then(() => setReady(true));
+    Promise.all([pageReady, navReady]).then(() => setReady(true));
   }, []);
 
   // Builds the actual reveal tween for a given set of split lines. Pulled

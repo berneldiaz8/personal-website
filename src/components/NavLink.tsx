@@ -47,7 +47,21 @@ export function NavLink({
       rel={rel}
       className={`group relative inline-block overflow-hidden ${boxSize[size]} ${className}`}
     >
-      <span className="block transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-full group-focus-visible:-translate-y-full motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-focus-visible:translate-y-0">
+      {/* data-nav-mount: MountReveal.tsx's mount-time reveal target (used both
+          by NavEntrance.tsx for Nav's own links and by GalleryInfoRow.tsx for
+          its email/LinkedIn/Dribbble links). Deliberately on this inner span,
+          not the <a> above — the <a> is what carries `overflow-hidden` (this
+          box's mask), so it has to stay the stationary window; transforming
+          it directly would move the clip boundary along with the content
+          instead of revealing anything. This span is also what the
+          hover-swap's own `group-hover:-translate-y-full` already targets —
+          MountReveal clears its GSAP-set inline transform on completion
+          (clearProps) so that CSS-driven hover keeps working untouched
+          afterward. */}
+      <span
+        data-nav-mount
+        className="block transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-full group-focus-visible:-translate-y-full motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-focus-visible:translate-y-0"
+      >
         {children}
       </span>
       <span
