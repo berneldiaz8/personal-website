@@ -46,6 +46,19 @@ import { hasPlayed, markPlayed } from "@/lib/playOnce";
  * skips straight to calling `onDone` with no animation at all — the fresh
  * elements are already rendering in their natural, final position, so
  * there's nothing to hide or reveal the second time.
+ *
+ * `pointer-events: none` on every `<a>` in scope, for the whole hidden+tween
+ * window: NavLink's hover-swap targets its *duplicate* span (the aria-hidden
+ * one), which this component never touches and has no idea a reveal is even
+ * in progress — it responds to `:hover` purely via CSS, independent of
+ * whatever GSAP is doing to the visible span next to it. Hovering while the
+ * visible span was still mid-tween (partially slid into view) let the
+ * duplicate slide up too, rendering both at once — two overlapping copies of
+ * the label (confirmed via a user-supplied screen recording, right after
+ * load, hovering a nav link). Blocking pointer-events for the same window
+ * `clearProps` already waits for makes hover physically impossible until the
+ * link has actually finished settling, closing the window entirely rather
+ * than trying to choreograph the two transforms around each other.
  */
 const DURATION = 0.7;
 const STAGGER = 0.06;
@@ -85,8 +98,10 @@ export function MountReveal({
           onDone?.();
           return;
         }
+        const anchors = root.querySelectorAll("a");
 
         gsap.set(targets, { yPercent: 100 });
+        gsap.set(anchors, { pointerEvents: "none" });
         waitFor.then(() => {
           gsap.to(targets, {
             yPercent: 0,
@@ -95,6 +110,7 @@ export function MountReveal({
             stagger: STAGGER,
             onComplete: () => {
               gsap.set(targets, { clearProps: "transform" });
+              gsap.set(anchors, { clearProps: "pointerEvents" });
               markPlayed(playKey);
             },
           });
