@@ -80,7 +80,7 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     scope: "Product, website, design system",
     team: "1 designer, 10+ engineers, plus stakeholder",
-    timeline: "1+ year, four phases of product growth",
+    timeline: "1 year, four phases of product growth",
     context: [
       "Lexora is a secure compliance platform. Organizations use it to manage and resolve reports across whistleblowing, grievances, conflict of interest, and fraud. Reporters submit anonymously. Case managers investigate without breaking that confidentiality. Organizations produce audit-ready documentation for regulators. I joined a five-person team as the only designer and built the design foundation across four phases of growth.",
     ],
