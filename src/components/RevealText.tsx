@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { REVEAL_EASE } from "@/lib/gsapEase";
 import { pageReady } from "@/lib/pageReady";
-import { navReady } from "@/lib/navReady";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -42,7 +41,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
  * The hide step (gsap.set to yPercent:110/opacity:0) always runs immediately
  * on mount/split, same as before pageReady (src/lib/pageReady.ts) existed —
  * only the actual reveal *tween* waits for it. Gating the hide step too was
- * tried and was wrong: LoadingScreen.tsx's overlay fades out over 0.5s
+ * tried and was wrong: LoadingScreen.tsx's overlay fades out over 0.35s
  * *before* pageReady resolves (it only resolves once that fade fully
  * completes), so if hiding waited on it too, the fully-visible, un-animated
  * text would flash through the dissolving overlay, then suddenly snap to
@@ -127,15 +126,15 @@ export function RevealText({
     readyRef.current = ready;
   }, [ready]);
 
-  // navReady always resolves after pageReady by construction (NavEntrance's
-  // own reveal tween only starts once pageReady fires), so awaiting it here
-  // guarantees any above-the-fold instance (Hero's h1, already past
-  // ScrollTrigger's "top 85%" the moment it's created) starts only once the
-  // nav row has visibly finished — see navReady.ts's own comment for why.
-  // Below-the-fold instances aren't delayed in practice: their ScrollTrigger
-  // already waits on the user scrolling there, long after nav is done.
+  // Used to gate on navReady too (Nav's own mount reveal), so above-the-fold
+  // instances (Hero's h1, already past ScrollTrigger's "top 85%" the moment
+  // it's created) started only once the nav row had visibly finished — one
+  // continuous top-to-bottom wave across nav and hero. Removed per explicit
+  // request (2026-09-23): Hero's reveal no longer waits on Nav's, so the two
+  // animate independently once the loading screen is gone — only Nav's own
+  // internal link-to-link stagger (MountReveal.tsx's STAGGER) remains.
   useEffect(() => {
-    Promise.all([pageReady, navReady]).then(() => setReady(true));
+    pageReady.then(() => setReady(true));
   }, []);
 
   // Builds the actual reveal tween for a given set of split lines. Pulled

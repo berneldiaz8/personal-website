@@ -7,9 +7,9 @@
  * Needed specifically because /gallery lives outside the (site) route
  * group's persistent layout — navigating between it and any other route
  * fully unmounts/remounts Nav (and thus NavEntrance), giving it a fresh
- * component instance with fresh refs. `pageReady`/`navReady` being
- * already-resolved promises by that point doesn't prevent a replay; it just
- * means the replay starts almost immediately instead of being skipped.
+ * component instance with fresh refs. `pageReady` being an already-resolved
+ * promise by that point doesn't prevent a replay; it just means the replay
+ * starts almost immediately instead of being skipped.
  * A plain per-component `useRef` doesn't survive an unmount either — this
  * needs to be module-level state, same reasoning as pageReady.ts's own
  * mutable binding and PageTransition.tsx's `hasMountedBefore` flag.
