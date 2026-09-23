@@ -169,7 +169,7 @@ export const projects: Project[] = [
     number: "04",
     name: "FoodOps",
     tagline:
-      "Translated a federal food safety regulation into a three-screen scan and a request-ready portal, built as an MVP.",
+      "Translated a federal food safety regulation into a three-screen scan and a request-ready portal, designed as an MVP.",
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Food Tech Startup",
     role: "Product Designer",
