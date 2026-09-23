@@ -75,7 +75,7 @@ html {
    form/scroll UI within this scope also renders dark. */
 [data-force-dark] {
   --background: #000000;
-  --foreground: #f4f4f5;
+  --foreground: #ffffff;
   --muted: #a1a1aa;
   --accent: #fb923c;
   --border: #27272a;
