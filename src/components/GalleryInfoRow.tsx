@@ -16,13 +16,14 @@ import { MaskedText } from "./MaskedText";
  * thin client wrapper around the same MountReveal.tsx mechanism
  * NavEntrance.tsx uses for Nav's wordmark/links) — every label and link here
  * slides up into place out of its own mask box, staggered, once per hard
- * load, gated on `navReady` so it starts only once Nav's own reveal is
- * underway on /gallery too (continuing the same top-to-bottom cascade
- * RevealText's above-the-fold instances already follow elsewhere).
- * GalleryFooterReveal exists specifically so `navReady` — a plain Promise —
- * never gets imported into *this* file: this component has no "use client"
- * and stays a Server Component, and passing a live Promise as a prop across
- * the Server→Client boundary made Next.js's SSR try to serialize/await it,
+ * load, gated on `pageReady` so it starts once the loading screen is gone.
+ * (This used to instead gate on `navReady`, starting only once Nav's own
+ * reveal on /gallery was underway — a cross-reveal wave removed per explicit
+ * request 2026-09-23; see GalleryFooterReveal.tsx's own comment.)
+ * GalleryFooterReveal exists specifically so that Promise never gets
+ * imported into *this* file: this component has no "use client" and stays a
+ * Server Component, and passing a live Promise as a prop across the
+ * Server→Client boundary made Next.js's SSR try to serialize/await it,
  * hanging every render of this page indefinitely (confirmed — see that
  * file's own comment for the full story). The three real links
  * (email/LinkedIn/Dribbble) get the reveal for free — NavLink.tsx's own

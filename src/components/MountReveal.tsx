@@ -24,12 +24,18 @@ import { hasPlayed, markPlayed } from "@/lib/playOnce";
  * scratch (GalleryInfoRow's labels/copyright have no existing NavLink-style
  * wrapper to reuse).
  *
- * `onDone` (if given) fires NAV_OVERLAP seconds before the sequence's
- * calculated end, not at the tween's true onComplete — see NavEntrance.tsx's
- * comment for why: waiting for full completion reads as a dead pause, since
- * REVEAL_EASE's tail is barely-perceptible motion by the time it actually
- * finishes. `clearProps`/hover-safety still waits for the real onComplete
- * regardless of `onDone`'s earlier timing.
+ * This used to also take an `onDone` callback, fired partway through the
+ * tween, that let a second reveal elsewhere (RevealText.tsx's above-the-fold
+ * instances, GalleryFooterReveal.tsx's footer row) start only once *this*
+ * reveal was underway — one continuous top-to-bottom wave chaining nav to
+ * whatever came next. Both of those cross-reveal dependencies were removed
+ * per explicit request (2026-09-23; see RevealText.tsx's and
+ * GalleryFooterReveal.tsx's own comments): each reveal now only waits on the
+ * loading screen (`pageReady`) directly, so `onDone`/`navReady`
+ * (src/lib/navReady.ts) had no remaining callers and were deleted along with
+ * it. Only this component's own internal per-target `STAGGER` remains — the
+ * cascade *within* a single reveal (e.g. Work → Info → Gallery → Contact),
+ * not the wave *between* separate reveals.
  *
  * `display: contents` keeps this wrapper out of whatever Grid layout it sits
  * inside — its children stay direct grid items for col-span placement, this
@@ -39,13 +45,13 @@ import { hasPlayed, markPlayed } from "@/lib/playOnce";
  * not once-per-mount: /gallery lives outside the (site) route group's
  * persistent layout, so navigating between it and any other route fully
  * remounts Nav (and thus whichever MountReveal instance lives under it) —
- * `waitFor` (pageReady/navReady) is already resolved by then, so without this
- * check the reveal replayed from scratch on every crossing, visible as the
+ * `waitFor` (pageReady) is already resolved by then, so without this check
+ * the reveal replayed from scratch on every crossing, visible as the
  * nav/footer briefly vanishing and sliding back in on each navigation
  * (confirmed via a user-supplied screen recording). On a replay mount this
- * skips straight to calling `onDone` with no animation at all — the fresh
- * elements are already rendering in their natural, final position, so
- * there's nothing to hide or reveal the second time.
+ * skips straight to returning with no animation at all — the fresh elements
+ * are already rendering in their natural, final position, so there's
+ * nothing to hide or reveal the second time.
  *
  * `pointer-events: none` on every `<a>` in scope, for the whole hidden+tween
  * window: NavLink's hover-swap targets its *duplicate* span (the aria-hidden
@@ -62,18 +68,14 @@ import { hasPlayed, markPlayed } from "@/lib/playOnce";
  */
 const DURATION = 0.7;
 const STAGGER = 0.06;
-const OVERLAP = 0.35;
 
 export function MountReveal({
   children,
   waitFor,
-  onDone,
   playKey,
 }: {
   children: ReactNode;
   waitFor: Promise<void>;
-  /** Called once this reveal is mostly finished — see file comment for exact timing. */
-  onDone?: () => void;
   /** Unique id for this reveal instance — see file comment. */
   playKey: string;
 }) {
@@ -81,23 +83,14 @@ export function MountReveal({
 
   useGSAP(
     () => {
-      if (hasPlayed(playKey)) {
-        onDone?.();
-        return;
-      }
+      if (hasPlayed(playKey)) return;
 
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const root = ref.current;
-        if (!root) {
-          onDone?.();
-          return;
-        }
+        if (!root) return;
         const targets = root.querySelectorAll("[data-nav-mount]");
-        if (!targets.length) {
-          onDone?.();
-          return;
-        }
+        if (!targets.length) return;
         const anchors = root.querySelectorAll("a");
 
         gsap.set(targets, { yPercent: 100 });
@@ -114,14 +107,7 @@ export function MountReveal({
               markPlayed(playKey);
             },
           });
-          if (onDone) {
-            const totalTime = DURATION + STAGGER * (targets.length - 1);
-            gsap.delayedCall(Math.max(totalTime - OVERLAP, 0), onDone);
-          }
         });
-      });
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        onDone?.();
       });
       return () => mm.revert();
     },

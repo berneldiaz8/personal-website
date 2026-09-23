@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { lenisInstance } from "@/components/SmoothScroll";
@@ -27,11 +26,12 @@ import { markPageReady } from "@/lib/pageReady";
  * Theme: this site has no system prefers-color-scheme switch anymore — it's
  * fixed light everywhere except /gallery, which forces dark via an explicit
  * data-force-dark attribute (see globals.css's [data-force-dark] block and
- * gallery/page.tsx's own root div). Since this component mounts at the root
- * layout, outside gallery's own data-force-dark div, it re-derives the same
- * thing from the route itself via usePathname() (same pattern
- * SmoothScroll.tsx already uses for pathname-driven logic) rather than
- * inventing a second dark-mode mechanism.
+ * gallery/page.tsx's own root div). The loading screen is a deliberate,
+ * scoped exception to that route split: it always forces dark, on every
+ * route, so the preloader itself reads consistently regardless of which
+ * page is loading underneath it (explicit request, 2026-09-23) — it doesn't
+ * re-derive light/dark from usePathname() the way gallery's own content
+ * does.
  *
  * Reduced motion: the overlay is hidden via the motion-reduce:hidden CSS
  * class directly on the root element, not a JS matchMedia check — a check
@@ -88,7 +88,6 @@ const RAMP_DURATION = 4;
 const MIN_DISPLAY_MS = 500;
 
 export function LoadingScreen() {
-  const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(true);
@@ -138,7 +137,7 @@ export function LoadingScreen() {
           gsap
             .timeline()
             .to(progress, { value: 100, duration: 0.35, ease: "power2.out", onUpdate: updateText })
-            .to(containerRef.current, { opacity: 0, duration: 0.5, ease: "power1.out" }, "+=0.2")
+            .to(containerRef.current, { opacity: 0, duration: 0.35, ease: "power1.out" })
             .call(() => {
               setVisible(false);
               markPageReady();
@@ -162,7 +161,7 @@ export function LoadingScreen() {
     <div
       ref={containerRef}
       aria-hidden="true"
-      {...(pathname === "/gallery" ? { "data-force-dark": "" } : {})}
+      data-force-dark=""
       className="fixed inset-0 z-[200] flex items-center justify-center bg-background text-foreground motion-reduce:hidden"
     >
       <span ref={valueRef} className="text-sm font-medium tabular-nums">
