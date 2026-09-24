@@ -407,8 +407,9 @@ function CarouselTile({
  * no custom-property cascade to break through the portal boundary.
  *
  * Font size/weight bumped from text-xs/(default weight) to text-sm/
- * font-normal (2026-09-16, explicit request) to match "Drag to explore"'s
- * font style (GalleryCarousel's own top-level comment). Color deliberately
+ * font-medium (2026-09-16, then font-normal briefly, back to font-medium
+ * 2026-09-24) to match "Drag to explore"'s font style (GalleryCarousel's
+ * own top-level comment). Color deliberately
  * left as the hardcoded hex above rather than switched to `text-muted` (what
  * "Drag to explore" uses) — swapping to that class here would reintroduce
  * the exact portal/custom-property bug this comment documents.
@@ -472,7 +473,7 @@ function GalleryLightbox({
       >
         <p
           aria-hidden="true"
-          className="text-left text-sm font-normal uppercase tracking-wide text-[#f4f4f5]"
+          className="text-left text-sm font-medium uppercase tracking-wide text-[#f4f4f5]"
         >
           {item.project} — {item.label}
         </p>
@@ -781,11 +782,12 @@ export function GalleryCarousel({ items }: { items: CarouselItem[] }) {
           Switched from `textStyles.showcaseCaption` to matching the /info
           page's "Experience" label's font style (2026-09-16, explicit
           request) — text-sm uppercase tracking-wide instead of the smaller
-          caption scale, but font-normal rather than `eyebrowLg`'s own
-          font-medium (explicit follow-up request), so written out
-          explicitly rather than using that token directly (it's shared with
-          the Experience label and other call sites, which stay font-medium).
-          Color is unchanged either way: text-muted resolves to #a1a1aa
+          caption scale. Was briefly font-normal instead of `eyebrowLg`'s own
+          font-medium (2026-09-16 follow-up), written out explicitly rather
+          than using that token directly; switched back to font-medium
+          (2026-09-24, explicit request), so it now matches eyebrowLg's
+          weight too even though it's still hand-written rather than using
+          that shared token. Color is unchanged either way: text-muted resolves to #a1a1aa
           under this page's forced-dark theme (see globals.css's
           [data-force-dark] block). Not aria-hidden: this is genuinely
           informative (the drag affordance isn't otherwise announced
@@ -795,7 +797,7 @@ export function GalleryCarousel({ items }: { items: CarouselItem[] }) {
           as="div"
           className="col-span-2 col-start-3 whitespace-nowrap sm:col-span-2 sm:col-start-5 lg:col-span-3 lg:col-start-7"
         >
-          <p className="text-sm font-normal uppercase tracking-wide text-muted">
+          <p className="text-sm font-medium uppercase tracking-wide text-muted">
             Drag to explore
           </p>
         </RevealText>
