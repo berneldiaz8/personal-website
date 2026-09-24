@@ -36,7 +36,7 @@ export function GalleryInfoRow() {
   return (
     <footer className="text-muted">
       <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
-      <Grid className="items-start pt-3 pb-6 text-sm gap-y-4">
+      <Grid className="items-start py-5 text-sm gap-y-4 sm:pb-6 sm:pt-3">
         <GalleryFooterReveal>
           <div className="col-span-4 flex flex-col items-start gap-1 font-medium text-foreground sm:col-span-4 lg:col-span-6">
             <MaskedText className="font-medium uppercase text-muted">Contact</MaskedText>

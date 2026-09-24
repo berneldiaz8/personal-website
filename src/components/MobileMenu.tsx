@@ -395,13 +395,13 @@ export function MobileMenu({
             </button>
           </div>
 
-          <nav data-tight-reveal-mask className="flex flex-1 flex-col items-start justify-center gap-2">
+          <nav data-tight-reveal-mask className="flex flex-1 flex-col items-start justify-center gap-1">
             {LINKS.map((link) => (
               <Link key={link.href} href={link.href} onClick={onClose}>
                 <RevealText
                   as="div"
                   delay={LINK_BASE_DELAY}
-                  className="text-4xl font-medium uppercase leading-[1] tracking-[-0.5px] text-foreground"
+                  className="text-[40px] font-medium uppercase leading-[1] tracking-[-0.5px] text-foreground"
                 >
                   {link.label}
                 </RevealText>
