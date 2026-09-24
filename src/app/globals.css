@@ -68,6 +68,18 @@ html {
   margin-block: -0.12em;
 }
 
+/* MobileMenu.tsx's Home/Work/Info/Gallery links, and its Contact label/email
+   underneath, opt out of the headroom above (explicit request, 2026-09-24) —
+   at their tight `gap-2`/`gap-1` spacing the extra padding/margin was
+   visibly changing the links' vertical rhythm. (The nav links are rendered
+   all-caps via `uppercase` and have no descenders to protect either way;
+   Contact's email does, so its descenders (the g in "gmail") may clip
+   slightly tighter now — accepted as part of the same explicit request.) */
+[data-tight-reveal-mask] .reveal-line-mask {
+  padding-block: 0;
+  margin-block: 0;
+}
+
 /* /gallery stays dark unconditionally, by deliberate design, independent of
    the rest of the site's (fixed light) palette — see src/app/gallery/page.tsx.
    Values are duplicated from the site's former dark palette rather than
