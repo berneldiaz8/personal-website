@@ -363,6 +363,31 @@ export function MobileMenu({
   if (!rendered) return null;
 
   return (
+    // `h-dvh` alongside `inset-0` (explicit request, 2026-09-25, after a
+    // user-supplied real-device screen recording — Recordings/
+    // ScreenRecording_09-24-2026 13-11-37_1.mp4) — root-caused via
+    // frame-by-frame extraction: the panel opened and closed correctly the
+    // first time, but on a second open, partway through (while `isOpen`
+    // stayed true the whole time — the panel never actually closed and
+    // reopened), a gap of real page content appeared bleeding through below
+    // the black area, cutting Contact off entirely, and the frame right
+    // before it showed Safari's own address bar visibly collapse to its
+    // compact state (freeing up extra viewport height). `inset-0` alone
+    // gives this fixed panel its height implicitly via `top:0`/`bottom:0`
+    // both resolving to 0 against the viewport — the classic iOS Safari bug
+    // this hits is that a `position:fixed` element's *implicit* height from
+    // top+bottom doesn't reliably re-resolve live as the dynamic toolbar
+    // animates (particularly while scroll is locked, which this panel does
+    // the whole time it's open — see the scroll-lock effect above), so the
+    // panel kept the shorter height computed while the toolbar was still
+    // expanded even after the toolbar shrank and the real viewport grew.
+    // `h-dvh` sets an *explicit* height in dynamic-viewport-height units,
+    // which browsers specifically keep live-updated against the toolbar's
+    // current state — CSS's abs-pos rules make an explicit `height` win over
+    // `inset-0`'s `bottom:0` when both are present, so this doesn't fight
+    // the existing `inset-0` positioning, it just makes the height track
+    // correctly. Same `h-dvh` pattern gallery/page.tsx already uses for its
+    // own single-viewport, no-overflow layout.
     <div
       ref={panelRef}
       data-force-dark
@@ -370,7 +395,7 @@ export function MobileMenu({
       aria-modal="true"
       id={id}
       tabIndex={-1}
-      className="fixed inset-0 z-40 focus:outline-none"
+      className="fixed inset-0 z-40 h-dvh focus:outline-none"
     >
       {/* clip-path default (pre-JS) is fully hidden — same reasoning as
           every other overlay in this codebase that must not flash visible
