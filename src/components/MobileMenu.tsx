@@ -360,6 +360,46 @@ export function MobileMenu({
     };
   }, [isOpen]);
 
+  // `h-dvh` in the className below (explicit request, 2026-09-25) turned out
+  // not to be enough on its own — confirmed against a real device after
+  // shipping it: the CSS-only fix worked in desktop devtools' mobile
+  // emulation (no real dynamic toolbar to get out of sync with) but the
+  // original bug still reproduced on an actual phone. `dvh` is *supposed* to
+  // stay live-synced to Safari's toolbar state by spec, but this panel's own
+  // scroll lock right above (`preventDefault` on wheel/touchmove) is
+  // specifically the kind of interference real-world reports tie to Safari's
+  // `dvh` recalculation going stale — the toolbar's collapse/expand gesture
+  // is partly driven by the page's own scroll, and blocking that scroll can
+  // leave the browser's internal viewport bookkeeping (and the `dvh` value
+  // derived from it) inconsistent even though the toolbar itself still
+  // visibly animates. `window.visualViewport` sidesteps this: it's a
+  // separate browser API specifically for tracking the actual visible
+  // viewport (accounting for on-screen keyboards and toolbar chrome) that
+  // fires its own synchronous `resize` event whenever that area changes,
+  // independent of whatever the page's scroll handling is doing — so this
+  // reads its `height` directly and writes it as an inline pixel height on
+  // the panel, refreshed live on every `resize`. Inline styles win over the
+  // `h-dvh` class by specificity, so `h-dvh` stays as the initial/fallback
+  // value (first paint, or a browser with no `visualViewport` support) and
+  // this effect only refines it once real measurements are available.
+  useEffect(() => {
+    if (!isOpen) return;
+    const panel = panelRef.current;
+    const vv = window.visualViewport;
+    if (!panel || !vv) return;
+
+    const updateHeight = () => {
+      panel.style.height = `${vv.height}px`;
+    };
+    updateHeight();
+    vv.addEventListener("resize", updateHeight);
+
+    return () => {
+      vv.removeEventListener("resize", updateHeight);
+      panel.style.height = "";
+    };
+  }, [isOpen]);
+
   if (!rendered) return null;
 
   return (
