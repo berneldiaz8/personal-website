@@ -107,7 +107,7 @@ export const projects: Project[] = [
     number: "02",
     name: "Opinly",
     tagline:
-      "Rebuilt a competitive intelligence platform from static reporting to guided action, design system built from zero.",
+      "Rebuilt an AI competitive intelligence platform from static reporting to guided action, design system built from zero.",
     industryTag: "SEO AI Startup",
     role: "UI/UX Designer",
     scope: "Product, website, design system",
