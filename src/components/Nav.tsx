@@ -37,9 +37,23 @@ import { textStyles } from "@/lib/typography";
  * exists in the DOM and keeps its ref the whole time; `invisible` elements
  * aren't part of the tab order or the accessibility tree, so there's no
  * double "Close" control competing with MobileMenu's own.
+ *
+ * The header/button's transparent-vs-opaque styling below reads
+ * `menuVisuallyOpen`, not `isOpen` directly (explicit bug report,
+ * 2026-09-25, "flickering... when opening/closing" — see MobileMenu.tsx's
+ * own "Nav.tsx flicker fix" comment for the full root cause: `isOpen` flips
+ * the instant Close is tapped, but MobileMenu's own panel stays visible for
+ * its whole close-tween duration afterward, so this header's opaque
+ * background used to snap back on top of it mid-retraction). MobileMenu
+ * reports its real visual state back up via `onRenderedChange` instead, so
+ * this only reverts once the panel has actually finished closing.
  */
 export function Nav() {
   const [isOpen, setIsOpen] = useState(false);
+  // Lags `isOpen` on close — see the file doc comment above. Starts equal to
+  // `isOpen` (both false) since MobileMenu reports its own initial
+  // `rendered` value (also false) the moment it mounts.
+  const [menuVisuallyOpen, setMenuVisuallyOpen] = useState(false);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   // Stable identity across renders (empty deps — setIsOpen is guaranteed
   // stable by React) — MobileMenu.tsx's focus-trap effect depends on this,
@@ -58,7 +72,7 @@ export function Nav() {
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 ${isOpen ? "bg-transparent" : "bg-background"}`}>
+    <header className={`sticky top-0 z-50 ${menuVisuallyOpen ? "bg-transparent" : "bg-background"}`}>
       <Grid className="items-center py-5">
         {/* NavEntrance is a display:contents wrapper (see that file) so these
             three stay direct Grid children for col-span placement — it only
@@ -111,14 +125,20 @@ export function Nav() {
             aria-expanded={isOpen}
             aria-controls="mobile-menu-panel"
             onClick={() => setIsOpen(true)}
-            className={`col-span-2 col-start-3 justify-self-end sm:hidden ${isOpen ? "invisible" : ""} ${textStyles.eyebrowPrimary}`}
+            className={`col-span-2 col-start-3 justify-self-end sm:hidden ${menuVisuallyOpen ? "invisible" : ""} ${textStyles.eyebrowPrimary}`}
           >
             Menu
           </button>
         </NavEntrance>
       </Grid>
 
-      <MobileMenu isOpen={isOpen} onClose={handleClose} returnFocusRef={toggleButtonRef} id="mobile-menu-panel" />
+      <MobileMenu
+        isOpen={isOpen}
+        onClose={handleClose}
+        returnFocusRef={toggleButtonRef}
+        id="mobile-menu-panel"
+        onRenderedChange={setMenuVisuallyOpen}
+      />
     </header>
   );
 }

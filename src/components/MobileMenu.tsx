@@ -84,6 +84,28 @@ const LINK_BASE_DELAY = 0.55;
  * `returnFocusRef`), it just goes `invisible` while this is open — see that
  * file's own comment.
  *
+ * **Nav.tsx flicker fix (2026-09-25):** Nav's own header background
+ * (`bg-transparent` <-> `bg-background`) and its Menu button's `invisible`
+ * toggle used to read Nav's `isOpen` state directly. That's an *instant*
+ * flip, but this panel's own close is not instant — `rendered` (and
+ * therefore this whole panel, including its own "Close" text) stays
+ * mounted and visible for the full `CLOSE_DURATION` retraction after
+ * `isOpen` already goes false. Since Nav's `<header>` is `z-50`, above this
+ * panel's `z-40`, that mismatch meant the instant you tapped Close (or hit
+ * Escape, or tapped a link), Nav's opaque header + "Menu" text would snap
+ * back into place *on top of* this panel's still-visible black curtain and
+ * its own still-showing "Close" text for the entire retraction — a jarring
+ * flash right at the moment of dismissal, confirmed against a real-device
+ * recording after two earlier, unrelated viewport-height fixes (`h-dvh`,
+ * then `window.visualViewport`, both still present below) didn't touch it,
+ * since the actual cause was never about height at all. Fixed by having
+ * this component report its own `rendered` value up to Nav via the new
+ * `onRenderedChange` prop, instead of Nav inferring visual state from
+ * `isOpen` alone — Nav now keys its header/button off that reported value,
+ * which only flips back once this panel has genuinely finished its close
+ * tween and unmounted, so there's nothing left for Nav's header to
+ * overlap.
+ *
  * Two-layer DOM inside `revealRef` (curtain, then content) rather than
  * one — both need to sit inside the same clipped element, but the content
  * layer needs `relative z-10` on top of the curtain's plain
@@ -211,14 +233,29 @@ export function MobileMenu({
   onClose,
   returnFocusRef,
   id,
+  onRenderedChange,
 }: {
   isOpen: boolean;
   onClose: () => void;
   returnFocusRef: RefObject<HTMLButtonElement | null>;
   id: string;
+  /**
+   * Fired whenever `rendered` (isOpen || closing, below) changes — see the
+   * file doc comment's "Nav.tsx flicker" section for why Nav needs this
+   * instead of just reading its own `isOpen` state directly.
+   */
+  onRenderedChange?: (rendered: boolean) => void;
 }) {
   const [closing, setClosing] = useState(false);
   const rendered = isOpen || closing;
+
+  // Tells Nav.tsx when it's actually safe to restore its own header
+  // background/Menu button — see the file doc comment above for the full
+  // flicker this closes. A plain effect (not derived-during-render) since
+  // it's a side effect reaching outside this component, not local state.
+  useEffect(() => {
+    onRenderedChange?.(rendered);
+  }, [rendered, onRenderedChange]);
   const panelRef = useRef<HTMLDivElement>(null);
   const revealRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
