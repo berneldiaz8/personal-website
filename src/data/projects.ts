@@ -74,7 +74,7 @@ export const projects: Project[] = [
     number: "01",
     name: "Lexora",
     tagline:
-      "Built the design foundation for a governance, risk, and compliance platform, solo, from MVP to enterprise-ready.",
+      "Built the design foundation for a GRC case management platform, solo, from MVP to enterprise-ready.",
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Compliance Startup",
     role: "UI/UX Designer",
