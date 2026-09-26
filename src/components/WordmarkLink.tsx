@@ -50,15 +50,32 @@ import { REVEAL_EASE } from "@/lib/gsapEase";
  * The transform has to live on the Logo, not this Link — the Link is what
  * carries `overflow-hidden`, so animating it directly would move the clip
  * boundary along with the content instead of revealing anything through it.
+ *
+ * `invisible` prop (2026-09-26) fades this out while Nav.tsx's mobile menu is
+ * open, rather than snapping — Nav's header background itself no longer
+ * changes at all while open (see Nav.tsx's own comment), so this and the
+ * Menu button are the only things left there that visibly change, and doing
+ * that instantly read as a hard pop against an otherwise-smooth open/close.
+ * `opacity`/`visibility` both sit in `transition-property` (not just
+ * `opacity`) so this keeps the same accessibility guarantee the instant-
+ * `invisible` version had — a `visibility` transition still switches to
+ * `hidden` only once the fade-out finishes (removing it from the tab order
+ * and accessibility tree only once it's actually invisible), but switches
+ * back to `visible` immediately when fading back in, matching how CSS
+ * defines transitioning that property either direction. Same cubic-bezier
+ * NavLink.tsx's own hover-swap already uses (`[0.16, 1, 0.3, 1]`, the CSS
+ * form of gsapEase.ts's shared REVEAL_EASE), for the same "premium" feel,
+ * and the same `motion-reduce:transition-none` escape hatch NavLink already
+ * has, so the swap is instant rather than animated under reduced motion.
  */
-export function WordmarkLink() {
+export function WordmarkLink({ invisible = false }: { invisible?: boolean }) {
   const pathname = usePathname();
 
   return (
     <Link
       href="/"
       aria-label="berneldiaz, home"
-      className="col-span-2 block h-[16px] w-fit overflow-hidden sm:col-span-2 lg:col-span-3"
+      className={`col-span-2 block h-[16px] w-fit overflow-hidden transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:col-span-2 lg:col-span-3 ${invisible ? "invisible opacity-0" : "visible opacity-100"}`}
       onClick={(e) => {
         if (pathname !== "/") return;
         e.preventDefault();
