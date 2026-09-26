@@ -32,6 +32,7 @@ export function NavLink({
   rel,
   className = "",
   size = "sm",
+  onClick,
 }: {
   href: string;
   children: ReactNode;
@@ -39,12 +40,14 @@ export function NavLink({
   rel?: string;
   className?: string;
   size?: "sm" | "md";
+  onClick?: () => void;
 }) {
   return (
     <Link
       href={href}
       target={target}
       rel={rel}
+      onClick={onClick}
       className={`group relative inline-block overflow-hidden ${boxSize[size]} ${className}`}
     >
       {/* data-nav-mount: MountReveal.tsx's mount-time reveal target (used both

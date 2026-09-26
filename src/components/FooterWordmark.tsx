@@ -523,7 +523,11 @@ export function FooterWordmark() {
   }, []);
 
   return (
-    <div aria-hidden="true" className="cursor-pointer px-6 py-6 text-foreground" onClick={handleCopyEmail}>
+    <div
+      aria-hidden="true"
+      className="cursor-pointer px-4 py-5 text-foreground sm:px-6 sm:py-6"
+      onClick={handleCopyEmail}
+    >
       <CursorLabel
         label={copied ? "Email Copied" : "Copy Email"}
         reverse={!copied}
