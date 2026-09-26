@@ -120,29 +120,36 @@ export function Nav() {
             className={`hidden sm:col-span-2 sm:col-start-7 sm:flex sm:justify-end lg:col-span-3 lg:col-start-10 ${textStyles.eyebrowPrimary}`}
           >
             <NavLink href="mailto:diaz.bernel@gmail.com" size="md">
-              Contact
+              Email Me
             </NavLink>
           </div>
 
           {/* Mobile only — replaces the old wrapped Work/Info/Gallery/Contact
-              row. Only ever shows "Menu" — MobileMenu.tsx's own Close button
-              is what's visible/interactive while open, this one fades to
+              row. Shows "Email Me, Menu" — MobileMenu.tsx's own Close button
+              is what's visible/interactive while open, this pair fades to
               `invisible` then (see the file doc comment above and
               WordmarkLink.tsx's own comment on the same transition — same
               duration/easing, so both fade together). Text is plain-case;
               `uppercase` in eyebrowPrimary handles the visual casing,
               matching how NavLink's own children are written elsewhere in
               this file. */}
-          <button
-            type="button"
-            ref={toggleButtonRef}
-            aria-expanded={isOpen}
-            aria-controls="mobile-menu-panel"
-            onClick={() => setIsOpen(true)}
-            className={`col-span-2 col-start-3 justify-self-end transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:hidden ${isOpen ? "invisible opacity-0" : "visible opacity-100"} ${textStyles.eyebrowPrimary}`}
+          <div
+            className={`col-span-2 col-start-3 flex items-center justify-end gap-x-2 transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:hidden ${isOpen ? "invisible opacity-0" : "visible opacity-100"} ${textStyles.eyebrowPrimary}`}
           >
-            Menu
-          </button>
+            <NavLink href="mailto:diaz.bernel@gmail.com" size="md">
+              Email Me,
+            </NavLink>
+            <button
+              type="button"
+              ref={toggleButtonRef}
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu-panel"
+              onClick={() => setIsOpen(true)}
+              className="uppercase"
+            >
+              Menu
+            </button>
+          </div>
         </NavEntrance>
       </Grid>
 
