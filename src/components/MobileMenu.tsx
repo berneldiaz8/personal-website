@@ -113,9 +113,22 @@ const LINK_BASE_DELAY = 0.55;
  * z-40, one below Nav's own z-50 — deliberately not matching or padding
  * around Nav's rendered height (which Footer.tsx's own comment documents
  * has already drifted once before, 56px -> 60px, when a NavLink size
- * changed). Since Nav's header goes `bg-transparent` while open, its own
- * strip simply reveals this panel underneath rather than needing to know
- * anything about this component's layout.
+ * changed). That z-40/z-50 comparison only governs stacking against Nav's
+ * *header element itself* relative to its own siblings elsewhere on the
+ * page (e.g. Footer) — it does not put this panel behind Nav's Grid content
+ * (WordmarkLink, the Menu button). This panel is rendered as a DOM child of
+ * Nav's `<header>`, and a positioned descendant with an explicit z-index
+ * (this panel: `fixed`, `z-40`) always paints above that same ancestor's
+ * other, non-positioned children (Nav's `Grid`) regardless of the numeric
+ * z-40 vs. z-50 comparison — confirmed directly via
+ * `document.elementFromPoint` at the wordmark's own coordinates mid-open,
+ * which already resolved to this panel. So this curtain naturally paints
+ * over Nav's own header content as it grows, without needing Nav's header to
+ * go transparent at all — see Nav.tsx's own "Header background stays
+ * bg-background unconditionally" comment for why Nav's header no longer
+ * does that (it used to, and doing so raced this panel's own animated
+ * reveal, exposing real page content underneath for a fraction of a second
+ * on both open and close).
  *
  * Mount/unmount timing mirrors LoadingScreen.tsx's own `visible` pattern,
  * adapted to this component being driven by an external `isOpen` prop rather

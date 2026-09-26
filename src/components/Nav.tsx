@@ -11,32 +11,58 @@ import { textStyles } from "@/lib/typography";
 /**
  * Client component (was a server component before the mobile menu existed)
  * — it now owns the menu's open/close state, since that state has to reach
- * both this <header>'s own transparent-background toggle (see below) and
- * the Menu button, and both live here.
+ * the Menu button, WordmarkLink, and MobileMenu, all of which live here.
  *
  * The matchMedia effect force-closes the menu the instant the viewport
  * crosses into `sm` (640px, Tailwind's default breakpoint — unmodified in
- * this project). This is what makes it safe to make the header's own
- * background transparent whenever `isOpen` (see below) without needing to
- * reason about the desktop Work/Info/Gallery/Contact row (sm:flex, only
- * visible at that width) ever being affected by it — `isOpen` is
- * structurally impossible to be true at a width where those links are
- * visible.
+ * this project) — necessary since `isOpen`'s own UI (WordmarkLink/Menu
+ * button going `invisible`, MobileMenu itself) has to stop applying the
+ * instant the desktop Work/Info/Gallery/Contact row (sm:flex) becomes
+ * visible instead.
  *
  * MobileMenu.tsx renders its own wordmark + Close row at the top of the
- * black panel (explicit request — the header's own data-force-dark
- * recoloring trick wasn't a reliable enough way to guarantee that row reads
- * correctly, so the panel now owns it outright as real content instead of
- * leaning on a cross-component z-index/color seam). That means this
- * header's own visible content must get out of the way while open, not
- * recolor to match: its background goes transparent (revealing the panel's
- * own black underneath, since the panel is `fixed inset-0` starting at the
- * same top:0 point) and its toggle button goes `invisible` (not `hidden` —
- * keeps its grid slot/layout so nothing reflows, and keeps it a valid,
- * eventually-refocusable target for `returnFocusRef`). The button still
- * exists in the DOM and keeps its ref the whole time; `invisible` elements
- * aren't part of the tab order or the accessibility tree, so there's no
- * double "Close" control competing with MobileMenu's own.
+ * black panel (explicit request — an earlier version had this header
+ * recolor via `data-force-dark` instead of MobileMenu owning its own copy,
+ * which wasn't a reliable enough way to guarantee that row reads correctly).
+ * That means this header's own wordmark/Menu button must get out of the way
+ * while open, not recolor to match — both go `invisible` (not `hidden` —
+ * keeps their grid slots so nothing reflows, and keeps the Menu button a
+ * valid, eventually-refocusable target for `returnFocusRef`); `invisible`
+ * elements aren't part of the tab order or the accessibility tree, so
+ * there's no double wordmark/Close control competing with MobileMenu's own.
+ *
+ * **Header background stays `bg-background` unconditionally, always
+ * (2026-09-26 fix)** — an earlier version made it `bg-transparent` while
+ * `isOpen`, reasoning that MobileMenu's own panel (`fixed inset-0`, same
+ * top:0 origin) would already be there underneath to show through. Two real
+ * bugs came from that assumption: (1) MobileMenu's own close isn't instant —
+ * it stays mounted and visible for its full retraction tween after `isOpen`
+ * already goes false, so an opaque-on-`isOpen` background snapped back
+ * *before* the panel had actually finished closing, flickering on top of it
+ * (in a later commit this got patched with an `onRenderedChange` callback
+ * lagging the header's toggle behind MobileMenu's real mounted state — that
+ * patch was reverted per explicit request in favor of this simpler fix,
+ * which removes the underlying race instead of resolving it). (2) Symmetric
+ * bug on *open*: MobileMenu's own black curtain is a `clipPath` tween
+ * growing down from the top over `OPEN_DURATION` (not an instant reveal) —
+ * making the header transparent the instant `isOpen` flips true, before that
+ * curtain has visually grown to cover the header's own strip, exposed
+ * whatever real page content was scrolled just underneath the header (a
+ * confirmed real-device report: a page's own H1 text visibly bled through,
+ * overlapping this header's wordmark, for the first fraction of a second of
+ * every open). Keeping the header's own `bg-background` fixed sidesteps both
+ * — MobileMenu is a `fixed`, `z-40` *child* of this `<header>` (`z-50`), and
+ * a positioned descendant with an explicit z-index always paints above this
+ * header's own non-positioned Grid content regardless of that header/panel
+ * z-index comparison (that comparison only governs stacking against this
+ * header's own *siblings* elsewhere on the page, e.g. Footer) — confirmed
+ * directly via `document.elementFromPoint` at the wordmark's own coordinates
+ * mid-open, which already resolved to MobileMenu's panel. So the growing
+ * curtain still naturally paints over this header's plain (now permanently
+ * opaque) strip as it grows, with the header's own opaque background as a
+ * safe, unchanging floor underneath it the whole time — nothing behind the
+ * header can ever show through, on open or close, since there's no
+ * transparency window left to race against the animation at all.
  */
 export function Nav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,14 +84,14 @@ export function Nav() {
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 ${isOpen ? "bg-transparent" : "bg-background"}`}>
+    <header className="sticky top-0 z-50 bg-background">
       <Grid className="items-center py-5">
         {/* NavEntrance is a display:contents wrapper (see that file) so these
             three stay direct Grid children for col-span placement — it only
             exists to scope the mount-time slide-up on the wordmark and
             Work/Info/Gallery/Contact. */}
         <NavEntrance>
-          <WordmarkLink />
+          <WordmarkLink invisible={isOpen} />
 
           {/* Desktop/tablet only now (hidden sm:flex) — mobile gets the MENU
               button + MobileMenu overlay below instead of this wrapped row.
@@ -100,18 +126,20 @@ export function Nav() {
 
           {/* Mobile only — replaces the old wrapped Work/Info/Gallery/Contact
               row. Only ever shows "Menu" — MobileMenu.tsx's own Close button
-              is what's visible/interactive while open, this one goes
-              `invisible` then (see the file doc comment above). Text is
-              plain-case; `uppercase` in eyebrowPrimary handles the visual
-              casing, matching how NavLink's own children are written
-              elsewhere in this file. */}
+              is what's visible/interactive while open, this one fades to
+              `invisible` then (see the file doc comment above and
+              WordmarkLink.tsx's own comment on the same transition — same
+              duration/easing, so both fade together). Text is plain-case;
+              `uppercase` in eyebrowPrimary handles the visual casing,
+              matching how NavLink's own children are written elsewhere in
+              this file. */}
           <button
             type="button"
             ref={toggleButtonRef}
             aria-expanded={isOpen}
             aria-controls="mobile-menu-panel"
             onClick={() => setIsOpen(true)}
-            className={`col-span-2 col-start-3 justify-self-end sm:hidden ${isOpen ? "invisible" : ""} ${textStyles.eyebrowPrimary}`}
+            className={`col-span-2 col-start-3 justify-self-end transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:hidden ${isOpen ? "invisible opacity-0" : "visible opacity-100"} ${textStyles.eyebrowPrimary}`}
           >
             Menu
           </button>
