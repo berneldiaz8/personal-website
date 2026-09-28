@@ -34,7 +34,9 @@ function ShowcaseImage({
   /** Extra classes appended to the wrapper — e.g. flex-1/min-h-0 for a
    * split-stacked slot whose height comes from its flex parent. */
   className?: string;
-  /** False for the Hero image only — see useMediaReveal.ts's own comment. */
+  /** No current call site sets this false (the Hero image was the one
+   * exception, reverted 2026-09-28 — see the HERO block's own comment in
+   * ProjectShowcase) — kept as an escape hatch given that back-and-forth. */
   revealOnScroll?: boolean;
 }) {
   const { loaded, onLoad } = useFadeInOnLoad(priority);
@@ -112,7 +114,9 @@ function ShowcaseVideo({
   /** Extra classes appended to the wrapper — e.g. flex-1/min-h-0 for a
    * split-stacked slot whose height comes from its flex parent. */
   className?: string;
-  /** False for the Hero video only — see useMediaReveal.ts's own comment. */
+  /** No current call site sets this false (the Hero video was the one
+   * exception, reverted 2026-09-28 — see the HERO block's own comment in
+   * ProjectShowcase) — kept as an escape hatch given that back-and-forth. */
   revealOnScroll?: boolean;
 }) {
   const letterboxed = fillHeight || fillWidth;
@@ -291,12 +295,13 @@ export function ProjectShowcase({
   return (
     <div className="flex flex-col">
       {/* ── HERO ── opening full-bleed image/video, the page's LCP candidate.
-          Renders statically, no scale-in/dark-fade (`revealOnScroll={false}`)
-          — this went through two intermediate states in one session (first
-          the full dark-fade+scale-in reveal every other media slot gets,
-          then scale-in only with the curtain dropped) before landing back
-          here per explicit request (2026-09-27): no useMediaReveal animation
-          on the Hero at all, same as before any of that started. `priority`'s
+          Now gets the same scale-in + dark-curtain useMediaReveal treatment
+          every other media slot on this page already gets (explicit request,
+          2026-09-28) — `revealOnScroll` left at its default `true`, no
+          override here. This is actually the *third* state the Hero's gone
+          through in this same back-and-forth: full curtain+scale (this one),
+          reverted to scale-only with the curtain dropped, reverted again to
+          no animation at all, and now back to the first state. `priority`'s
           own load-fade skip (useFadeInOnLoad) is unrelated regardless — that
           was never part of this scroll-driven mechanism to begin with.
           aspect-[1/1] on mobile, stepping up to 16/10 at sm+ (2026-09-21,
@@ -320,7 +325,6 @@ export function ProjectShowcase({
           aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
           priority={priority}
-          revealOnScroll={false}
         />
       ) : (
         <ShowcaseVideo
@@ -329,7 +333,6 @@ export function ProjectShowcase({
           alt={pick(project.media, 0).alt}
           aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
-          revealOnScroll={false}
         />
       )}
 
