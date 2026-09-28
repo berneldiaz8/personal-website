@@ -164,7 +164,12 @@ export function WorkTeaser() {
               id={project.slug}
               className="scroll-mt-28 border-t border-border pb-[200px]"
             >
-              <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
+              <Link
+                href={`/work?open=${project.slug}`}
+                scroll={false}
+                data-project-accent
+                style={accentStyle(project.accent)}
+              >
                 <CursorLabel
                   label="View case study"
                   portal

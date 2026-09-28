@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -11,6 +11,12 @@ import { lenisInstance } from "./SmoothScroll";
 import { ProjectShowcase } from "./showcase/ProjectShowcase";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// How long the `?open={slug}` deep-link scroll keeps re-correcting itself
+// against later layout shifts (see the useLayoutEffect below) — generous
+// enough to comfortably cover a project's own hero video reaching its real
+// dimensions on an ordinary connection, not just a debounce-length buffer.
+const REASSERT_WINDOW_MS = 4000;
 
 function accentStyle(accent: { light: string; dark: string }): CSSProperties {
   return {
@@ -70,15 +76,40 @@ export function WorkBrowser() {
     { scope: containerRef },
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (openParam && projects.some((p) => p.slug === openParam)) {
       const row = rowRefs.current[openParam];
       if (row) {
         // No transform/margin trick on any row anymore (see the useGSAP block above
         // — the new mechanic pins the *outgoing* card instead of moving the
         // incoming one), so the row's own natural document position is once again
-        // exactly where its hero sits — no offset math needed.
-        const targetY = row.getBoundingClientRect().top + window.scrollY;
+        // exactly where its hero sits.
+        //
+        // Nav.tsx's `<header>` is `sticky top-0 z-50`, so without compensating for
+        // it here, landing exactly on the row's own top tucks the first 60px of the
+        // project's content underneath Nav instead of actually showing it (confirmed
+        // by measuring Nav's rendered height — same 60px on mobile and desktop,
+        // since `py-5` + its content row's line-height aren't responsive-varied).
+        // Measured live via the DOM (`<header>` is unique on the page) rather than a
+        // hardcoded constant — a hardcoded value would silently go stale the moment
+        // Nav's own height changes, the same staleness Footer.tsx's own `mt-[60px]`
+        // comment already flags for exactly this measurement.
+        //
+        // Computed fresh inside a function, not once up front: this row's own
+        // height isn't final at mount — its video/image content hasn't loaded yet,
+        // so `getBoundingClientRect()` at this exact instant can be measuring a
+        // shorter box than the row will actually end up being, and *earlier* rows
+        // growing as their own media loads pushes this row further down the
+        // document afterward. A frozen target computed once would go stale the
+        // moment that happens (confirmed: landing drifted into the tail end of the
+        // previous project's row once its hero video finished sizing, well after
+        // this effect had already run). Recomputing on every call means each
+        // correction below reflects the document's actual, current layout instead
+        // of whatever it looked like at the original jump.
+        const computeTargetY = () => {
+          const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+          return row.getBoundingClientRect().top + window.scrollY - headerHeight;
+        };
 
         // Always an instant jump (`immediate: true` / `behavior: "auto"`), not an
         // animated scroll — deliberate, requested: this is a page-to-page
@@ -95,22 +126,86 @@ export function WorkBrowser() {
         // under prefers-reduced-motion (SmoothScroll skips creating it entirely
         // then), so the native fallback there is correct either way — no smooth
         // Lenis animation to prefer when there's no Lenis instance running.
-        if (lenisInstance) {
-          // A synchronous resize() first, not optional: scrollTo() clamps its target
-          // against Lenis's cached `limit` (confirmed in node_modules/lenis/dist/
-          // lenis.mjs — `target = clamp(0, target, this.limit)`), and on a
-          // client-side <Link> navigation into /work, SmoothScroll.tsx's own resync
-          // is deferred (staggered setTimeout(0/100/300)), so this effect can run
-          // before any of them fire. resize() here is synchronous and reads the
-          // DOM's current (already-correct) state, so the clamp uses a fresh limit
-          // regardless of whether SmoothScroll's own resync has fired yet.
-          lenisInstance.resize();
-          lenisInstance.scrollTo(targetY, { immediate: true });
-        } else {
-          window.scrollTo({ top: targetY, behavior: "auto" });
-        }
+        const jump = () => {
+          const targetY = computeTargetY();
+          if (lenisInstance) {
+            // A synchronous resize() first, not optional: scrollTo() clamps its
+            // target against Lenis's cached `limit` (confirmed in node_modules/
+            // lenis/dist/lenis.mjs — `target = clamp(0, target, this.limit)`),
+            // and this can run before SmoothScroll's own resize has landed.
+            // resize() here is synchronous and reads the DOM's current
+            // (already-correct) state, so the clamp uses a fresh limit
+            // regardless of whether SmoothScroll's own resync has fired yet.
+            lenisInstance.resize();
+            // `force: true` is load-bearing, not defensive padding: Lenis's own
+            // scrollTo() no-ops entirely (`if ((this.isStopped || this.isLocked)
+            // && !force) return;`, confirmed in lenis.mjs) while Lenis is
+            // stopped, and LoadingScreen.tsx stops it for the duration of the
+            // initial page load, only calling .start() once its own GSAP
+            // timeline completes. That timeline runs on gsap.ticker (a
+            // requestAnimationFrame loop), so on a slow connection where a
+            // visitor reaches and clicks a WorkTeaser link before that timeline
+            // has finished, this jump would otherwise be silently dropped,
+            // leaving scroll stranded at the top (i.e. Lexora) with nothing to
+            // correct it. Forcing through is correct here: LoadingScreen stops
+            // Lenis to block a *visitor's* scroll input during the overlay, not
+            // our own one-time programmatic positioning once the deep-linked
+            // page has actually mounted.
+            lenisInstance.scrollTo(targetY, { immediate: true, force: true });
+          } else {
+            window.scrollTo({ top: targetY, behavior: "auto" });
+          }
+        };
+
+        jump();
+
+        // Re-assert the jump — recomputing the target fresh each time, see
+        // computeTargetY's own comment — every time GSAP's ScrollTrigger
+        // finishes a refresh, for a window after mount. Two distinct things
+        // both funnel through ScrollTrigger's "refresh" event, which is why
+        // reacting to it (rather than only fixing one of them) covers both:
+        //
+        // 1. `ScrollTrigger.refresh()` (called by SmoothScroll.tsx's own
+        //    staggered setTimeout(0/100/300) resync) unconditionally scrolls
+        //    every scroller to 0 first to remeasure this page's stacked-card
+        //    pins (`_scrollers.forEach(obj => obj(0))` in ScrollTrigger.js),
+        //    then tries to restore whatever scroll position it recorded right
+        //    before doing that (`obj.rec && obj(obj.rec)`) — a truthy check on
+        //    the recorded value, so a refresh that began at exactly scrollY 0
+        //    skips its own restore outright.
+        // 2. SmoothScroll.tsx also runs a `ResizeObserver` on
+        //    `document.documentElement` that debounces into its own
+        //    `ScrollTrigger.refresh()` call — so as this page's rows finish
+        //    loading their video/image content and grow, that resize reliably
+        //    lands here too, which is what actually corrects the drift.
+        //
+        // Bounded to REASSERT_WINDOW_MS, not indefinite: once a real user
+        // starts scrolling, that should never get silently overridden by a
+        // late-arriving refresh.
+        const reassert = () => {
+          if (Math.round(window.scrollY) !== Math.round(computeTargetY())) jump();
+        };
+        ScrollTrigger.addEventListener("refresh", reassert);
+        const stopListening = setTimeout(() => {
+          ScrollTrigger.removeEventListener("refresh", reassert);
+        }, REASSERT_WINDOW_MS);
+
+        return () => {
+          clearTimeout(stopListening);
+          ScrollTrigger.removeEventListener("refresh", reassert);
+        };
       }
     }
+    // Was previously a plain `useEffect`, which — unlike this — runs *after*
+    // the browser paints. That gap was a second, independent bug: React would
+    // commit and paint one frame at the pre-jump scroll position (the top of
+    // the page, i.e. Lexora, the first row) before this effect ever ran, then
+    // jump afterward. Landing on Lexora itself never showed it (the target
+    // *is* the top), which is exactly why the flash only ever showed on
+    // every other project. useLayoutEffect runs synchronously before that
+    // first paint, so the initial jump above is resolved before anything
+    // reaches the screen.
+    //
     // Only run once on mount, driven by the URL at load time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
