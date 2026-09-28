@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 
 /**
  * Nav link hover interaction: the label slides up and out of view while an
@@ -33,6 +33,7 @@ export function NavLink({
   className = "",
   size = "sm",
   onClick,
+  disableHover = false,
 }: {
   href: string;
   children: ReactNode;
@@ -40,8 +41,25 @@ export function NavLink({
   rel?: string;
   className?: string;
   size?: "sm" | "md";
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLAnchorElement>) => void;
+  // Drops the group-hover/group-focus-visible swap classes entirely (rather
+  // than just leaving them in place while hovered) and switches both spans to
+  // `transition-none`, so a hover that's already active when this flips true
+  // snaps to resting position instantly instead of animating there. Needed
+  // for Nav.tsx's "Email Me"/"Email Copied" link: without it, leaving the
+  // button mid-"Email Copied" (having clicked it, so the cursor was already
+  // hovering) plays this hover-out slide over identical duplicate content —
+  // a pointless reveal motion with nothing actually changing, layered right
+  // on top of AnimatedNavText's own copy-state slide. Every other NavLink
+  // usage leaves this at its default false.
+  disableHover?: boolean;
 }) {
+  const hoverTransition = disableHover
+    ? "transition-none"
+    : "transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+  const mainHoverSwap = disableHover ? "" : "group-hover:-translate-y-full group-focus-visible:-translate-y-full";
+  const duplicateHoverSwap = disableHover ? "" : "group-hover:translate-y-0 group-focus-visible:translate-y-0";
+
   return (
     <Link
       href={href}
@@ -61,15 +79,12 @@ export function NavLink({
           MountReveal clears its GSAP-set inline transform on completion
           (clearProps) so that CSS-driven hover keeps working untouched
           afterward. */}
-      <span
-        data-nav-mount
-        className="block transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-full group-focus-visible:-translate-y-full motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-focus-visible:translate-y-0"
-      >
+      <span data-nav-mount className={`block ${hoverTransition} ${mainHoverSwap} motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-focus-visible:translate-y-0`}>
         {children}
       </span>
       <span
         aria-hidden="true"
-        className="absolute inset-0 translate-y-full transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 group-focus-visible:translate-y-0 motion-reduce:hidden"
+        className={`absolute inset-0 translate-y-full ${hoverTransition} ${duplicateHoverSwap} motion-reduce:hidden`}
       >
         {children}
       </span>

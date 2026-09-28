@@ -169,7 +169,7 @@ export function CursorLabel({
   // downward/enters from above — mirroring NavLink.tsx's own hover-out,
   // which reverses direction rather than replaying the hover-in motion
   // backward-in-time-but-same-direction. Callers with a two-state toggle
-  // (FooterWordmark's "Copy Email" / "Email Copied") pass the inverse of
+  // (FooterWordmark's "Email Me" / "Email Copied") pass the inverse of
   // whichever boolean drives the label, so the "forward" change (e.g. to
   // "Email Copied") slides one way and reverting slides the other.
   reverse?: boolean;
@@ -197,7 +197,7 @@ export function CursorLabel({
   // new text is swapped in below the fold and slides up into place — same
   // motion as NavLink's hover swap, just driven by a prop change through one
   // element instead of two elements toggled by CSS hover. Only ever fires
-  // today for FooterWordmark's "Copy Email" / "Email Copied" swap; every
+  // today for FooterWordmark's "Email Me" / "Email Copied" swap; every
   // other CursorLabel usage passes a static label for its whole mount, so
   // label === prevLabelRef.current there and this never runs.
   useGSAP(

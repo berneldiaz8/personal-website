@@ -150,7 +150,7 @@ export function FooterWordmark() {
   // rather than risk an opaque black block sitting in the footer.
   const [useFallback, setUseFallback] = useState(false);
   // "Email Copied" feedback on the CursorLabel after a click, reverting to
-  // "Copy Email" after a delay — a plain setTimeout, not GSAP, since this is
+  // "Email Me" after a delay — a plain setTimeout, not GSAP, since this is
   // just a label-text swap, not a tweened value. copiedTimeoutRef lets a
   // second click within the delay window restart the timer instead of the
   // first click's timeout firing early and reverting the label out from
@@ -529,7 +529,7 @@ export function FooterWordmark() {
       onClick={handleCopyEmail}
     >
       <CursorLabel
-        label={copied ? "Email Copied" : "Copy Email"}
+        label={copied ? "Email Copied" : "Email Me"}
         reverse={!copied}
         className="relative block w-full"
       >

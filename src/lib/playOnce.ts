@@ -12,7 +12,7 @@
  * starts almost immediately instead of being skipped.
  * A plain per-component `useRef` doesn't survive an unmount either — this
  * needs to be module-level state, same reasoning as pageReady.ts's own
- * mutable binding and PageTransition.tsx's `hasMountedBefore` flag.
+ * mutable binding.
  *
  * A single shared boolean (like those two) isn't enough here because there
  * are multiple *independent* reveals using this same mechanism (the nav row,

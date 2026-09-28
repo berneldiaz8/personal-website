@@ -8,6 +8,7 @@ import { CursorLabel } from "./CursorLabel";
 import { RevealText } from "./RevealText";
 import { VideoLoadingSpinner } from "./VideoLoadingSpinner";
 import { useVideoReady } from "@/lib/useVideoReady";
+import { useMediaReveal } from "@/lib/useMediaReveal";
 import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
 import { textStyles } from "@/lib/typography";
 
@@ -58,8 +59,10 @@ function previewFor(project: Project) {
  */
 function TeaserVideo({ preview, projectName }: { preview: { src: string; poster: string }; projectName: string }) {
   const { ready, onLoadedData } = useVideoReady();
+  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>();
   return (
     <div
+      ref={wrapperRef}
       // lg:self-start overrides the parent's lg:items-stretch for this box
       // specifically — Safari resolves a stretched grid item's aspect-ratio
       // by computing height first (from the row's stretch target) and
@@ -87,20 +90,29 @@ function TeaserVideo({ preview, projectName }: { preview: { src: string; poster:
       // bottom.
       className="relative col-span-4 mt-2 aspect-[4/3] self-start overflow-hidden bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:col-span-8 sm:aspect-[16/9] lg:col-span-8"
     >
-      <video
-        ref={ensureVideoMuted}
-        src={preview.src}
-        poster={preview.poster}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        aria-label={`${projectName} product walkthrough`}
-        onLoadedData={onLoadedData}
-        className="absolute inset-0 h-full w-full object-cover object-top"
-      />
+      {/* mediaRef wrapper: see useMediaReveal.ts for why the scale transform
+          lands on a neutral div rather than the <video> itself. */}
+      <div ref={mediaRef} className="absolute inset-0">
+        <video
+          ref={ensureVideoMuted}
+          src={preview.src}
+          poster={preview.poster}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          aria-label={`${projectName} product walkthrough`}
+          onLoadedData={onLoadedData}
+          className="absolute inset-0 h-full w-full object-cover object-top"
+        />
+      </div>
       <VideoLoadingSpinner ready={ready} />
+      <div
+        ref={overlayRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-neutral-950 opacity-0"
+      />
     </div>
   );
 }
@@ -152,7 +164,12 @@ export function WorkTeaser() {
               id={project.slug}
               className="scroll-mt-28 border-t border-border pb-[200px]"
             >
-              <Link href={`/work?open=${project.slug}`} data-project-accent style={accentStyle(project.accent)}>
+              <Link
+                href={`/work?open=${project.slug}`}
+                scroll={false}
+                data-project-accent
+                style={accentStyle(project.accent)}
+              >
                 <CursorLabel
                   label="View case study"
                   portal
