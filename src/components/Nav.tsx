@@ -1,12 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import { NavLink } from "./NavLink";
+import { AnimatedNavText } from "./AnimatedNavText";
 import { NavEntrance } from "./NavEntrance";
 import { WordmarkLink } from "./WordmarkLink";
 import { MobileMenu } from "./MobileMenu";
 import { Grid } from "./showcase/Grid";
 import { textStyles } from "@/lib/typography";
+
+const EMAIL = "diaz.bernel@gmail.com";
 
 /**
  * Client component (was a server component before the mobile menu existed)
@@ -83,6 +87,30 @@ export function Nav() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  // "Email Me" copies the address instead of opening a mail client — the
+  // href stays a real "mailto:" (so a hover preview/right-click still shows
+  // something meaningful), but the click itself is always intercepted via
+  // preventDefault. "Email Copied" feedback reverts after a delay, matching
+  // FooterWordmark.tsx's existing copy-email convention; a second click
+  // within the window restarts the timer instead of an in-flight timeout
+  // reverting a still-fresh copy early.
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
+    };
+  }, []);
+
+  const handleCopyEmail = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(EMAIL).catch(() => {});
+    setCopied(true);
+    if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
+    copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-background">
       <Grid className="items-center py-5">
@@ -117,10 +145,11 @@ export function Nav() {
               with the grid's right edge). Hidden on mobile since it already
               appears in the group above there. */}
           <div
+            aria-live="polite"
             className={`hidden sm:col-span-2 sm:col-start-7 sm:flex sm:justify-end lg:col-span-3 lg:col-start-10 ${textStyles.eyebrowPrimary}`}
           >
-            <NavLink href="mailto:diaz.bernel@gmail.com" size="md">
-              Email Me
+            <NavLink href={`mailto:${EMAIL}`} size="md" onClick={handleCopyEmail} disableHover={copied}>
+              <AnimatedNavText text={copied ? "Email Copied" : "Email Me"} reverse={!copied} />
             </NavLink>
           </div>
 
@@ -134,10 +163,11 @@ export function Nav() {
               matching how NavLink's own children are written elsewhere in
               this file. */}
           <div
+            aria-live="polite"
             className={`col-span-2 col-start-3 flex items-center justify-end gap-x-2 transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:hidden ${isOpen ? "invisible opacity-0" : "visible opacity-100"} ${textStyles.eyebrowPrimary}`}
           >
-            <NavLink href="mailto:diaz.bernel@gmail.com" size="md">
-              Email Me,
+            <NavLink href={`mailto:${EMAIL}`} size="md" onClick={handleCopyEmail} disableHover={copied}>
+              <AnimatedNavText text={copied ? "Email Copied," : "Email Me,"} reverse={!copied} />
             </NavLink>
             <button
               type="button"
@@ -145,9 +175,11 @@ export function Nav() {
               aria-expanded={isOpen}
               aria-controls="mobile-menu-panel"
               onClick={() => setIsOpen(true)}
-              className="uppercase"
+              className="relative inline-block h-[20px] overflow-hidden uppercase leading-[20px]"
             >
-              Menu
+              <span data-nav-mount className="block">
+                Menu
+              </span>
             </button>
           </div>
         </NavEntrance>
