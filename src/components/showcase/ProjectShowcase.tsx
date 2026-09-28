@@ -6,6 +6,7 @@ import { ShowcaseHeadline } from "./ShowcaseHeadline";
 import { textStyles } from "@/lib/typography";
 import { useFadeInOnLoad } from "@/lib/useFadeInOnLoad";
 import { useVideoReady } from "@/lib/useVideoReady";
+import { useMediaReveal } from "@/lib/useMediaReveal";
 import { ensureVideoMuted } from "@/lib/ensureVideoMuted";
 import { VideoLoadingSpinner } from "../VideoLoadingSpinner";
 import { ImageSkeleton } from "../ImageSkeleton";
@@ -19,6 +20,7 @@ function ShowcaseImage({
   position = "object-center",
   priority = false,
   className = "",
+  revealOnScroll = true,
 }: {
   src: string;
   alt: string;
@@ -32,10 +34,14 @@ function ShowcaseImage({
   /** Extra classes appended to the wrapper — e.g. flex-1/min-h-0 for a
    * split-stacked slot whose height comes from its flex parent. */
   className?: string;
+  /** False for the Hero image only — see useMediaReveal.ts's own comment. */
+  revealOnScroll?: boolean;
 }) {
   const { loaded, onLoad } = useFadeInOnLoad(priority);
+  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>(revealOnScroll);
   return (
     <div
+      ref={wrapperRef}
       className={`relative w-full overflow-hidden bg-background ${aspect} ${
         bordered
           ? "shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
@@ -51,18 +57,27 @@ function ShowcaseImage({
           longer has a dark palette to accidentally pick up (see
           globals.css; only /gallery's [data-force-dark] still does). */}
       <ImageSkeleton loaded={loaded} />
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        sizes={sizes}
-        quality={90}
-        priority={priority}
-        onLoad={onLoad}
-        className={`object-cover ${position} transition-opacity duration-500 motion-reduce:transition-none ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
-      />
+      {/* mediaRef wrapper: see useMediaReveal.ts for why the scale transform
+          lands on a neutral div rather than the <Image> itself. */}
+      <div ref={mediaRef} className="absolute inset-0">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes={sizes}
+          quality={90}
+          priority={priority}
+          onLoad={onLoad}
+          className={`object-cover ${position}`}
+        />
+      </div>
+      {revealOnScroll && (
+        <div
+          ref={overlayRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-neutral-950 opacity-0"
+        />
+      )}
     </div>
   );
 }
@@ -76,6 +91,7 @@ function ShowcaseVideo({
   fillHeight = false,
   fillWidth = false,
   className = "",
+  revealOnScroll = true,
 }: {
   src: string;
   poster: string;
@@ -96,11 +112,15 @@ function ShowcaseVideo({
   /** Extra classes appended to the wrapper — e.g. flex-1/min-h-0 for a
    * split-stacked slot whose height comes from its flex parent. */
   className?: string;
+  /** False for the Hero video only — see useMediaReveal.ts's own comment. */
+  revealOnScroll?: boolean;
 }) {
   const letterboxed = fillHeight || fillWidth;
   const { ready, onLoadedData } = useVideoReady();
+  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>(revealOnScroll);
   return (
     <div
+      ref={wrapperRef}
       className={`relative w-full overflow-hidden ${letterboxed ? "" : "bg-background"} ${aspect} ${
         bordered
           ? "shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
@@ -112,26 +132,38 @@ function ShowcaseVideo({
       // gradient instead.
       style={letterboxed ? { background: "linear-gradient(to bottom, #E9E8E6 0%, #DAD9D6 100%)" } : undefined}
     >
-      <video
-        ref={ensureVideoMuted}
-        src={src}
-        poster={poster}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        aria-label={alt}
-        onLoadedData={onLoadedData}
-        className={
-          fillHeight
-            ? "absolute left-1/2 top-0 h-full w-auto -translate-x-1/2"
-            : fillWidth
-              ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
-              : "absolute inset-0 h-full w-full object-cover"
-        }
-      />
+      {/* mediaRef wrapper: see useMediaReveal.ts for why the scale transform
+          lands on a neutral div rather than the <video> itself — this keeps
+          the video's own fillHeight/fillWidth centering transform untouched. */}
+      <div ref={mediaRef} className="absolute inset-0">
+        <video
+          ref={ensureVideoMuted}
+          src={src}
+          poster={poster}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          aria-label={alt}
+          onLoadedData={onLoadedData}
+          className={
+            fillHeight
+              ? "absolute left-1/2 top-0 h-full w-auto -translate-x-1/2"
+              : fillWidth
+                ? "absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"
+                : "absolute inset-0 h-full w-full object-cover"
+          }
+        />
+      </div>
       <VideoLoadingSpinner ready={ready} />
+      {revealOnScroll && (
+        <div
+          ref={overlayRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-neutral-950 opacity-0"
+        />
+      )}
     </div>
   );
 }
@@ -259,9 +291,14 @@ export function ProjectShowcase({
   return (
     <div className="flex flex-col">
       {/* ── HERO ── opening full-bleed image/video, the page's LCP candidate.
-          Renders statically, no fade-on-scroll — the scroll-reveal fade
-          (Reveal.tsx) was removed site-wide per explicit user request,
-          alongside RevealWipe.tsx before it.
+          Renders statically, no scale-in/dark-fade (`revealOnScroll={false}`)
+          — this went through two intermediate states in one session (first
+          the full dark-fade+scale-in reveal every other media slot gets,
+          then scale-in only with the curtain dropped) before landing back
+          here per explicit request (2026-09-27): no useMediaReveal animation
+          on the Hero at all, same as before any of that started. `priority`'s
+          own load-fade skip (useFadeInOnLoad) is unrelated regardless — that
+          was never part of this scroll-driven mechanism to begin with.
           aspect-[1/1] on mobile, stepping up to 16/10 at sm+ (2026-09-21,
           explicit request — asked for as "4/4", written as the equivalent
           1/1 since that's the same ratio in its normal form; tried 4/3,
@@ -283,6 +320,7 @@ export function ProjectShowcase({
           aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
           priority={priority}
+          revealOnScroll={false}
         />
       ) : (
         <ShowcaseVideo
@@ -291,6 +329,7 @@ export function ProjectShowcase({
           alt={pick(project.media, 0).alt}
           aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
+          revealOnScroll={false}
         />
       )}
 

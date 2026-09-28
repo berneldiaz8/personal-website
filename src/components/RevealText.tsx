@@ -119,8 +119,7 @@ export function RevealText({
   // Mirrors `ready` for code that can't wait for a dependency-array re-run
   // (see onSplit below) — the write happens in an effect, not during render
   // (mutating a ref during render trips this codebase's own
-  // react-hooks/refs lint rule, same reasoning as PageTransition.tsx's
-  // module-flag comment), read only from effects/callbacks.
+  // react-hooks/refs lint rule), read only from effects/callbacks.
   const readyRef = useRef(false);
   useEffect(() => {
     readyRef.current = ready;
