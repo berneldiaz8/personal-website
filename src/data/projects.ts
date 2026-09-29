@@ -74,7 +74,7 @@ export const projects: Project[] = [
     number: "01",
     name: "Lexora",
     tagline:
-      "Built the design foundation for a GRC case management platform, solo, from MVP to enterprise-ready.",
+      "Built the design foundation for a compliance reporting and case management platform, solo, from MVP to enterprise-ready.",
     ndaCaption: "Presented under NDA. The product name and certain visuals have been changed.",
     industryTag: "Compliance Startup",
     role: "UI/UX Designer",
@@ -92,11 +92,11 @@ export const projects: Project[] = [
     ],
     workBody: [
       "I placed the disclosure guide directly beside the access choice, not tucked into a separate help page, so the tradeoff registers before a reporter commits, not after. Underneath that, a two-layer permission model does the heavier lifting, account-level roles control who manages the company and its settings, case-level roles control who can act on one specific report. It protects a report from the people it might concern, but not from an implicated admin, and I say that limit out loud instead of overselling what the system can do.",
-      "The case lifecycle closes things out with three closure types. Locking freezes the case record, redaction leaves a visible marker instead of quietly deleting data, so the audit-ready claim has a real mechanism behind it, not just a label. The design system scaled right along with all of this, every new domain reused the same components instead of starting from zero, which is what let the product grow from one module to six without a rebuild. One case-management engine carried the whole thing, maintained solo, and in Phase 4 that same architecture extended into a four-tier partner model with no rebuild needed.",
+      "The case lifecycle closes things out with three closure types. Locking freezes the case record, redaction leaves a visible marker instead of quietly deleting data, so the audit-ready claim has a real mechanism behind it, not just a label. The design system scaled right along with all of this, every new domain reused the same components instead of starting from zero, which is what let the product grow from one module to six without a rebuild. One case-management engine carried the whole thing, maintained solo, and in Phase 4 that same architecture extended into a partner model with no rebuild needed.",
     ],
     outcomeSummary: [
       "A compliance system got built from a brief, by one designer. Reporters choose between two access methods, each carrying a disclosed tradeoff, not a hidden one. Case managers work inside a permission structure that states its own limits instead of pretending it doesn't have any. Compliance officers close cases with a locked, structured final report built to hold up under regulatory scrutiny.",
-      "Engineering grew past ten people. Design stayed a team of one, and the foundation held, later extending into a four-tier partner architecture without a rebuild. One gap turned up on later review: every anonymity protection in this product shields the reporter from the company, none of them shields the investigator from the reporter. That's the next problem this system needs to solve.",
+      "Engineering grew past ten people. Design stayed a team of one, and the foundation held, later extending into a partner architecture without a rebuild. One gap turned up on later review: every anonymity protection in this product shields the reporter from the company, none of them shields the investigator from the reporter. That's the next problem this system needs to solve.",
     ],
     media: videoMedia("lexora", 5, "Lexora"),
     images: imageGallery("lexora", 7, "Lexora"),
