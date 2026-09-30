@@ -433,7 +433,7 @@ export function ProjectShowcase({
           of the single full-bleed block every other project uses. Every
           other project still placeholders pending a future media pass. */}
       {project.slug === "the-dividend-tracker" ? (
-        <Grid className="pt-3 pb-4 sm:pt-4 sm:pb-6">
+        <Grid className="pt-4 pb-4 sm:pb-6">
           <div className="col-span-4 sm:col-span-4 lg:col-span-6">
             <ShowcaseVideo
               src={`${base}/showcase-holdings.mp4`}
@@ -452,7 +452,7 @@ export function ProjectShowcase({
           </div>
         </Grid>
       ) : (
-        <div className="px-4 pt-3 pb-4 sm:px-5 sm:pt-4 sm:pb-6 lg:px-6">
+        <div className="px-4 pt-4 pb-4 sm:px-5 sm:pb-6 lg:px-6">
           {isOpinly ? (
             <ShowcaseVideo
               src={`${base}/showcase-app.mp4`}

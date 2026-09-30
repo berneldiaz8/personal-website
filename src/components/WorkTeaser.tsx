@@ -145,7 +145,7 @@ export function WorkTeaser() {
           const delay = i * 0.08;
 
           return (
-            // border-t + the 200px gap to the next row live on this plain
+            // border-t + the gap to the next row (128px mobile, 200px sm+) live on this plain
             // wrapper, not the Link itself — a Link's hover/click box
             // covers its own padding too, so putting that spacing directly
             // on the Link made hovering the empty space below each row
@@ -162,7 +162,7 @@ export function WorkTeaser() {
             <div
               key={project.slug}
               id={project.slug}
-              className="scroll-mt-28 border-t border-border pb-[200px]"
+              className="scroll-mt-28 border-t border-border pb-32 sm:pb-[200px]"
             >
               <TransitionLink
                 href={`/work?open=${project.slug}`}
