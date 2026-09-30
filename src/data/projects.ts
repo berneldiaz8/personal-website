@@ -82,7 +82,7 @@ export const projects: Project[] = [
     team: "1 designer, 10+ engineers, plus stakeholder",
     timeline: "1 year, four phases of product growth",
     context: [
-      "Lexora is a secure compliance platform. Organizations use it to manage and resolve reports across whistleblowing, grievances, conflict of interest, and fraud. Reporters submit anonymously. Case managers investigate without breaking that confidentiality. Organizations produce audit-ready documentation for regulators. I joined a five-person team as the only designer and built the design foundation across four phases of growth.",
+      "Lexora is a secure compliance reporting and case management platform. Organizations use it to manage and resolve reports across six domains, from workplace conduct to vendor risk. Reporters submit anonymously. Case managers investigate without breaking that confidentiality. Organizations produce audit-ready documentation for regulators. I joined a five-person team as the only designer and built the design foundation across four phases of growth.",
     ],
     problem: [
       "No product existed. No design system was in place. We were starting from a blank canvas with nothing but a dense compliance brief and a hard regulatory deadline. Every structural call was still open. Three questions sat at the center of it: How do you give someone recoverable access when you've agreed never to know who they are? How do you protect a report from the people it might be about? How do you build a paper trail that holds up in court without exposing the reporter? That's the core of the product, not an edge case.",
