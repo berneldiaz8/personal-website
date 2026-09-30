@@ -5,7 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { REVEAL_EASE } from "@/lib/gsapEase";
-import { pageReady } from "@/lib/pageReady";
+import { pageReady, pageVisible } from "@/lib/pageReady";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,6 +56,14 @@ const SCALE_DURATION = 1.15;
  * ever touches it, so the caller should skip rendering that div entirely
  * rather than mount a dead, permanently-invisible one.
  *
+ * `withOverlay` (default true) — false keeps the scale-in but drops the dark
+ * curtain: the media is visible from the start and only scales down from
+ * SCALE_FROM, starting as soon as the page overlay begins fading
+ * (`pageVisible`) rather than once it's gone. Used by the project Hero
+ * (explicit request, 2026-09-30). Same
+ * rule as `enabled`: when false, the caller should skip rendering the
+ * overlay div.
+ *
  * `mediaRef` is a *plain wrapper div* around the real `<Image>`/`<video>`,
  * not the media element itself — ShowcaseVideo's letterboxed (fillHeight/
  * fillWidth) variant already centers the `<video>` via its own translate
@@ -71,7 +79,7 @@ const SCALE_DURATION = 1.15;
  * under reduced motion the curtain/scale never apply in the first place,
  * nothing to reveal, media just renders in its final state immediately.
  */
-export function useMediaReveal<T extends HTMLElement>(enabled: boolean = true) {
+export function useMediaReveal<T extends HTMLElement>(enabled: boolean = true, withOverlay: boolean = true) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<T>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -84,27 +92,29 @@ export function useMediaReveal<T extends HTMLElement>(enabled: boolean = true) {
         const wrapper = wrapperRef.current;
         const media = mediaRef.current;
         const overlay = overlayRef.current;
-        if (!wrapper || !media || !overlay) return;
+        if (!wrapper || !media || (withOverlay && !overlay)) return;
 
         gsap.set(media, { scale: SCALE_FROM });
-        gsap.set(overlay, { opacity: 1 });
+        if (withOverlay) gsap.set(overlay, { opacity: 1 });
 
-        pageReady.then(() => {
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: wrapper,
-                start: "top 85%",
-                toggleActions: "play none none none",
-              },
-            })
-            .to(overlay, { opacity: 0, duration: OVERLAY_DURATION, ease: REVEAL_EASE })
-            .to(media, { scale: 1, duration: SCALE_DURATION, ease: REVEAL_EASE }, 0);
+        // Curtain-less media is on show the moment the page overlay starts
+        // fading, so it starts scaling then (pageVisible) instead of sitting
+        // frozen at SCALE_FROM until the fade has fully finished (pageReady).
+        (withOverlay ? pageReady : pageVisible).then(() => {
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: wrapper,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          });
+          if (withOverlay) tl.to(overlay, { opacity: 0, duration: OVERLAY_DURATION, ease: REVEAL_EASE }, 0);
+          tl.to(media, { scale: 1, duration: SCALE_DURATION, ease: REVEAL_EASE }, 0);
         });
       });
       return () => mm.revert();
     },
-    { scope: wrapperRef, dependencies: [enabled] },
+    { scope: wrapperRef, dependencies: [enabled, withOverlay] },
   );
 
   return { wrapperRef, mediaRef, overlayRef };

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import Link from "next/link";
+import { TransitionLink } from "./TransitionLink";
 import type { Project } from "@/data/projects";
 import { projects } from "@/data/projects";
 import { CursorLabel } from "./CursorLabel";
@@ -164,7 +164,7 @@ export function WorkTeaser() {
               id={project.slug}
               className="scroll-mt-28 border-t border-border pb-[200px]"
             >
-              <Link
+              <TransitionLink
                 href={`/work?open=${project.slug}`}
                 scroll={false}
                 data-project-accent
@@ -216,7 +216,7 @@ export function WorkTeaser() {
                   <div aria-hidden="true" className="hidden lg:col-span-1 lg:block" />
                   <TeaserVideo preview={preview} projectName={project.name} />
                 </CursorLabel>
-              </Link>
+              </TransitionLink>
             </div>
           );
         })}

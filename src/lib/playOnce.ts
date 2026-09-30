@@ -2,7 +2,9 @@
  * Tracks which keyed, mount-time-only animations (MountReveal.tsx's
  * callers — NavEntrance.tsx, GalleryFooterReveal.tsx) have already played
  * once this hard-load session, so a later remount of the same logical
- * reveal doesn't replay it.
+ * reveal doesn't replay it. (Both callers now bypass this check via
+ * MountReveal's `replayOnNavigate` and replay behind every page transition,
+ * so nothing currently relies on it.)
  *
  * Needed specifically because /gallery lives outside the (site) route
  * group's persistent layout — navigating between it and any other route

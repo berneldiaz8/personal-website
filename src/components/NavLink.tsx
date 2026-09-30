@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TransitionLink } from "./TransitionLink";
 import type { MouseEvent, ReactNode } from "react";
 
 /**
@@ -61,7 +61,7 @@ export function NavLink({
   const duplicateHoverSwap = disableHover ? "" : "group-hover:translate-y-0 group-focus-visible:translate-y-0";
 
   return (
-    <Link
+    <TransitionLink
       href={href}
       target={target}
       rel={rel}
@@ -88,6 +88,6 @@ export function NavLink({
       >
         {children}
       </span>
-    </Link>
+    </TransitionLink>
   );
 }

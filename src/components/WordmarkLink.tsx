@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { TransitionLink } from "./TransitionLink";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { Logo } from "./Logo";
@@ -72,7 +72,7 @@ export function WordmarkLink({ invisible = false }: { invisible?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <Link
+    <TransitionLink
       href="/"
       aria-label="berneldiaz, home"
       className={`col-span-2 block h-[16px] w-fit overflow-hidden transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:col-span-2 lg:col-span-3 ${invisible ? "invisible opacity-0" : "visible opacity-100"}`}
@@ -91,6 +91,6 @@ export function WordmarkLink({ invisible = false }: { invisible?: boolean }) {
       }}
     >
       <Logo data-nav-mount className="h-[16px] w-auto text-foreground" aria-hidden="true" />
-    </Link>
+    </TransitionLink>
   );
 }

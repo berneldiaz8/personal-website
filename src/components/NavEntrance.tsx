@@ -9,7 +9,9 @@ import { MountReveal } from "./MountReveal";
  * Contact) — a thin, nav-specific wrapper around MountReveal.tsx (see that
  * file for the actual mask/stagger/reduced-motion mechanics, shared with
  * GalleryInfoRow's own entrance). This file only wires up nav's one timing
- * dependency: wait for `pageReady` before starting.
+ * dependency: wait for `pageReady` before starting. With `replayOnNavigate`
+ * it also replays after every client-side page transition, once
+ * PageTransition's curtain has faded back out (see MountReveal.tsx).
  *
  * Why not route through RevealText/SplitText instead: the wordmark is a Logo
  * SVG, not a text node, so SplitText's line-detection has nothing to split
@@ -32,7 +34,7 @@ import { MountReveal } from "./MountReveal";
  */
 export function NavEntrance({ children }: { children: ReactNode }) {
   return (
-    <MountReveal waitFor={pageReady} playKey="nav-entrance">
+    <MountReveal waitFor={pageReady} playKey="nav-entrance" replayOnNavigate>
       {children}
     </MountReveal>
   );

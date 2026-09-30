@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { lenisInstance } from "@/components/SmoothScroll";
-import { markPageReady } from "@/lib/pageReady";
+import { markPageReady, markPageVisible } from "@/lib/pageReady";
 
 /**
  * Full-viewport preloader shown on every hard page load. Mounted in root
@@ -137,6 +137,7 @@ export function LoadingScreen() {
           gsap
             .timeline()
             .to(progress, { value: 100, duration: 0.35, ease: "power2.out", onUpdate: updateText })
+            .call(markPageVisible)
             .to(containerRef.current, { opacity: 0, duration: 0.35, ease: "power1.out" })
             .call(() => {
               setVisible(false);

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import Link from "next/link";
+import { TransitionLink, shouldFadeOut } from "./TransitionLink";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
@@ -247,10 +248,31 @@ export function MobileMenu({
   // render, even for this exact comparison), and calling `setState` directly
   // in the render body, guarded so it only fires on an actual transition.
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  // Set by closeInstantly() below, in the same batch as the parent's
+  // onClose(): skips the clip-path close tween and unmounts the panel
+  // outright on this very render.
+  const [instantClose, setInstantClose] = useState(false);
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
-    if (!isOpen) setClosing(true);
+    if (!isOpen) setClosing(!instantClose);
+    else setInstantClose(false);
   }
+
+  // Route-changing links don't close the panel on tap (explicit request,
+  // 2026-09-30, after a screen recording): the close wipe used to play first,
+  // uncovering the current page for a moment before PageTransition's fade
+  // out dimmed it. The panel is already dark and sits below the curtain
+  // (z-40 vs. z-[70]), so it now stays open while the curtain fades up over
+  // it, and TransitionLink's onBeforeNavigate removes it instantly once the
+  // screen is fully black. Taps that won't fade (the current page, or
+  // reduced motion) keep the normal animated close.
+  const closeInstantly = () => {
+    setInstantClose(true);
+    onClose();
+  };
+  const closeUnlessFading = (href: string) => () => {
+    if (!shouldFadeOut(href)) onClose();
+  };
 
   useEffect(() => {
     if (!closing) return;
@@ -540,9 +562,15 @@ export function MobileMenu({
               one call site wasn't worth it — this is a plain home link,
               closing the menu is the only behavior it needs beyond that. */}
           <div className="flex items-center justify-between pt-5">
-            <Link href="/" aria-label="berneldiaz, home" onClick={onClose} className="block h-[16px] w-fit">
+            <TransitionLink
+              href="/"
+              aria-label="berneldiaz, home"
+              onClick={closeUnlessFading("/")}
+              onBeforeNavigate={closeInstantly}
+              className="block h-[16px] w-fit"
+            >
               <Logo className="h-[16px] w-auto text-foreground" aria-hidden="true" />
-            </Link>
+            </TransitionLink>
             <button type="button" ref={closeButtonRef} onClick={onClose} className={textStyles.eyebrowPrimary}>
               Close
             </button>
@@ -552,7 +580,12 @@ export function MobileMenu({
             {/* Plain div + SplitText (see the useGSAP block above), not
                 <RevealText> — same line-mask look, no per-link ScrollTrigger. */}
             {LINKS.map((link, i) => (
-              <Link key={link.href} href={link.href} onClick={onClose}>
+              <TransitionLink
+                key={link.href}
+                href={link.href}
+                onClick={closeUnlessFading(link.href)}
+                onBeforeNavigate={closeInstantly}
+              >
                 <div
                   ref={(el) => {
                     linkRefs.current[i] = el;
@@ -561,7 +594,7 @@ export function MobileMenu({
                 >
                   {link.label}
                 </div>
-              </Link>
+              </TransitionLink>
             ))}
           </nav>
 

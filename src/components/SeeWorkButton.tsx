@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { TransitionLink } from "./TransitionLink";
 import gsap from "gsap";
 import { lenisInstance } from "./SmoothScroll";
 import { REVEAL_EASE } from "@/lib/gsapEase";
@@ -58,7 +58,7 @@ import { REVEAL_EASE } from "@/lib/gsapEase";
  */
 export function SeeWorkButton({ targetSlug }: { targetSlug: string }) {
   return (
-    <Link
+    <TransitionLink
       href={`/#${targetSlug}`}
       onClick={(e) => {
         if (!lenisInstance) return;
@@ -94,6 +94,6 @@ export function SeeWorkButton({ targetSlug }: { targetSlug: string }) {
           SEE SELECTED WORK
         </span>
       </span>
-    </Link>
+    </TransitionLink>
   );
 }
