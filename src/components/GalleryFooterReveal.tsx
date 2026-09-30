@@ -33,10 +33,16 @@ import { MountReveal } from "./MountReveal";
  * anymore. Nav's own internal link-to-link stagger and this row's own
  * internal stagger (both via MountReveal.tsx's `STAGGER`) are unaffected —
  * only the cross-component wave between the two rows is gone.
+ *
+ * `replayOnNavigate` (explicit request, 2026-09-30, matching Nav): replays
+ * on every arrival at /gallery, once PageTransition's curtain has faded,
+ * instead of once per session. `groupSelector` (explicit request, same
+ * date): each column's label and value (GalleryInfoRow's `data-mount-group`
+ * wrappers) slide up together, with the stagger only between columns.
  */
 export function GalleryFooterReveal({ children }: { children: ReactNode }) {
   return (
-    <MountReveal waitFor={pageReady} playKey="gallery-footer-entrance">
+    <MountReveal waitFor={pageReady} playKey="gallery-footer-entrance" replayOnNavigate groupSelector="[data-mount-group]">
       {children}
     </MountReveal>
   );

@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import Link from "next/link";
+import { TransitionLink, shouldFadeOut } from "./TransitionLink";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
-import { RevealText } from "./RevealText";
 import { Logo } from "./Logo";
 import { lenisInstance } from "./SmoothScroll";
 import { REVEAL_EASE } from "@/lib/gsapEase";
@@ -68,11 +68,12 @@ const LINK_BASE_DELAY = 0.55;
  * single `clipPath` tween (`inset(0% 0% 100% 0%)` fully hidden <->
  * `inset(0% 0% 0% 0%)` fully shown) on `revealRef`, run forward on open and
  * reversed (a fresh tween back to the hidden value, not GSAP's `.reverse()`
- * method) on close. Individual links still separately use RevealText for
- * their own per-line mask-slide (visible in the recording as e.g. "WORKS"
- * or "STUDIO" caught mid-reveal, cut off — the same signature RevealText's
- * own SplitText masking already produces), layered on top of this panel-
- * level reveal, not replacing it.
+ * method) on close. Individual links still separately get their own
+ * per-line mask-slide (visible in the recording as e.g. "WORKS" or "STUDIO"
+ * caught mid-reveal, cut off — the same signature RevealText's own SplitText
+ * masking produces elsewhere on the site), layered on top of this panel-
+ * level reveal, not replacing it — see the useGSAP block below for why that's
+ * a hand-rolled SplitText call now, not literally `<RevealText>`.
  *
  * The wordmark + Close row lives here, as real panel content, rather than
  * leaning on Nav.tsx's own header row recoloring above this (an earlier
@@ -146,57 +147,58 @@ const LINK_BASE_DELAY = 0.55;
  * effect itself has already returned, which is the pattern React's own
  * guidance explicitly endorses.
  *
- * Nav links are `<Link href>` wrapping `<RevealText as="div">`, not the
- * reverse and not RevealText's own `as="a"` variant. `as="a"` renders a
- * plain anchor with no Next.js client-side routing. Nesting an `<a>` *inside*
- * the text RevealText/SplitText splits is the specific pattern RevealText's
- * own doc comment warns is broken (SplitText sweeps the nested element into
- * an aria-hidden mask, silently dropping it from the accessibility tree,
- * confirmed as a real past bug elsewhere in this codebase). Here the <a> is
- * the ancestor instead, outside anything SplitText touches — SplitText only
- * ever sees the inner div's own text nodes and puts its compensating
- * aria-label there, and the outer <a>'s accessible name resolves through
- * that labeled child per the standard accessible-name-from-content
- * algorithm (the same mechanism that makes
+ * Nav links are `<Link href>` wrapping a plain split target `<div>`, not the
+ * reverse. Nesting an `<a>` *inside* text SplitText splits is the specific
+ * pattern RevealText's own doc comment warns is broken (SplitText sweeps the
+ * nested element into an aria-hidden mask, silently dropping it from the
+ * accessibility tree, confirmed as a real past bug elsewhere in this
+ * codebase). Here the <a> is the ancestor instead, outside anything
+ * SplitText touches — SplitText only ever sees the inner div's own text
+ * nodes and puts its compensating aria-label there, and the outer <a>'s
+ * accessible name resolves through that labeled child per the standard
+ * accessible-name-from-content algorithm (the same mechanism that makes
  * `<button><span aria-label="Close">×</span></button>` accessible). Verified
  * via a real accessibility-tree snapshot once built, matching this
  * codebase's own established practice of confirming every SplitText +
  * semantics interaction empirically rather than trusting it blind.
  *
- * The Contact/email block originally deliberately did NOT use RevealText —
- * it reused Footer.tsx/GalleryInfoRow.tsx's own established convention
- * (uppercase muted label + NavLink), since the initial request was scoped
- * to "the navlinks" (the four big links above it). RevealText was later
- * requested here too, first tried via the literal `RevealText` component
- * (matching the `Link > RevealText as="div"` pattern the four links above
- * use) — that reveal never played, a real bug: RevealText's line-mask tween
- * is gated behind a GSAP ScrollTrigger at `start: "top 85%"` (see that
- * file's own comment on above-the-fold instances "already past" that line
- * at creation), and this block sits `mt-auto`-pinned near the very bottom of
- * a `fixed inset-0` panel — below the 85% line on every viewport height this
- * was checked against, not just this one. ScrollTrigger only "enters" that
- * state by the window actually scrolling past the computed threshold, but
- * this panel locks scrolling for its entire open duration (Lenis
- * `.stop()` + wheel/touchmove `preventDefault`, see the scroll-lock effect
- * below) — so the tween's trigger condition can never become true and the
- * text stays permanently masked at `opacity:0`. Confirmed live: the split
- * `.reveal-line` spans sat at `opacity:0`/un-translated indefinitely with no
- * console error, since ScrollTrigger fails silently when its condition is
- * simply never met rather than throwing.
- *
- * Fixed by reproducing RevealText's own line-mask recipe directly
- * (SplitText `type:"lines"`/`mask:"lines"`/`linesClass:"reveal-line"` —
- * same `.reveal-line-mask` CSS in globals.css, which isn't scoped to the
- * RevealText component itself) but driven by a plain `gsap.to` alongside
- * the panel's own open tween below, instead of a ScrollTrigger — this
- * content is inside a `fixed inset-0` overlay that's either fully visible or
- * fully unmounted, never scrolled into view, so gating its
- * reveal on scroll position was never the right mechanism to begin with.
- * NavLink's own hover-swap span pair was dropped for this call site (a
- * plain `Link` wraps the split target `<div>` instead) for the same reason
- * RevealText's own doc comment warns against nesting an anchor *inside*
- * split text — here the anchor is the ancestor, which is the safe
- * direction.
+ * The four links used to be `<RevealText as="div">` instead of this
+ * hand-rolled SplitText call, and the Contact/email block below tried the
+ * same thing once too — both were switched to the identical manual
+ * `SplitText.create(...)` + plain `gsap.to` recipe seen in the useGSAP block
+ * below, for the same reason in both cases: RevealText's line-mask tween is
+ * gated behind a GSAP ScrollTrigger at `start: "top 85%"`, but this entire
+ * panel is a `fixed inset-0` overlay that's either fully visible or fully
+ * unmounted — never actually scrolled — so a scroll-position gate was never
+ * the right mechanism for any of this content. For Contact (mt-auto-pinned
+ * near the very bottom) that mechanism was worse than just wrong: the panel
+ * locks scrolling for its whole open duration (Lenis `.stop()` +
+ * wheel/touchmove `preventDefault`, see the scroll-lock effect below), so
+ * ScrollTrigger's "top 85%" condition could never become true on any
+ * viewport this was checked against, and the text stayed permanently masked
+ * at `opacity:0` — confirmed live, the split `.reveal-line` spans just sat
+ * there indefinitely with no console error, since ScrollTrigger fails
+ * silently when its condition is simply never met rather than throwing. For
+ * the four links, the ScrollTrigger usually *did* fire (they typically sit
+ * within the initial 85%-of-viewport threshold the instant they're created,
+ * so ScrollTrigger's constructor-time check marks them active right away) —
+ * but a real trigger was still being created and registered for content that
+ * can never scroll, and that turned out not to be free: a user-supplied
+ * recording (Recordings/MenuBug.mov) showed real compositor tearing (a stale
+ * rectangular tile of page content frozen mid-viewport while everything
+ * around it kept updating) right as the curtain opened, worst on
+ * ScrollTrigger-heavy pages like /info — creating 4 more triggers at that
+ * exact moment adds to GSAP's page-wide recalculation cost right when the
+ * main thread also needs to keep up with the clip-path tween's own per-frame
+ * paint. Same fix for both: no ScrollTrigger, no `<RevealText>`, just
+ * SplitText's `type:"lines"`/`mask:"lines"`/`linesClass:"reveal-line"` (same
+ * `.reveal-line-mask` CSS in globals.css, which isn't scoped to the
+ * RevealText component itself) driven by a `gsap.to` running alongside the
+ * panel's own open tween. NavLink's own hover-swap span pair was dropped for
+ * both call sites (a plain `Link` wraps the split target `<div>` instead)
+ * for the same reason RevealText's own doc comment warns against nesting an
+ * anchor *inside* split text — here the anchor is the ancestor, which is the
+ * safe direction.
  *
  * Focus trap cycles real Tab order (this panel's own Close button, then the
  * 4 nav links, then the Contact email link — all real focusable elements
@@ -235,6 +237,7 @@ export function MobileMenu({
   const panelRef = useRef<HTMLDivElement>(null);
   const revealRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const linkRefs = useRef<(HTMLDivElement | null)[]>([]);
   const contactLabelRef = useRef<HTMLDivElement>(null);
   const contactEmailRef = useRef<HTMLDivElement>(null);
 
@@ -245,16 +248,42 @@ export function MobileMenu({
   // render, even for this exact comparison), and calling `setState` directly
   // in the render body, guarded so it only fires on an actual transition.
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  // Set by closeInstantly() below, in the same batch as the parent's
+  // onClose(): skips the clip-path close tween and unmounts the panel
+  // outright on this very render.
+  const [instantClose, setInstantClose] = useState(false);
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
-    if (!isOpen) setClosing(true);
+    if (!isOpen) setClosing(!instantClose);
+    else setInstantClose(false);
   }
+
+  // Route-changing links don't close the panel on tap (explicit request,
+  // 2026-09-30, after a screen recording): the close wipe used to play first,
+  // uncovering the current page for a moment before PageTransition's fade
+  // out dimmed it. The panel is already dark and sits below the curtain
+  // (z-40 vs. z-[70]), so it now stays open while the curtain fades up over
+  // it, and TransitionLink's onBeforeNavigate removes it instantly once the
+  // screen is fully black. Taps that won't fade (the current page, or
+  // reduced motion) keep the normal animated close.
+  const closeInstantly = () => {
+    setInstantClose(true);
+    onClose();
+  };
+  const closeUnlessFading = (href: string) => () => {
+    if (!shouldFadeOut(href)) onClose();
+  };
 
   useEffect(() => {
     if (!closing) return;
 
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // Same compositor-layer hint as the open tween (see its own comment) —
+      // no matching clearProps needed here since the panel unmounts the
+      // instant this completes (`onComplete` below flips `closing` false,
+      // which is what `rendered` is gated on), destroying the node anyway.
+      gsap.set(revealRef.current, { willChange: "clip-path" });
       gsap.to(revealRef.current, {
         clipPath: CLIP_HIDDEN,
         duration: CLOSE_DURATION,
@@ -273,23 +302,84 @@ export function MobileMenu({
       if (!rendered) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // `will-change` hints the browser to promote this element to its own
+        // compositor layer for the `clipPath` tween below — animating
+        // `clip-path` doesn't get that promotion automatically the way
+        // `transform`/`opacity` do, so without this hint every tick can fall
+        // back to a main-thread repaint of the full panel. Cleared via
+        // clearProps once the curtain settles (the panel then sits static,
+        // possibly for a while, until the user closes it — no reason to keep
+        // an idle layer promoted the whole time it's just sitting open).
+        gsap.set(revealRef.current, { willChange: "clip-path" });
         gsap.fromTo(
           revealRef.current,
           { clipPath: CLIP_HIDDEN },
-          { clipPath: CLIP_VISIBLE, duration: OPEN_DURATION, ease: "power2.inOut" },
+          {
+            clipPath: CLIP_VISIBLE,
+            duration: OPEN_DURATION,
+            ease: "power2.inOut",
+            onComplete: () => gsap.set(revealRef.current, { clearProps: "willChange" }),
+          },
         );
 
         // Contact's own line-mask reveal — see the file doc comment above
-        // for why this can't just be a <RevealText> like the four links:
-        // ScrollTrigger's "top 85%" gate can never fire for this
+        // for why this can't just be a <RevealText> like the four links used
+        // to be: ScrollTrigger's "top 85%" gate can never fire for this
         // mt-auto-pinned, near-bottom block while the panel's scroll lock
         // is active, so it's driven by a plain tween instead — delayed by
         // LINK_BASE_DELAY, same as the four links below, so both stages
         // stay in sync with each other and start once the curtain itself
         // has finished opening (see that constant's own comment).
+        //
+        // The four links (below) now share this exact same no-ScrollTrigger
+        // recipe instead of <RevealText> — they used to be
+        // `<RevealText as="div">`, which internally creates a real
+        // ScrollTrigger per link. That ScrollTrigger only ever "fired" by
+        // accident (these links sit within the initial 85%-of-viewport
+        // threshold the instant they're created, inside a `fixed inset-0`
+        // panel that's either fully visible or fully unmounted and never
+        // actually scrolled) — the exact same dead-mechanism case already
+        // diagnosed for Contact above, just never extended to the links.
+        // Root-caused from a user-supplied recording (Recordings/
+        // MenuBug.mov): frame-by-frame extraction showed real compositor
+        // tearing (a stale rectangular tile of page content sitting frozen
+        // mid-viewport while the header above and text below it kept
+        // updating normally) right as the curtain started opening — worst on
+        // /info, which has ~16 other RevealText/ScrollTrigger instances
+        // already registered on the page. Creating 4 more ScrollTriggers at
+        // that exact moment forces GSAP to recalculate trigger positions
+        // across the whole page, right when the main thread also needs to
+        // keep up with the clip-path tween's per-frame paint — on a
+        // ScrollTrigger-heavy page that recalculation is expensive enough to
+        // visibly stall a frame. The links never needed ScrollTrigger in the
+        // first place, so removing it removes that contention entirely
+        // rather than just shrinking it.
+        const linkTargets = linkRefs.current.filter((el): el is HTMLDivElement => el !== null);
         const contactTargets = [contactLabelRef.current, contactEmailRef.current].filter(
           (el): el is HTMLDivElement => el !== null,
         );
+        if (linkTargets.length) {
+          SplitText.create(linkTargets, {
+            type: "lines",
+            mask: "lines",
+            linesClass: "reveal-line",
+            onSplit(self) {
+              gsap.set(self.lines, { yPercent: 110, opacity: 0 });
+              gsap.to(self.lines, {
+                yPercent: 0,
+                opacity: 1,
+                // Matches what RevealText's own createRevealTween would have
+                // computed for a single-line target (lineCount 1): duration
+                // clamps to 0.85, and stagger amount clamps to 0 since
+                // there's only one line per link to begin with — same visual
+                // result as before, just without the ScrollTrigger.
+                duration: 0.85,
+                delay: LINK_BASE_DELAY,
+                ease: REVEAL_EASE,
+              });
+            },
+          });
+        }
         if (contactTargets.length) {
           SplitText.create(contactTargets, {
             type: "lines",
@@ -402,7 +492,14 @@ export function MobileMenu({
     if (!panel || !vv) return;
 
     const updateHeight = () => {
-      panel.style.height = `${vv.height}px`;
+      // Guard against redundant writes: `visualViewport` can fire `resize`
+      // more often than the height actually changes, and writing an inline
+      // style on this `fixed` panel forces a layout recalculation every
+      // time — avoidable main-thread cost stacked right on top of the
+      // clip-path tween's own per-frame paint work while the panel is
+      // opening or closing.
+      const next = `${vv.height}px`;
+      if (panel.style.height !== next) panel.style.height = next;
     };
     updateHeight();
     vv.addEventListener("resize", updateHeight);
@@ -465,25 +562,39 @@ export function MobileMenu({
               one call site wasn't worth it — this is a plain home link,
               closing the menu is the only behavior it needs beyond that. */}
           <div className="flex items-center justify-between pt-5">
-            <Link href="/" aria-label="berneldiaz, home" onClick={onClose} className="block h-[16px] w-fit">
+            <TransitionLink
+              href="/"
+              aria-label="berneldiaz, home"
+              onClick={closeUnlessFading("/")}
+              onBeforeNavigate={closeInstantly}
+              className="block h-[16px] w-fit"
+            >
               <Logo className="h-[16px] w-auto text-foreground" aria-hidden="true" />
-            </Link>
+            </TransitionLink>
             <button type="button" ref={closeButtonRef} onClick={onClose} className={textStyles.eyebrowPrimary}>
               Close
             </button>
           </div>
 
           <nav data-tight-reveal-mask className="flex flex-1 flex-col items-start justify-center gap-1">
-            {LINKS.map((link) => (
-              <Link key={link.href} href={link.href} onClick={onClose}>
-                <RevealText
-                  as="div"
-                  delay={LINK_BASE_DELAY}
+            {/* Plain div + SplitText (see the useGSAP block above), not
+                <RevealText> — same line-mask look, no per-link ScrollTrigger. */}
+            {LINKS.map((link, i) => (
+              <TransitionLink
+                key={link.href}
+                href={link.href}
+                onClick={closeUnlessFading(link.href)}
+                onBeforeNavigate={closeInstantly}
+              >
+                <div
+                  ref={(el) => {
+                    linkRefs.current[i] = el;
+                  }}
                   className="text-[40px] font-medium uppercase leading-[1] tracking-[-0.5px] text-foreground"
                 >
                   {link.label}
-                </RevealText>
-              </Link>
+                </div>
+              </TransitionLink>
             ))}
           </nav>
 

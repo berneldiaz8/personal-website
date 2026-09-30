@@ -21,6 +21,7 @@ function ShowcaseImage({
   priority = false,
   className = "",
   revealOnScroll = true,
+  revealOverlay = true,
 }: {
   src: string;
   alt: string;
@@ -38,9 +39,11 @@ function ShowcaseImage({
    * exception, reverted 2026-09-28 — see the HERO block's own comment in
    * ProjectShowcase) — kept as an escape hatch given that back-and-forth. */
   revealOnScroll?: boolean;
+  /** False keeps the scale-in but drops the dark curtain (the Hero). */
+  revealOverlay?: boolean;
 }) {
   const { loaded, onLoad } = useFadeInOnLoad(priority);
-  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>(revealOnScroll);
+  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>(revealOnScroll, revealOverlay);
   return (
     <div
       ref={wrapperRef}
@@ -73,7 +76,7 @@ function ShowcaseImage({
           className={`object-cover ${position}`}
         />
       </div>
-      {revealOnScroll && (
+      {revealOnScroll && revealOverlay && (
         <div
           ref={overlayRef}
           aria-hidden="true"
@@ -94,6 +97,7 @@ function ShowcaseVideo({
   fillWidth = false,
   className = "",
   revealOnScroll = true,
+  revealOverlay = true,
 }: {
   src: string;
   poster: string;
@@ -118,10 +122,12 @@ function ShowcaseVideo({
    * exception, reverted 2026-09-28 — see the HERO block's own comment in
    * ProjectShowcase) — kept as an escape hatch given that back-and-forth. */
   revealOnScroll?: boolean;
+  /** False keeps the scale-in but drops the dark curtain (the Hero). */
+  revealOverlay?: boolean;
 }) {
   const letterboxed = fillHeight || fillWidth;
   const { ready, onLoadedData } = useVideoReady();
-  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>(revealOnScroll);
+  const { wrapperRef, mediaRef, overlayRef } = useMediaReveal<HTMLDivElement>(revealOnScroll, revealOverlay);
   return (
     <div
       ref={wrapperRef}
@@ -161,7 +167,7 @@ function ShowcaseVideo({
         />
       </div>
       <VideoLoadingSpinner ready={ready} />
-      {revealOnScroll && (
+      {revealOnScroll && revealOverlay && (
         <div
           ref={overlayRef}
           aria-hidden="true"
@@ -295,13 +301,12 @@ export function ProjectShowcase({
   return (
     <div className="flex flex-col">
       {/* ── HERO ── opening full-bleed image/video, the page's LCP candidate.
-          Now gets the same scale-in + dark-curtain useMediaReveal treatment
-          every other media slot on this page already gets (explicit request,
-          2026-09-28) — `revealOnScroll` left at its default `true`, no
-          override here. This is actually the *third* state the Hero's gone
-          through in this same back-and-forth: full curtain+scale (this one),
+          Scale-in only, no dark curtain (`revealOverlay={false}`, explicit
+          request, 2026-09-30) — every other media slot on this page keeps
+          both. History of this same back-and-forth: full curtain+scale,
           reverted to scale-only with the curtain dropped, reverted again to
-          no animation at all, and now back to the first state. `priority`'s
+          no animation at all, back to full curtain+scale (2026-09-28), and
+          now scale-only again. `priority`'s
           own load-fade skip (useFadeInOnLoad) is unrelated regardless — that
           was never part of this scroll-driven mechanism to begin with.
           aspect-[1/1] on mobile, stepping up to 16/10 at sm+ (2026-09-21,
@@ -325,6 +330,7 @@ export function ProjectShowcase({
           aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
           priority={priority}
+          revealOverlay={false}
         />
       ) : (
         <ShowcaseVideo
@@ -333,6 +339,7 @@ export function ProjectShowcase({
           alt={pick(project.media, 0).alt}
           aspect="aspect-[1/1] sm:aspect-[16/10]"
           bordered={false}
+          revealOverlay={false}
         />
       )}
 
@@ -426,7 +433,7 @@ export function ProjectShowcase({
           of the single full-bleed block every other project uses. Every
           other project still placeholders pending a future media pass. */}
       {project.slug === "the-dividend-tracker" ? (
-        <Grid className="pt-3 pb-4 sm:pt-4 sm:pb-6">
+        <Grid className="pt-4 pb-4 sm:pb-6">
           <div className="col-span-4 sm:col-span-4 lg:col-span-6">
             <ShowcaseVideo
               src={`${base}/showcase-holdings.mp4`}
@@ -445,7 +452,7 @@ export function ProjectShowcase({
           </div>
         </Grid>
       ) : (
-        <div className="px-4 pt-3 pb-4 sm:px-5 sm:pt-4 sm:pb-6 lg:px-6">
+        <div className="px-4 pt-4 pb-4 sm:px-5 sm:pb-6 lg:px-6">
           {isOpinly ? (
             <ShowcaseVideo
               src={`${base}/showcase-app.mp4`}

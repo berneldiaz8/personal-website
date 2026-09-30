@@ -15,8 +15,10 @@ import { MaskedText } from "./MaskedText";
  * Mount-time entrance (2026-09-22): wrapped in GalleryFooterReveal.tsx (a
  * thin client wrapper around the same MountReveal.tsx mechanism
  * NavEntrance.tsx uses for Nav's wordmark/links) — every label and link here
- * slides up into place out of its own mask box, staggered, once per hard
- * load, gated on `pageReady` so it starts once the loading screen is gone.
+ * slides up into place out of its own mask box on every arrival at
+ * /gallery, gated on `pageReady` so it starts once the loading screen or
+ * page-transition curtain is gone. Each column's `data-mount-group` makes its
+ * label and value move together; the stagger runs between columns only.
  * (This used to instead gate on `navReady`, starting only once Nav's own
  * reveal on /gallery was underway — a cross-reveal wave removed per explicit
  * request 2026-09-23; see GalleryFooterReveal.tsx's own comment.)
@@ -38,25 +40,25 @@ export function GalleryInfoRow() {
       <div className="mx-4 border-t border-border sm:mx-5 lg:mx-6" />
       <Grid className="items-start py-5 text-sm gap-y-4 sm:pb-6 sm:pt-3">
         <GalleryFooterReveal>
-          <div className="col-span-4 flex flex-col items-start gap-1 font-medium text-foreground sm:col-span-4 lg:col-span-6">
+          <div data-mount-group className="col-span-4 flex flex-col items-start gap-1 font-medium text-foreground sm:col-span-4 lg:col-span-6">
             <MaskedText className="font-medium uppercase text-muted">Contact</MaskedText>
             <NavLink href="mailto:diaz.bernel@gmail.com" size="md">
               diaz.bernel@gmail.com
             </NavLink>
           </div>
-          <div className="col-span-4 flex flex-col items-start gap-1 font-medium uppercase text-foreground sm:col-span-2 sm:col-start-5 lg:col-span-2 lg:col-start-7">
+          <div data-mount-group className="col-span-4 flex flex-col items-start gap-1 font-medium uppercase text-foreground sm:col-span-2 sm:col-start-5 lg:col-span-2 lg:col-start-7">
             <MaskedText className="font-medium uppercase text-muted">Connect</MaskedText>
             <NavLink href="https://linkedin.com/in/berneldiaz" target="_blank" rel="noopener noreferrer" size="md">
               LinkedIn
             </NavLink>
           </div>
-          <div className="col-span-4 flex flex-col items-start gap-1 font-medium uppercase text-foreground sm:col-span-2 sm:col-start-7 lg:col-span-2 lg:col-start-9">
+          <div data-mount-group className="col-span-4 flex flex-col items-start gap-1 font-medium uppercase text-foreground sm:col-span-2 sm:col-start-7 lg:col-span-2 lg:col-start-9">
             <MaskedText className="font-medium uppercase text-muted">Snapshots</MaskedText>
             <NavLink href="https://dribbble.com/berneldiaz" target="_blank" rel="noopener noreferrer" size="md">
               Dribbble
             </NavLink>
           </div>
-          <div className="col-span-4 flex flex-col items-start gap-1 sm:col-span-2 sm:col-start-1 sm:items-start lg:col-span-2 lg:col-start-11 lg:items-end">
+          <div data-mount-group className="col-span-4 flex flex-col items-start gap-1 sm:col-span-2 sm:col-start-1 sm:items-start lg:col-span-2 lg:col-start-11 lg:items-end">
             <MaskedText as="p" className="font-medium text-muted">
               &copy; {new Date().getFullYear()}
             </MaskedText>

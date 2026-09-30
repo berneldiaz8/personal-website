@@ -55,7 +55,7 @@ export function Hero() {
         <SeeWorkButton targetSlug={projects[0].slug} />
       </div>
 
-      <div className="h-[196px]" />
+      <div className="h-[124px] sm:h-[196px]" />
     </section>
   );
 }
